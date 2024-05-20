@@ -1,0 +1,83 @@
+#options, #game-info {
+    display: flex;
+    background-color: #401b7b;
+    color: white;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+.option, .info {
+    margin-left: auto;
+    margin-right: auto;
+}
+#game-count {
+    width: 50px;
+}
+#game-stats, #prompt-info {
+    display: flex;
+    align-items: center;
+    background-color: lightgrey;
+    margin-top: 10px;
+    padding: 5px;
+    border: 3px solid black;
+}
+#prompt-info {
+    display: none;
+}
+#start-btn, #stop-btn {
+    display: block;
+    width: 200px;
+    height: 50px;
+    font-size: 30px;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    cursor: pointer;
+}
+#start-btn {
+    color: green;
+}
+#stop-btn {
+    /* Stop button is hidden until play starts */
+    display: none;
+    color: red;
+}
+#tic-tac-toe-board {
+    display: table;
+    background-color: black;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 10px;
+    border-spacing: 3px;
+}
+#connect-four-board {
+    display: none;
+    background-color: black;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 10px;
+    border-spacing: 3px;
+}
+.row {
+    display: table-row;
+}
+.cell {
+    width: 100px;
+    height: 100px;
+    font-size: 80px;
+    background-color: lightgrey;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+#game-info-buttons {
+    text-align: center;
+    margin-top: 10px;
+    padding: 5px;
+}
+.info-button {
+    width: 250px;
+    height: 50px;
+    font-size: 30px;
+    margin-left: 10px;
+    cursor: pointer;
+}
