@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>LLM Game Simulation</title>
+        <link rel="stylesheet" href="game-simulation.css">
+    </head>
+    <body>
+        <div id="options">
+            <div class="option">
+                <label for="game-type">Game Type: </label>
+                <select id="game-type" name="game-type">
+                    <option value="tic-tac-toe">Tic-Tac-Toe</option>
+                    <option value="connect-four">Connect Four</option>
+                </select>
+            </div>
+            <div class="option">
+                <label for="first-player">1st Player LLM: </label>
+                <select id="first-player" name="first-player">
+                    <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
+                    <option value="gpt-4">GPT-4</option>
+                </select>
+            </div>
+            <div class="option">
+                <label for="second-player">2nd Player LLM: </label>
+                <select id="second-player" name="second-player">
+                    <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
+                    <option value="gpt-4">GPT-4</option>
+                </select>
+            </div>
+            <div class="option">
+                <label for="prompt-type">Prompt Type: </label>
+                <select id="prompt-type" name="prompt-type">
+                    <option value="list">List</option>
+                    <option value="illustration">Illustration</option>
+                </select>
+            </div>
+            <div class="option">
+                <label for="game-count">Number of Games: </label>
+                <input type="text" id="game-count" name="game-count" value=3>
+            </div>
+        </div>
+        <div id="game-info">
+            <!-- Game information (settings) will go here once the game starts -->
+        </div>
+        <div id="game-stats">
+            <div><strong><em>Stats:</em></strong></div>
+            <div class='info' id='first-player-wins'><strong>1st Player Wins: </strong>0</div>
+            <div class='info' id='second-player-wins'><strong>2nd Player Wins: </strong>0</div>
+            <div class='info' id='draws'><strong>Draws: </strong>0</div>
+            <div class='info' id='first-player-moves'><strong>1st Player Moves: </strong>0</div>
+            <div class='info' id='second-player-moves'><strong>2nd Player Moves: </strong>0</div>
+            <div class='info' id='first-player-invalid-moves'><strong>1st Player Invalid Moves: </strong>0</div>
+            <div class='info' id='second-player-invalid-moves'><strong>2nd Player Invalid Moves: </strong>0</div>
+            <div class='info' id='first-player-moves-per-win'><strong>1st Player Moves per Win: </strong>0</div>
+            <div class='info' id='second-player-moves-per-win'><strong>2nd Player Moves per Win: </strong>0</div>
+            <button id='reset-btn'>Reset Stats</button>
+        </div>
+        <button id="start-btn">Start</button>
+        <button id="stop-btn">Stop</button>
+        <div id="tic-tac-toe-board">
+            <div class="row">
+                <div class="cell" id="tic-tac-toe-1-1"></div>
+                <div class="cell" id="tic-tac-toe-1-2"></div>
+                <div class="cell" id="tic-tac-toe-1-3"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="tic-tac-toe-2-1"></div>
+                <div class="cell" id="tic-tac-toe-2-2"></div>
+                <div class="cell" id="tic-tac-toe-2-3"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="tic-tac-toe-3-1"></div>
+                <div class="cell" id="tic-tac-toe-3-2"></div>
+                <div class="cell" id="tic-tac-toe-3-3"></div>
+            </div>
+        </div>
+        <div id="connect-four-board">
+            <div class="row">
+                <div class="cell" id="connect-four-1-1"></div>
+                <div class="cell" id="connect-four-1-2"></div>
+                <div class="cell" id="connect-four-1-3"></div>
+                <div class="cell" id="connect-four-1-4"></div>
+                <div class="cell" id="connect-four-1-5"></div>
+                <div class="cell" id="connect-four-1-6"></div>
+                <div class="cell" id="connect-four-1-7"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="connect-four-2-1"></div>
+                <div class="cell" id="connect-four-2-2"></div>
+                <div class="cell" id="connect-four-2-3"></div>
+                <div class="cell" id="connect-four-2-4"></div>
+                <div class="cell" id="connect-four-2-5"></div>
+                <div class="cell" id="connect-four-2-6"></div>
+                <div class="cell" id="connect-four-2-7"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="connect-four-3-1"></div>
+                <div class="cell" id="connect-four-3-2"></div>
+                <div class="cell" id="connect-four-3-3"></div>
+                <div class="cell" id="connect-four-3-4"></div>
+                <div class="cell" id="connect-four-3-5"></div>
+                <div class="cell" id="connect-four-3-6"></div>
+                <div class="cell" id="connect-four-3-7"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="connect-four-4-1"></div>
+                <div class="cell" id="connect-four-4-2"></div>
+                <div class="cell" id="connect-four-4-3"></div>
+                <div class="cell" id="connect-four-4-4"></div>
+                <div class="cell" id="connect-four-4-5"></div>
+                <div class="cell" id="connect-four-4-6"></div>
+                <div class="cell" id="connect-four-4-7"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="connect-four-5-1"></div>
+                <div class="cell" id="connect-four-5-2"></div>
+                <div class="cell" id="connect-four-5-3"></div>
+                <div class="cell" id="connect-four-5-4"></div>
+                <div class="cell" id="connect-four-5-5"></div>
+                <div class="cell" id="connect-four-5-6"></div>
+                <div class="cell" id="connect-four-5-7"></div>
+            </div>
+            <div class="row">
+                <div class="cell" id="connect-four-6-1"></div>
+                <div class="cell" id="connect-four-6-2"></div>
+                <div class="cell" id="connect-four-6-3"></div>
+                <div class="cell" id="connect-four-6-4"></div>
+                <div class="cell" id="connect-four-6-5"></div>
+                <div class="cell" id="connect-four-6-6"></div>
+                <div class="cell" id="connect-four-6-7"></div>
+            </div>
+        </div>
+        <div id="game-info-buttons">
+            <button class="info-button" id="prompt-info-btn">Prompt Details</button>
+            <button class="info-button" id="game-info-btn">Game Details</button>
+        </div>
+        <div id="prompt-info">
+            <p>
+                Each prompt starts with an explanation, then the part where we dynamically list the current status, then the part that asks for the next move. Below are examples of each prompt.<br><br>
+
+                <strong>Tic Tac Toe Explanation:</strong> Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game.<br><br>
+                <strong>Tic Tac Toe List:</strong> The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:<br>
+                The locations occupied by the first player (marked by X): 1,2; 3,3<br>
+                The locations occupied by the second player (marked by O): 1,1<br><br>
+                <strong>Tic Tac Toe Illustration:</strong> The current state of the game is displayed on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:<br>
+                .O.<br>
+                X..<br>
+                ...<br><br>
+                <strong>Tic Tac Toe Request for Next Move:</strong> Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3.<br><br>
+
+                <strong>Connect Four Explanation:</strong> Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game.<br><br>
+
+                <strong>Connect Four List:</strong> The game's progress is noted by recording each move in a specific format: moves are delineated with a semicolon (';'), and within each move, the column is indicated by a number. If no moves were taken by the player, 'None' is noted. The current state of the game as indicated by the previous moves is as follows:<br>
+                The moves by the first player (using red discs): 6,5<br>
+                The moves by the second player (using yellow discs): None<br><br>
+
+                <strong>Connect Four Illustration:</strong> The previous moves are presented on a grid layout. 'R' and 'Y' indicate positions taken by the first player (using red discs) and the second player (using yellow discs), respectively, while '.' indicates an available position in the 7 by 6 grid.<br>
+                The current state of the game, showing previously taken and available positions, is as follows:<br>
+                .......<br>
+                .......<br>
+                .......<br>
+                .......<br>
+                .......<br>
+                ..RYR..<br><br>
+
+                <strong>Connect Four Request for Next Move:</strong> Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response.<br><br>
+
+                <strong>Gomoku Explanation:</strong> Gomoku, a classic two-player game, is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for five in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their stones on an empty intersection of the grid. You are a skilled strategic Gomoku player, currently engaged in a game.<br><br>
+
+                <strong>Gomoku List:</strong> The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:<br>
+                The locations occupied by the first player (marked by B for black stones): 5,7<br>
+                The locations occupied by the second player (marked by W for white stones): None<br><br>
+
+                <strong>Gomoku Illustration:</strong> The current state of the game is displayed on a 15 by 15 grid. 'B' represents positions taken by the first player (using black stones) and 'W' represents positions taken by the second player (using white stones), while '.' indicates an available position. The current layout is as follows:<br>
+                ...............<br>
+                ...............<br>
+                ...............<br>
+                ...............<br>
+                ...............<br>
+                ...............<br>
+                .....B.........<br>
+                ....WB.........<br>
+                ...BW..........<br>
+                ..BW...........<br>
+                .BW............<br>
+                W..............<br>
+                ...............<br>
+                ...............<br>
+                ...............<br><br>
+
+                <strong>Gomoku Request for Next Move:</strong> Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 15, as the grid is 15 by 15.<br><br>
+
+                <strong>Request for Next Move (Used by All Games):</strong> You are the (<em>first/second</em>) player. What would be your next move?
+            </p>
+        </div>
+        <script type="text/javascript" src="game-simulation.js"></script>
+    </body>
+</html>
