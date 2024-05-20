@@ -41,7 +41,7 @@
     display: none;
     color: red;
 }
-#tic-tac-toe-board {
+#tic-tac-toe-board, #connect-four-board, #gomoku-board {
     display: table;
     background-color: black;
     margin-right: auto;
@@ -51,16 +51,14 @@
 }
 #connect-four-board {
     display: none;
-    background-color: black;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 10px;
-    border-spacing: 3px;
+}
+#gomoku-board {
+    display: none;
 }
 .row {
     display: table-row;
 }
-.cell {
+#tic-tac-toe-board .cell, #connect-four-board .cell, #gomoku-board .cell {
     width: 100px;
     height: 100px;
     font-size: 80px;
@@ -68,6 +66,27 @@
     display: table-cell;
     text-align: center;
     vertical-align: middle;
+}
+#connect-four-board .cell {
+    width: 80px;
+    height: 80px;
+    font-size: 64px;
+}
+#gomoku-board .cell {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+.black-stone {
+    width: 35px;
+    height: 35px;
+    background-color: black;
+    border-radius: 50%;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
 }
 #game-info-buttons {
     text-align: center;
