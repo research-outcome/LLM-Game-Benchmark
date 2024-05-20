@@ -1,0 +1,18 @@
+[
+  {
+      "GameType": "TicTacToe",
+      "Prompt": "list",
+      "LLM1stPlayer": "gpt-4",
+      "LLM2ndPlayer": "gpt4-o",
+      "WinRatio-1st": 0.5,
+      "WinRatio-2nd": 0.3,
+      "Wins-1st": 7,
+      "Wins-2nd": 4,
+      "Draws": 4,
+      "InvalidMovesRatio-1st": 0.07,
+      "InvalidMovesRatio-2nd": 0.02,
+      "TotalMoves-1st": 50,
+      "TotalMoves-2nd": 42,
+      "ProviderEmail": "otopsakal@floridapoly.edu, jharper@floridapoly.edu, robert@gmail.com"
+  }
+]
