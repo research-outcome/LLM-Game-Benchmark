@@ -1,0 +1,94 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Times New Roman', Times, serif, sans-serif;
+    background-color: #e3f2fd;
+}
+.container {
+    position: relative; 
+    max-width: 200px;
+    width: 100%;
+    margin: 20px auto; /* Adjusted margin */
+    float: left;
+}
+.select-btn {
+    display: flex;
+    height: 40px; /* Adjusted height */
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #fff;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+.select-btn .btn-txt {
+    font-size: 14px; /* Adjusted font size */
+    font-weight: 400;
+    color: #333;
+}
+.select-btn .arrow-dwn {
+    display: flex;
+    height: 21px;
+    width: 21px;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 50%;
+    background: #6e93d7;
+    align-items: center;
+    justify-content: center;
+}
+.list-items {
+    position: relative;
+    margin-top: 15px;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #fff;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+.list-items .item {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    height: 30px; /* Adjusted height */
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 0 15px;
+    border-radius: 8px;
+}
+.list-items .item:hover {
+    background-color: #e7edfe;
+}
+.item .item-text {
+    font-size: 14px; /* Adjusted font size */
+    font-weight: 400;
+    color: #333;
+}
+.item .checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+    width: 16px;
+    border-radius: 4px;
+    margin-right: 12px;
+    border: 1.5px solid #c0c0c0;
+    transition: all 0.3s ease-in-out;
+}
+.checkbox.checked {
+    background-color: #6e93d7;
+}
+.checkbox .check-icon {
+    font-size: 11px;
+    transform: scale(0);
+}
+.checkbox.checked .check-icon {
+    transform: scale(1);
+}
+h1 {
+    color: purple;
+}

@@ -1,0 +1,50 @@
+[
+  {
+      "GameType": "TicTacToe",
+      "Prompt": "list",
+      "LLM1stPlayer": "gpt-4",
+      "LLM2ndPlayer": "gpt4-o",
+      "WinRatio-1st": 0.6,
+      "WinRatio-2nd": 0.4,
+      "Wins-1st": 6,
+      "Wins-2nd": 4,
+      "Draws": 2,
+      "InvalidMovesRatio-1st": 0.05,
+      "InvalidMovesRatio-2nd": 0.03,
+      "TotalMoves-1st": 40,
+      "TotalMoves-2nd": 30,
+      "ProviderEmail": "otopsakal@floridapoly.edu, jharper@floridapoly.edu"
+  },
+  {
+      "GameType": "TicTacToe",
+      "Prompt": "list",
+      "LLM1stPlayer": "gemini",
+      "LLM2ndPlayer": "gpt4-o",
+      "WinRatio-1st": 0.6,
+      "WinRatio-2nd": 0.4,
+      "Wins-1st": 6,
+      "Wins-2nd": 4,
+      "Draws": 2,
+      "InvalidMovesRatio-1st": 0.05,
+      "InvalidMovesRatio-2nd": 0.03,
+      "TotalMoves-1st": 40,
+      "TotalMoves-2nd": 30,
+      "ProviderEmail": "otopsakal@floridapoly.edu, jharper@floridapoly.edu"
+  },
+  {
+      "GameType": "TicTacToe",
+      "Prompt": "list",
+      "LLM1stPlayer": "llama3",
+      "LLM2ndPlayer": "gpt4-o",
+      "WinRatio-1st": 0.6,
+      "WinRatio-2nd": 0.4,
+      "Wins-1st": 6,
+      "Wins-2nd": 4,
+      "Draws": 2,
+      "InvalidMovesRatio-1st": 0.05,
+      "InvalidMovesRatio-2nd": 0.03,
+      "TotalMoves-1st": 40,
+      "TotalMoves-2nd": 30,
+      "ProviderEmail": "otopsakal@floridapoly.edu, jharper@floridapoly.edu"
+  }
+]
