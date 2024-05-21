@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/merged_data.json';
+    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/Leaderboard.json';
 
     $.getJSON(jsonURL, function(data) {
         const formattedData = data.map(item => [

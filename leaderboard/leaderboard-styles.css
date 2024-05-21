@@ -1,17 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 body {
-    font-family: 'Times New Roman', Times, serif, sans-serif;
-    background-color: #e3f2fd;
+    font-family: 'Kanit', serif, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: small;
+    background-color: #ffffff;
+    margin: 0; /* Remove default margin */
+    padding-top: 0; /* Remove default padding */
+    padding-left: 2.5%;
 }
 .container {
     position: relative; 
     max-width: 200px;
     width: 100%;
-    margin: 20px auto; 
+    margin: 10px auto; 
     float: left;
 }
 .select-btn {
     display: flex;
-    height: 40px; 
+    height: 35px; 
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
@@ -20,11 +28,13 @@ body {
     background-color: #fff;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
+
 .select-btn .btn-txt {
     font-size: 14px;
     font-weight: 400;
     color: #333;
 }
+
 .select-btn .arrow-dwn {
     display: flex;
     height: 21px;
@@ -36,15 +46,18 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 .list-items {
-    position: relative;
+    position: absolute; /* Change to absolute positioning */
     margin-top: 15px;
     border-radius: 8px;
     padding: 16px;
     background-color: #fff;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
     display: none;
+    z-index: 10; /* Ensure it appears above other elements */
 }
+
 .list-items .item {
     display: flex;
     align-items: center;
@@ -55,9 +68,11 @@ body {
     padding: 0 15px;
     border-radius: 8px;
 }
+
 .list-items .item:hover {
     background-color: #e7edfe;
 }
+
 .item .item-text {
     font-size: 14px;
     font-weight: 400;
@@ -90,3 +105,73 @@ h1 {
 .dataTables_filter {
     float: left !important;
  }
+
+ .table-container {
+    max-width: 95%; /* Adjust the max-width */
+    padding-right: 2.5%; /* Add right padding */
+    margin: 0 auto; /* Center the container */
+    box-sizing: border-box; 
+}
+
+#mytable{
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+/* Style the submit button */
+.submit-btn {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: purple;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.submit-btn:hover {
+    background-color: darkviolet;
+}
+
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
