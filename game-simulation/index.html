@@ -3,6 +3,9 @@
     <head>
         <meta charset="UTF-8">
         <title>LLM Game Simulation</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Merriweather&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="game-simulation.css">
     </head>
     <body>
@@ -56,6 +59,8 @@
             <div class='info' id='draws'><strong>Draws: </strong>0</div>
             <div class='info' id='first-player-moves'><strong>1st Player Moves: </strong>0</div>
             <div class='info' id='second-player-moves'><strong>2nd Player Moves: </strong>0</div>
+            <div class='info' id='first-player-disqualifications'><strong>1st Player Disqual.: </strong>0</div>
+            <div class='info' id='second-player-disqualifications'><strong>2nd Player Disqual.: </strong>0</div>
             <div class='info' id='first-player-invalid-moves'><strong>1st Player Invalid Moves: </strong>0</div>
             <div class='info' id='second-player-invalid-moves'><strong>2nd Player Invalid Moves: </strong>0</div>
             <div class='info' id='first-player-moves-per-win'><strong>1st Player Moves per Win: </strong>0</div>
@@ -83,58 +88,58 @@
         </div>
         <div id="connect-four-board">
             <div class="row">
-                <div class="cell" id="connect-four-1-1"></div>
-                <div class="cell" id="connect-four-1-2"></div>
-                <div class="cell" id="connect-four-1-3"></div>
-                <div class="cell" id="connect-four-1-4"></div>
-                <div class="cell" id="connect-four-1-5"></div>
-                <div class="cell" id="connect-four-1-6"></div>
-                <div class="cell" id="connect-four-1-7"></div>
+                <div class="cell" id="connect-four-1-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-1-7"><span class="connect-four-space"></span></div>
             </div>
             <div class="row">
-                <div class="cell" id="connect-four-2-1"></div>
-                <div class="cell" id="connect-four-2-2"></div>
-                <div class="cell" id="connect-four-2-3"></div>
-                <div class="cell" id="connect-four-2-4"></div>
-                <div class="cell" id="connect-four-2-5"></div>
-                <div class="cell" id="connect-four-2-6"></div>
-                <div class="cell" id="connect-four-2-7"></div>
+                <div class="cell" id="connect-four-2-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-2-7"><span class="connect-four-space"></span></div>
             </div>
             <div class="row">
-                <div class="cell" id="connect-four-3-1"></div>
-                <div class="cell" id="connect-four-3-2"></div>
-                <div class="cell" id="connect-four-3-3"></div>
-                <div class="cell" id="connect-four-3-4"></div>
-                <div class="cell" id="connect-four-3-5"></div>
-                <div class="cell" id="connect-four-3-6"></div>
-                <div class="cell" id="connect-four-3-7"></div>
+                <div class="cell" id="connect-four-3-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-3-7"><span class="connect-four-space"></span></div>
             </div>
             <div class="row">
-                <div class="cell" id="connect-four-4-1"></div>
-                <div class="cell" id="connect-four-4-2"></div>
-                <div class="cell" id="connect-four-4-3"></div>
-                <div class="cell" id="connect-four-4-4"></div>
-                <div class="cell" id="connect-four-4-5"></div>
-                <div class="cell" id="connect-four-4-6"></div>
-                <div class="cell" id="connect-four-4-7"></div>
+                <div class="cell" id="connect-four-4-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-4-7"><span class="connect-four-space"></span></div>
             </div>
             <div class="row">
-                <div class="cell" id="connect-four-5-1"></div>
-                <div class="cell" id="connect-four-5-2"></div>
-                <div class="cell" id="connect-four-5-3"></div>
-                <div class="cell" id="connect-four-5-4"></div>
-                <div class="cell" id="connect-four-5-5"></div>
-                <div class="cell" id="connect-four-5-6"></div>
-                <div class="cell" id="connect-four-5-7"></div>
+                <div class="cell" id="connect-four-5-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-5-7"><span class="connect-four-space"></span></div>
             </div>
             <div class="row">
-                <div class="cell" id="connect-four-6-1"></div>
-                <div class="cell" id="connect-four-6-2"></div>
-                <div class="cell" id="connect-four-6-3"></div>
-                <div class="cell" id="connect-four-6-4"></div>
-                <div class="cell" id="connect-four-6-5"></div>
-                <div class="cell" id="connect-four-6-6"></div>
-                <div class="cell" id="connect-four-6-7"></div>
+                <div class="cell" id="connect-four-6-1"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-2"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-3"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-4"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-5"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-6"><span class="connect-four-space"></span></div>
+                <div class="cell" id="connect-four-6-7"><span class="connect-four-space"></span></div>
             </div>
         </div>
         <div id="gomoku-board">
@@ -397,6 +402,7 @@
         <div id="game-info-buttons">
             <button class="info-button" id="prompt-info-btn">Prompt Details</button>
             <button class="info-button" id="game-info-btn">Game Details</button>
+            <button class="info-button" id="edit-llms-btn">Add/Edit LLMs</button>
         </div>
         <div id="prompt-info">
             <p>
@@ -456,6 +462,50 @@
 
                 <strong>Request for Next Move (Used by All Games):</strong> You are the (<em>first/second</em>) player. What would be your next move?
             </p>
+        </div>
+        <div id="edit-llms">
+            <strong><em>Add/Edit LLMS Page: </em></strong> This page displays all LLMs that will be listed as players in the current dropdown box. Model name, URL, API key fields are editable in the list below.<br>
+            <strong><u>Add/Edit LLMs</u></strong>
+            <div>
+                <label for="llm-type">Type: </label>
+                <select id="llm-type">
+                    <option value="OpenAI">OpenAI</option>
+                    <option value="Google">Google</option>
+                    <option value="AWS Bedrock">AWS Bedrock</option>
+                    <option value="Other">Other</option>
+                </select>
+                <label for="llm-name">Name: </label>
+                <input type="text" id="llm-name" name="llm-name">
+                <label for="llm-id">ID: </label>
+                <input type="text" id="llm-id" name="llm-id">
+                <label for="llm-supports-images">Supports Images: </label>
+                <select id="llm-supports-images">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+                <button id="add-llm-btn">Add</button>
+            </div>
+            <div id="llm-table">
+                <div id="llm-table-body">
+                    <div class="llm-table-row" id="llm-table-header">
+                        <div class="llm-table-cell">Type</div>
+                        <div class="llm-table-cell">Name</div>
+                        <div class="llm-table-cell">API Key</div>
+                        <div class="llm-table-cell">URL</div>
+                        <div class="llm-table-cell">Supports Images?</div>
+                        <div class="llm-table-cell"></div>
+                    </div>
+                    <div class="llm-table-row">
+                        <div class="llm-table-cell">OpenAI</div>
+                        <div class="llm-table-cell">gpt-4</div>
+                        <div class="llm-table-cell"><input type="text" value="sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il"></div>
+                        <div class="llm-table-cell"><input type="text" value="https://api.openai.com/v1/chat/completions"></div>
+                        <div class="llm-table-cell">true</div>
+                        <button>X</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
         <script type="module" src="game-simulation.js"></script>
     </body>
