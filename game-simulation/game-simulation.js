@@ -1,9 +1,12 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 // Initialize variables
 let GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
 let INVALID_MOVE_THRESHOLD = 5; // Number of invalid moves a player can make before the win is given to the other player.
 
 let OPENAI_API_KEY = "sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il";
 let OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+let GOOGLE_API_KEY = "AIzaSyC-xij8Mk7bdlh0HDQUbNaSseqkqY4nTBE";
 
 let PROMPT_EXPLAIN_TIC_TAC_TOE = "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game.";
 let PROMPT_RESPONSE_FORMAT_NEXT_MOVE_TIC_TAC_TOE = "Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
@@ -20,11 +23,11 @@ let SYSTEM_PROMPT_GOMOKU = "Suggest your next move in the following JSON format:
 let TIC_TAC_TOE_BOARD_SIZE = 3;
 let TIC_TAC_TOE_MAX_ALLOWED_MOVES = 20;
 
+let models = [];
 let gameStopped = false;
 let resetStats = true;
 
 // Event Handlers
-// Option change handlers
 document.getElementById("game-type").addEventListener("change", (event) => {
     resetStats = true;
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -32,17 +35,24 @@ document.getElementById("game-type").addEventListener("change", (event) => {
     if (event.target.value === "tic-tac-toe") {
         document.getElementById("tic-tac-toe-board").style.display = "table";
         document.getElementById("connect-four-board").style.display = "none";
+        document.getElementById("gomoku-board").style.display = "none";
     }
     else if (event.target.value === "connect-four") {
         document.getElementById("tic-tac-toe-board").style.display = "none";
         document.getElementById("connect-four-board").style.display = "table";
+        document.getElementById("gomoku-board").style.display = "none";
+    }
+    else if (event.target.value === "gomoku") {
+        document.getElementById("tic-tac-toe-board").style.display = "none";
+        document.getElementById("connect-four-board").style.display = "none";
+        document.getElementById("gomoku-board").style.display = "table";
     }
 });
 
-// Button handlers.
 document.getElementById("start-btn").addEventListener("click", (event) => {
     playGame();
 });
+
 document.getElementById("reset-btn").addEventListener("click", () => {
     resetStats = true;
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -52,6 +62,7 @@ document.getElementById("stop-btn").addEventListener("click", (event) => {
     console.log("Stopping gameplay...");
     gameStopped = true;
 });
+
 document.getElementById("prompt-info-btn").addEventListener("click", () => {
     if (document.getElementById("prompt-info").style.display === "none") {
         document.getElementById("prompt-info").style.display = "flex";
@@ -61,6 +72,15 @@ document.getElementById("prompt-info-btn").addEventListener("click", () => {
     }
 });
 
+document.getElementById("first-player").addEventListener("change", () => {
+    checkImageCompatibility();
+});
+
+document.getElementById("second-player").addEventListener("change", () => {
+    checkImageCompatibility();
+});
+
+
 async function playGame() {
     let gameType = document.getElementById("game-type").value;
     let gameCount = document.getElementById("game-count").value;
@@ -68,7 +88,6 @@ async function playGame() {
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
     let promptType = document.getElementById("prompt-type").value;
-
 
     // Obtain existing statistics.
     let firstPlayerWins = parseInt(document.getElementById("first-player-wins").innerText.split(': ')[1]);
@@ -105,14 +124,9 @@ async function playGame() {
         gameStopped = false;
         let currentMoveCount = 1;
         let currentPlayer = 1;
+        let moves = [];
         let firstPlayerCurrentInvalidMoves = 0;
         let secondPlayerCurrentInvalidMoves = 0;
-        let invalidMovesFirstPlayerAlreadyTaken = 0;
-        let invalidMovesSecondPlayerAlreadyTaken = 0;
-        let invalidMovesFirstPlayerInvalidFormat = 0;
-        let invalidMovesSecondPlayerInvalidFormat = 0;
-        let invalidMovesFirstPlayerOutOfBounds = 0;
-        let invalidMovesSecondPlayerOutOfBounds = 0;
         let gameLog = "";
         let gameStartTime = Date.now();
 
@@ -123,17 +137,11 @@ async function playGame() {
                 break;
             }
 
-            // Get initial response
-            let initialContent = await getMove(promptType, gameType, currentPlayer, firstPlayer, secondPlayer);
+            // Get the current model object from the 'models' list.
+            let model = (currentPlayer === 1) ? models[document.getElementById("first-player").selectedIndex] : models[document.getElementById("second-player").selectedIndex];
 
-            // Format the current status prompt based on the selected prompt type.
-            let currentStatusPrompt;
-            if (promptType === "list") {
-                currentStatusPrompt = listBoard(gameType);
-            }
-            else if (promptType === "illustration") {
-                currentStatusPrompt = drawBoard(gameType);
-            }
+            // Get initial response from the corresponding API for the model.
+            let initialContent = await getMove(promptType, gameType, currentPlayer, model);
 
             // If gameplay was stopped, exit before attempting to process move.
             if (gameStopped) {
@@ -141,13 +149,16 @@ async function playGame() {
                 break;
             }
 
-            let move = await processMove(gameType, initialContent, currentPlayer, firstPlayer, secondPlayer, currentMoveCount, promptType, currentStatusPrompt);
-            if(move.getValid() === "Y") {
-                // A valid move was made. Process it.
+            // Get move outcome ('Y' for valid move, or a description of how the move was invalid).
+            let move = await processMove(gameType, initialContent, currentPlayer, model, currentMoveCount);
+            moves.push(move);
+
+            // If a valid move was made, process it.
+            if(move.getOutcome() === "Y") {
                 gameLog += updateGameLog(gameType); // Append new move to game log.
                 if (checkForWin(gameType)) { // If a player has won the game, write the game log accordingly.
-                    let winningModel = (currentPlayer === 1) ? firstPlayer : secondPlayer;
                     let winningSymbol = (currentPlayer === 1) ? "X" : "O";
+
                     if (currentPlayer === 1) {
                         firstPlayerWins++;
                         firstPlayerMovesPerWin = firstPlayerTotalMoveCount / firstPlayerWins;
@@ -155,13 +166,14 @@ async function playGame() {
                         secondPlayerWins++;
                         secondPlayerMovesPerWin = secondPlayerTotalMoveCount / secondPlayerWins;
                     }
-                    writeGameLogToFile(firstPlayer, secondPlayer, winningModel + " " + winningSymbol + " wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds);
-                    console.log(winningModel + " (" + winningSymbol + ") wins!");
+
+                    writeGameLogToFile(firstPlayer, secondPlayer, model.getID() + " " + winningSymbol + " wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moves);
+                    console.log(model.getID() + " (" + winningSymbol + ") wins!");
                     isGameActive = false;
                 }
                 else if (isBoardFull(gameType)) { // If a draw has taken place, write the game log accordingly.
                     draws++;
-                    writeGameLogToFile(firstPlayer, secondPlayer, "Draw", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds);
+                    writeGameLogToFile(firstPlayer, secondPlayer, "Draw", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moves);
                     console.log("Draw");
                     isGameActive = false;
                 }
@@ -171,43 +183,23 @@ async function playGame() {
                 // An invalid move was made. Increment current player's invalid move count for this game.
                 if (currentPlayer === 1) {
                     firstPlayerCurrentInvalidMoves++;
-
-                    if (move.getValid() === "Already Taken") {
-                        invalidMovesFirstPlayerAlreadyTaken++;
-                    }
-                    if (move.getValid() === "Out of Bounds") {
-                        invalidMovesFirstPlayerOutOfBounds++;
-                    }
-                    if (move.getValid() === "Invalid Format") {
-                        invalidMovesFirstPlayerInvalidFormat++;
-                    }
                 }
                 else {
                     secondPlayerCurrentInvalidMoves++;
-
-                    if (move.getValid() === "Already Taken") {
-                        invalidMovesSecondPlayerAlreadyTaken++;
-                    }
-                    if (move.getValid() === "Out of Bounds") {
-                        invalidMovesSecondPlayerOutOfBounds++;
-                    }
-                    if (move.getValid() === "Invalid Format") {
-                        invalidMovesSecondPlayerInvalidFormat++;
-                    }
                 }
 
                 // If a player's invalid move count is above the threshold, give the win to the other player.
                 if (firstPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
                     secondPlayerWins++;
                     secondPlayerMovesPerWin = secondPlayerTotalMoveCount / secondPlayerWins;
-                    writeGameLogToFile(firstPlayer, secondPlayer, secondPlayer + " (O) wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds);
+                    writeGameLogToFile(firstPlayer, secondPlayer, secondPlayer + " (O) wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moves);
                     console.log(secondPlayer + " (O) wins because " + firstPlayer + " made too many invalid moves!");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
                     firstPlayerWins++;
                     firstPlayerMovesPerWin = firstPlayerTotalMoveCount / firstPlayerWins;
-                    writeGameLogToFile(firstPlayer, secondPlayer, firstPlayer + " (X) wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds);
+                    writeGameLogToFile(firstPlayer, secondPlayer, firstPlayer + " (X) wins!", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moves);
                     console.log(firstPlayer + " (X) wins because " + secondPlayer + " made too many invalid moves!");
                     isGameActive = false;
                 }
@@ -231,13 +223,14 @@ async function playGame() {
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
             if (currentMoveCount >= TIC_TAC_TOE_MAX_ALLOWED_MOVES) {
-                writeGameLogToFile(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds);
+                writeGameLogToFile(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moveOutcomes);
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
         }
         firstPlayerTotalInvalidMoves += firstPlayerCurrentInvalidMoves;
         secondPlayerTotalInvalidMoves += secondPlayerCurrentInvalidMoves;
+        await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
         resetBoard(gameType);
         currentGameCount++;
         updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount, gameType, promptType, currentGameCount, currentMoveCount, gameLog);
@@ -474,23 +467,32 @@ function resetBoard(gameType) {
     }
 }
 
-async function getMove(promptType, gameType, currentPlayer, firstPlayer, secondPlayer) {
+async function getMove(promptType, gameType, currentPlayer, model) {
     let prompt = createPrompt(promptType, gameType, currentPlayer);
     let systemPrompt = createSystemPrompt();
-    let model = (currentPlayer === 1) ? firstPlayer : secondPlayer;
     return await asynchronousWebServiceCall(prompt, systemPrompt, model);
 }
 
-async function processMove(gameType, initialContent, currentPlayer, firstPlayer, secondPlayer, currentMoveCount, promptType, currentStatusPrompt) {
+async function processMove(gameType, initialContent, currentPlayer, model, currentMoveCount) {
     if (gameType === "tic-tac-toe") {
         let row;
         let col;
-        let content = cleanResponse(initialContent);
-        let model = (currentPlayer === 1) ? firstPlayer : secondPlayer;
+        let jsonResponse = cleanResponse(initialContent);
+        let modelID = model.getID();
         let symbol = (currentPlayer === 1) ? "X" : "O";
         try {
-            let jsonResponse = JSON.parse(content);
-            if (model === "gpt-3.5-turbo" || model === "gpt-4" || model === "gpt-4-turbo" || model === "gpt-4o") {
+            if (modelID === "gemini-pro" || modelID === "gemini-pro-vision") {
+                if (jsonResponse.candidates !== undefined) {
+                    jsonResponse = jsonResponse.candidates[0].content.parts[0].text;
+                }
+                if (jsonResponse.row !== undefined) {
+                    row = jsonResponse.row;
+                }
+                if (jsonResponse.column !== undefined) {
+                    col = jsonResponse.column;
+                }
+            }
+            else if (modelID === "gpt-3.5-turbo" || modelID === "gpt-4" || modelID === "gpt-4-turbo" || modelID === "gpt-4o") {
                 if (jsonResponse.choices !== undefined) {
                     jsonResponse = jsonResponse.choices[0].message.content;
                 }
@@ -503,8 +505,8 @@ async function processMove(gameType, initialContent, currentPlayer, firstPlayer,
             }
         }
         catch (e) {
-            console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + model + " (" + symbol + ")'s given move had an invalid format.");
-            return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", promptType, currentStatusPrompt, initialContent);
+            console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + modelID + " (" + symbol + ")'s given move had an invalid format.");
+            return "Invalid Format";
         }
 
         // Validate row and column
@@ -522,19 +524,19 @@ async function processMove(gameType, initialContent, currentPlayer, firstPlayer,
                 }
 
                 // Return successful move.
-                console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + model + " (" + symbol + ") places at space (" + row + ", " + col + ").");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Y", promptType, currentStatusPrompt, initialContent);
+                console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + modelID + " (" + symbol + ") places at space (" + row + ", " + col + ").");
+                return new Move(currentPlayer, "Y");
             }
             else {
                 // Return unsuccessful move because AI attempted to play in a space that was already taken.
-                console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + model + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", promptType, currentStatusPrompt, initialContent);
+                console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + modelID + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
+                return new Move(currentPlayer, "Already Taken");
             }
         }
         else {
             // Return unsuccessful move because AI attempted to play in a space that was out of bounds.
-            console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + model + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", promptType, currentStatusPrompt, initialContent);
+            console.log("Move " + currentMoveCount + "/" + TIC_TAC_TOE_MAX_ALLOWED_MOVES + ": " + modelID + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
+            return new Move(currentPlayer, "Out of Bounds");
         }
     }
 }
@@ -552,19 +554,28 @@ function cleanResponse(content) {
             content = content.substring(0, content.lastIndexOf("}") + 1);
         }
     }
-    return content;
+    return JSON.parse(content);
 }
 
 async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
+    let modelID = model.getID();
+    let apiKey = model.getApiKey();
+
+    if (modelID === "gemini-pro" || modelID === "gemini-pro-vision") {
+        let genAI = new GoogleGenerativeAI(apiKey);
+        model = genAI.getGenerativeModel({ model: modelID });
+        let result = await model.generateContent(prompt);
+        let response = await result.response;
+        return JSON.stringify(response);
+    }
     return new Promise((resolve, reject) => {
-        let url;
+        let url = new URL(model.getUrl());
         let secret = "LLM-GameOn";
         let requestBody;
 
-        if (model === "gpt-3.5-turbo" || model === "gpt-4" || model === "gpt-4-turbo" || model === "gpt-4o") {
-            url = new URL(OPENAI_URL);
+        if (modelID === "gpt-3.5-turbo" || modelID === "gpt-4" || modelID === "gpt-4-turbo" || modelID === "gpt-4o") {
             requestBody = JSON.stringify({
-                "model": model,
+                "model": modelID,
                 "messages": [{
                     "role": "user",
                     "content": prompt
@@ -575,7 +586,7 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
         fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + OPENAI_API_KEY,
+                'Authorization': 'Bearer ' + apiKey,
                 'Content-Type': 'application/json'
             },
             body: requestBody
@@ -590,7 +601,7 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
         }).catch(error => {
             reject(error)
         });
-    })
+    });
 }
 
 function getMovesForPlayer(gameType, player) {
@@ -620,7 +631,6 @@ function formatGameDuration(durationInMillis) {
     minutes = String((minutes < 10) ? '0' + minutes : minutes).padStart(2, "0"); // Pad with 0s to at least 2 decimal places.
     seconds = seconds % 60;
     seconds = String((seconds < 10) ? '0' + seconds : seconds).padStart(2, "0");
-    console.log(seconds);
     return (minutes + ":" + seconds);
 }
 
@@ -635,6 +645,7 @@ function formatTimestamp(gameEndTime) {
     // Return timestamp in yyMMdd-HHmmss format.
     return year + month + day + "-" + hours + minutes + seconds;
 }
+
 function updateGameLog(gameType) {
     let boardState = "";
     if (gameType === "tic-tac-toe") {
@@ -652,19 +663,53 @@ function updateGameLog(gameType) {
     return boardState + "\n";
 }
 
-function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, invalidMovesFirstPlayerAlreadyTaken, invalidMovesSecondPlayerAlreadyTaken, invalidMovesFirstPlayerInvalidFormat, invalidMovesSecondPlayerInvalidFormat, invalidMovesFirstPlayerOutOfBounds, invalidMovesSecondPlayerOutOfBounds) {
+function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, currentGameCount, currentMoveCount, gameLog, moves) {
+    let gameDuration = formatGameDuration(Date.now() - gameStartTime);
     let sanitizedFirstPlayer = firstPlayer.replace("/", "_");
     let sanitizedSecondPlayer = secondPlayer.replace("/", "_");
     result = result.replace("/", "_");
-    let gameDuration = formatGameDuration(Date.now() - gameStartTime);
 
-    // Name the file.
+    // Count the number of invalid moves and their types.
+    let invalidMovesFirstPlayerAlreadyTaken = 0;
+    let invalidMovesSecondPlayerAlreadyTaken = 0;
+    let invalidMovesFirstPlayerInvalidFormat = 0;
+    let invalidMovesSecondPlayerInvalidFormat = 0;
+    let invalidMovesFirstPlayerOutOfBounds = 0;
+    let invalidMovesSecondPlayerOutOfBounds = 0;
+
+    for (let move of moves) {
+        if (move.getPlayer() === 1) {
+            if (move.getOutcome() === "Already Taken") {
+                invalidMovesFirstPlayerAlreadyTaken++;
+            }
+            if (move.getOutcome() === "Out of Bounds") {
+                invalidMovesFirstPlayerOutOfBounds++;
+            }
+            if (move.getOutcome() === "Invalid Format") {
+                invalidMovesFirstPlayerInvalidFormat++;
+            }
+        }
+        else {
+            if (move.getOutcome() === "Already Taken") {
+                invalidMovesSecondPlayerAlreadyTaken++;
+            }
+            if (move.getOutcome() === "Out of Bounds") {
+                invalidMovesSecondPlayerOutOfBounds++;
+            }
+            if (move.getOutcome() === "Invalid Format") {
+                invalidMovesSecondPlayerInvalidFormat++;
+            }
+        }
+    }
+
+    // Name the output files.
     let timestamp = formatTimestamp(new Date());
     let fileName = gameType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + result + "_" + promptType + "_" + timestamp;
     let textFileName = fileName + ".txt";
     let jsonFileName = fileName + ".json";
     let csvFileName = fileName + ".csv";
 
+    // Write the text file content.
     let textFileContent = "Game Type: " + gameType + "\n" +
         "Game #: " + (currentGameCount + 1) + "\n" +
         "Prompt Type: " + promptType + "\n" +
@@ -714,55 +759,8 @@ function downloadFile(content, extension, fileName) {
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
 
-    // Remove the downloader achor element from the HTML body.
+    // Remove the downloader anchor element from the HTML body.
     document.body.removeChild(downloadAnchor);
-}
-
-class Move {
-    moveNumber;
-    player;
-    row;
-    col;
-    valid;
-    promptType;
-    promptCurrentStatus;
-    response;
-
-    constructor(moveNumber, player, row, col, valid, promptType, promptCurrentStatus, response) {
-        this.moveNumber = moveNumber;
-        this.player = player;
-        this.row = row;
-        this.col = col;
-        this.valid = valid;
-        this.promptType = promptType;
-        this.promptCurrentStatus = promptCurrentStatus;
-        this.response = response;
-    }
-
-    getMoveNumber() {
-        return this.moveNumber;
-    }
-    getPlayer() {
-        return this.player;
-    }
-    getRow() {
-        return this.row;
-    }
-    getCol() {
-        return this.col;
-    }
-    getValid() {
-        return this.valid;
-    }
-    getPromptType() {
-        return this.promptType;
-    }
-    getPromptCurrentStatus() {
-        return this.promptCurrentStatus;
-    }
-    getResponse() {
-        return this.response;
-    }
 }
 
 function resetVisualStats() {
@@ -779,7 +777,85 @@ function resetVisualStats() {
     document.getElementById("second-player-moves-per-win").innerHTML = "<div class='info' id='second-player-moves-per-win'><strong>2nd Player Moves per Win: </strong>0</div>";
 }
 
+class Move {
+    #player;
+    #outcome;
+
+    constructor(player, outcome) {
+        this.#player = player;
+        this.#outcome = outcome;
+    }
+
+    getPlayer() {
+        return this.#player;
+    }
+    getOutcome() {
+        return this.#outcome;
+    }
+}
+
+class Model {
+    #name;
+    #ID;
+    #apiKey;
+    #url;
+    #supportsImages;
+
+    constructor(name, ID, apiKey, url, supportsImages) {
+        this.#name = name;
+        this.#ID = ID;
+        this.#apiKey = apiKey;
+        this.#url = url;
+        this.#supportsImages = supportsImages;
+    }
+
+    getName() {
+        return this.#name;
+    }
+    getID() {
+        return this.#ID;
+    }
+    getApiKey() {
+        return this.#apiKey;
+    }
+    getUrl() {
+        return this.#url;
+    }
+    getSupportsImages() {
+        return this.#supportsImages;
+    }
+}
+
+function addModel(model) {
+    models.push(model);
+    document.getElementById("first-player").innerHTML +=
+        "<option value=\"" + model.getID() + "\">" + model.getName() + "</option>";
+    document.getElementById("second-player").innerHTML +=
+        "<option value=\"" + model.getID() + "\">" + model.getName() + "</option>";
+}
+
+function checkImageCompatibility() {
+    // If both selected models support images as input, allow it as an option in the "prompt type" field.
+    if (models[document.getElementById("first-player").selectedIndex].getSupportsImages() && models[document.getElementById("second-player").selectedIndex].getSupportsImages()) {
+        document.getElementById("prompt-type").innerHTML = "<option value=\"list\">List</option>" +
+            "<option value=\"illustration\">Illustration</option>" +
+            "<option value=\"image\">Image</option>";
+    }
+    else {
+        document.getElementById("prompt-type").innerHTML = "<option value=\"list\">List</option>" +
+            "<option value=\"illustration\">Illustration</option>";
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async function() {
+    // Add initial models.
+    addModel(new Model("GPT 3.5 Turbo", "gpt-3.5-turbo", OPENAI_API_KEY, OPENAI_URL, false));
+    addModel(new Model("GPT-4", "gpt-4", OPENAI_API_KEY, OPENAI_URL, true));
+    addModel(new Model("GPT-4 Turbo", "gpt-4-turbo", OPENAI_API_KEY, OPENAI_URL, true));
+    addModel(new Model("GPT-4o", "gpt-4o", OPENAI_API_KEY, OPENAI_URL, true));
+    addModel(new Model("Gemini Pro", "gemini-pro", GOOGLE_API_KEY, null, false));
+    addModel(new Model("Gemini Pro Vision", "gemini-pro-vision", GOOGLE_API_KEY, null, true));
+
     let gameType = document.getElementById("game-type").value;
     let gameCount = document.getElementById("game-count").value;
     let currentGameCount = 0;
