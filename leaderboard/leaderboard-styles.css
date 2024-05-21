@@ -8,7 +8,7 @@ body {
     background-color: #ffffff;
     margin: 0; /* Remove default margin */
     padding-top: 0; /* Remove default padding */
-    padding-left: 2.5%;
+    padding-left: 1.5%;
 }
 .container {
     position: relative; 
@@ -108,7 +108,7 @@ h1 {
 
  .table-container {
     max-width: 95%; /* Adjust the max-width */
-    padding-right: 2.5%; /* Add right padding */
+    padding-right: 1.5%; /* Add right padding */
     margin: 0 auto; /* Center the container */
     box-sizing: border-box; 
 }
@@ -121,17 +121,16 @@ h1 {
 /* Style the submit button */
 .submit-btn {
     display: block;
-    margin: 10px auto;
     padding: 10px 20px;
     font-size: 16px;
     color: white;
     background-color: purple;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    cursor: pointer;  
+    position: relative; 
+    top: 10px; /* Position it at the bottom */
+    left: 10px; /* Position it at the left */
 }
 
 .submit-btn:hover {
