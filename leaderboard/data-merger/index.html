@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge JSON Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            display: block;
+            margin: 10px 0;
+        }
+        textarea {
+            display: block;
+            margin: 10px 0;
+            width: 100%;
+            height: 200px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Merge JSON Files</h1>
+
+    <button type="button" id="openAllDataBtn">Open All Data JSON file</button>
+    <input type="file" id="allDataFileInput" accept=".json" style="display: none;">
+
+    <button type="button" id="openReceivedSubmissionsBtn">Open Received Submission JSON file</button>
+    <input type="file" id="receivedSubmissionsFileInput" accept=".json" style="display: none;">
+
+    <button type="button" id="mergeAndDownloadBtn">Merge & Download Files</button>
+
+    <textarea id="allDataTextArea" readonly></textarea>
+    <textarea id="receivedSubmissionsTextArea" readonly></textarea>
+
+    <script src="merger-script.js"></script>
+</body>
+</html>
