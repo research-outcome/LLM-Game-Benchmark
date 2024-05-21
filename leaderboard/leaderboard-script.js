@@ -22,7 +22,7 @@ $(document).ready(function() {
         const table = $('#mytable').DataTable({
             data: formattedData,
             columns: [
-                { title: "Game Type",},
+                { title: "Game Type"},
                 { title: "Prompt" },
                 { title: "LLM (1st)" },
                 { title: "LLM (2nd)" },
