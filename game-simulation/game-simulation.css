@@ -1,27 +1,71 @@
+body {
+    font-family: 'Kanit', serif, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: small;
+}
 #options, #game-info {
     display: flex;
-    background-color: #401b7b;
-    color: white;
+    background-color: #f1f1f1;
     padding: 5px;
+    border: 3px solid black;
     margin-bottom: 10px;
 }
 .option, .info {
     margin-left: auto;
     margin-right: auto;
 }
+select, button {
+    font-family: 'Kanit', serif, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: small;
+}
 #game-count {
     width: 50px;
 }
-#game-stats, #prompt-info {
+#game-stats, #prompt-info, #edit-llms {
     display: flex;
     align-items: center;
-    background-color: lightgrey;
+    background-color: #f1f1f1;
     margin-top: 10px;
     padding: 5px;
     border: 3px solid black;
 }
 #prompt-info {
     display: none;
+}
+#edit-llms {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 1250px;
+    height: 500px;
+    margin: auto;
+    background-color: lightgrey;
+    font-size: large;
+}
+#llm-table {
+    display: table;
+}
+#llm-table-body {
+    display: table-row-group;
+}
+.llm-table-row {
+    display: table-row;
+}
+.llm-table-cell {
+    display: table-cell;
+    padding: 10px;
+}
+#llm-table-header .llm-table-cell {
+    color: white;
+    background-color: black;
+    padding: 10px;
+
 }
 #start-btn, #stop-btn {
     display: block;
@@ -61,20 +105,36 @@
 #tic-tac-toe-board .cell, #connect-four-board .cell, #gomoku-board .cell {
     width: 100px;
     height: 100px;
-    font-size: 80px;
+    font-size: 60px;
     background-color: lightgrey;
     display: table-cell;
     text-align: center;
     vertical-align: middle;
 }
+#connect-four-board {
+    background-color: #1965dd;
+    position: relative;
+}
 #connect-four-board .cell {
     width: 80px;
     height: 80px;
     font-size: 64px;
+    background-color: #1965dd;
+}
+.connect-four-space {
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-block;
+}
+#gomoku-board {
+    background-color: #562509;
 }
 #gomoku-board .cell {
     width: 40px;
     height: 40px;
+    background-color: #e7ae75;
     position: relative;
 }
 .black-stone {
