@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/merged_data.json';
+    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/Leaderboard.json';
 
     $.getJSON(jsonURL, function(data) {
         const formattedData = data.map(item => [
@@ -22,7 +22,7 @@ $(document).ready(function() {
         const table = $('#mytable').DataTable({
             data: formattedData,
             columns: [
-                { title: "Game Type" },
+                { title: "Game Type"},
                 { title: "Prompt" },
                 { title: "LLM (1st)" },
                 { title: "LLM (2nd)" },
@@ -37,7 +37,8 @@ $(document).ready(function() {
                 { title: "Total Moves (2nd)" },
                 { title: "Provider Email" }
             ],
-            //searching: false,
+            dom: 'frtlpi'
+            // searching: false,
             //paging: false,
             //info: false
         });
