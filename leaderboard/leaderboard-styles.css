@@ -128,8 +128,8 @@ h1 {
     border: none;
     border-radius: 5px;
     cursor: pointer;  
-    position: absolute; /* Ensure it stays in place while scrolling */
-    top: 850px; /* Position it at the bottom */
+    position: relative; 
+    top: 10px; /* Position it at the bottom */
     left: 10px; /* Position it at the left */
 }
 
