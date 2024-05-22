@@ -7,6 +7,8 @@ let INVALID_MOVE_THRESHOLD = 10; // Number of invalid moves a player can make be
 let OPENAI_API_KEY = "sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il";
 let OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 let GOOGLE_API_KEY = "AIzaSyC-xij8Mk7bdlh0HDQUbNaSseqkqY4nTBE";
+let BEDROCK_SECRET = "LLM-GameOn";
+let BEDROCK_URL = "https://v5fb43ch74.execute-api.us-east-1.amazonaws.com/devpost/bedrockllms";
 
 let PROMPT_EXPLAIN_TIC_TAC_TOE = "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game.";
 let PROMPT_RESPONSE_FORMAT_NEXT_MOVE_TIC_TAC_TOE = "Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
@@ -616,7 +618,6 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
     }
     return new Promise((resolve, reject) => {
         let url = new URL(model.getUrl());
-        let secret = "LLM-GameOn";
         let requestBody;
 
         if (modelType === "OpenAI") {
@@ -926,13 +927,16 @@ function checkImageCompatibility() {
 }
 
 document.addEventListener("DOMContentLoaded", async function() {
-    // Add initial models.
+    // Add initial models to model list.
     addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_API_KEY, OPENAI_URL, false));
     addModel(new Model("OpenAI", "gpt-4", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("Google", "gemini-pro", GOOGLE_API_KEY, null, false));
     addModel(new Model("Google", "gemini-pro-vision", GOOGLE_API_KEY, null, true));
+
+    // Use initialized model list to initialize add/edit LLMs page.
+
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;
