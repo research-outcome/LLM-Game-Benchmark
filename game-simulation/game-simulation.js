@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { uuidv7 } from "https://unpkg.com/uuidv7@^1";
 
 // Initialize variables
 let GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -78,6 +79,22 @@ document.getElementById("edit-llms-btn").addEventListener("click", () => {
     document.getElementById("edit-llms").style.display = "inline-block";
 });
 
+document.getElementById("llm-type").addEventListener("change", (event) => {
+    updateAddOptions(event);
+});
+
+document.getElementById("add-llm-btn").addEventListener("click", () => {
+    let model = new Model(
+        document.getElementById("llm-type").value,
+        document.getElementById("llm-name").value,
+        "",
+        "",
+        document.getElementById("llm-supports-images").value,
+    );
+    addModel(model);
+    updateModelLists();
+});
+
 document.getElementById("first-player").addEventListener("change", () => {
     checkImageCompatibility();
 });
@@ -95,6 +112,8 @@ async function playGame() {
     let secondPlayer = document.getElementById("second-player").value;
     let promptType = document.getElementById("prompt-type").value;
     let currentGameCount = 0;
+    let uuid = uuidv7();
+    let gameLogFiles = [];
 
     // Obtain existing statistics from the "stats" box.
     let firstPlayerWins = parseInt(document.getElementById("first-player-wins").innerText.split(': ')[1]);
@@ -183,14 +202,14 @@ async function playGame() {
                     }
 
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
-                    writeGameLogToFile(firstPlayer, secondPlayer, "winner" + winner, gameStartTime, gameType, promptType, gameCount, currentGameCount, currentMoveCount, gameLog, moves);
+                    gameLogFiles.push(writeGameLogToFile(firstPlayer, secondPlayer, "winner" + winner, gameStartTime, gameType, promptType, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log(winner + " player wins!");
                     isGameActive = false;
                 }
                 // If a draw has taken place, process it accordingly.
                 else if (isBoardFull(gameType)) {
                     draws++;
-                    writeGameLogToFile(firstPlayer, secondPlayer, "draw", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves);
+                    gameLogFiles.push(writeGameLogToFile(firstPlayer, secondPlayer, "draw", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Draw");
                     isGameActive = false;
                 }
@@ -208,12 +227,12 @@ async function playGame() {
 
                 // If a player's invalid move count is above the threshold, disqualify the player.
                 if (firstPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    writeGameLogToFile(firstPlayer, secondPlayer, "disqualified1st", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves);
+                    gameLogFiles.push(writeGameLogToFile(firstPlayer, secondPlayer, "disqualified1st", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    writeGameLogToFile(firstPlayer, secondPlayer, "disqualified2nd", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves);
+                    gameLogFiles.push(writeGameLogToFile(firstPlayer, secondPlayer, "disqualified2nd", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
@@ -238,7 +257,7 @@ async function playGame() {
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
             if (currentMoveCount >= TIC_TAC_TOE_MAX_ALLOWED_MOVES) {
-                writeGameLogToFile(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves);
+                gameLogFiles.push(writeGameLogToFile(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
@@ -255,7 +274,9 @@ async function playGame() {
     }
 
     // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
-    writeSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu");
+    let submissionFile = generateSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
+    downloadZipFile(submissionFile, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
+
     disableInputs(false);
     document.getElementById("start-btn").style.display = "block";  // Show start button
     document.getElementById("stop-btn").style.display = "none";  // Hide stop button
@@ -684,13 +705,13 @@ function formatGameDuration(durationInMillis) {
 }
 
 // Format a timestamp in yyMMdd-HHmmss format.
-function formatTimestamp(gameEndTime) {
-    let year = String(gameEndTime.getFullYear()).slice(-2); // Get last 2 digits of year.
-    let month = String(gameEndTime.getMonth() + 1).padStart(2, "0"); // Get month and pad to 2 digits.
-    let day = String(gameEndTime.getDate()).padStart(2, "0"); // Get day and pad to 2 digits.
-    let hours = String(gameEndTime.getHours()).padStart(2, "0"); // Get hour and pad to 2 digits.
-    let minutes = String(gameEndTime.getMinutes()).padStart(2, "0"); // Get minute and pad to 2 digits.
-    let seconds = String(gameEndTime.getSeconds()).padStart(2, "0"); // Get seconds and pad to 2 digits.
+function formatTimestamp(timestamp) {
+    let year = String(timestamp.getFullYear()).slice(-2); // Get last 2 digits of year.
+    let month = String(timestamp.getMonth() + 1).padStart(2, "0"); // Get month and pad to 2 digits.
+    let day = String(timestamp.getDate()).padStart(2, "0"); // Get day and pad to 2 digits.
+    let hours = String(timestamp.getHours()).padStart(2, "0"); // Get hour and pad to 2 digits.
+    let minutes = String(timestamp.getMinutes()).padStart(2, "0"); // Get minute and pad to 2 digits.
+    let seconds = String(timestamp.getSeconds()).padStart(2, "0"); // Get seconds and pad to 2 digits.
 
     // Return timestamp in yyMMdd-HHmmss format.
     return year + month + day + "-" + hours + minutes + seconds;
@@ -715,7 +736,7 @@ function updateGameLog(gameType) {
 }
 
 // Write information about the current game to .txt, .json, and .csv formats.
-function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves) {
+function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid) {
     let gameDuration = formatGameDuration(Date.now() - gameStartTime);
     let sanitizedFirstPlayer = firstPlayer.replace("/", "_");
     let sanitizedSecondPlayer = secondPlayer.replace("/", "_");
@@ -762,7 +783,8 @@ function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, ga
     let csvFileName = fileName + ".csv";
 
     // Generate the text file content.
-    let textFileContent = "Game Type: " + gameType + "\n" +
+    let textFileContent = "UUID: " + uuid + "\n" +
+        "Game Type: " + gameType + "\n" +
         "Game #: " + (currentGameCount + 1) + "\n" +
         "Prompt Type: " + promptType + "\n" +
         "Player 1: " + sanitizedFirstPlayer + "\n" +
@@ -781,26 +803,24 @@ function writeGameLogToFile(firstPlayer, secondPlayer, result, gameStartTime, ga
         gameLog;
 
     // Generate the JSON file content.
-    let jsonFileContent = "{\"GameType\": \"" + gameType + "\", \"Prompt\": \"" + promptType + "\", \"LLM1stPlayer\": \"" + firstPlayer + "\", \"LLM2ndPlayer\": \"" + secondPlayer + "\"}";
+    let jsonFileContent = "{\"UUID\": \"" + uuid + "\", \"GameType\": \"" + gameType + "\", \"Prompt\": \"" + promptType + "\", \"LLM1stPlayer\": \"" + firstPlayer + "\", \"LLM2ndPlayer\": \"" + secondPlayer + "\"}";
 
     // Generate the CSV file content.
-    let csvFileContent = "Timestamp,GameType,PromptType,Player1,Player2,Result,TotalTime,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat, Player2InvalidFormat, Player1OutOfBounds, Player2OutOfBounds\n" +
-        timestamp + "," + gameType + "," + promptType + "," + firstPlayer + "," + secondPlayer + "," + result + "," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
+    let csvFileContent = "UUID,Timestamp,GameType,PromptType,Player1,Player2,Result,TotalTime,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat, Player2InvalidFormat, Player1OutOfBounds, Player2OutOfBounds\n" +
+        uuid + "," + timestamp + "," + gameType + "," + promptType + "," + firstPlayer + "," + secondPlayer + "," + result + "," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
 
-    // Download each of the generated files.
-    downloadFile(textFileContent, 'txt', textFileName);
-    downloadFile(jsonFileContent, 'json', jsonFileName);
-    downloadFile(csvFileContent, 'csv', csvFileName);
+    // Add each of the generated files to the log ZIP file, which will be downloaded after gameplay concludes.
+    return new gameLogFiles(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent);
 }
 
 // Generate a JSON file containing aggregated information about a number of games to be submitted to the leaderboard.
-function writeSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail) {
+function generateSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid) {
     let sanitizedFirstPlayer = firstPlayer.replace("/", "_");
     let sanitizedSecondPlayer = secondPlayer.replace("/", "_");
 
     // Name the submission file.
     let timestamp = formatTimestamp(new Date());
-    let fileName = "submission_" + gameType + "_" + promptType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + timestamp + ".json";
+    let submissionFileName = "submission_" + gameType + "_" + promptType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + timestamp + ".json";
 
     // Generate the submission file content.
     let submissionFileContent = "{\"GameType\": \"" + gameType +
@@ -820,36 +840,35 @@ function writeSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, fi
         "\", \"TotalMoves-2nd\": \"" + secondPlayerTotalMoveCount +
         "\", \"ProviderEmail\": \"" + providerEmail +
         "\", \"SubmissionDate\": \"" + timestamp +
+        "\", \"UUID\": \"" + uuid +
         "\"}";
 
     // Download the generated submission file.
-    downloadFile(submissionFileContent, 'json', fileName);
+    return [submissionFileName, submissionFileContent];
 }
 
 // Download a file given its content, file extension, and filename.
-function downloadFile(content, extension, fileName) {
-    let type = "";
-    if (extension === 'txt') {
-        type = "text/plain";
-    }
-    else if (extension === 'csv') {
-        type = "text/csv";
-    }
-    else if (extension === 'json') {
-        type = "text/json";
+function downloadZipFile(submissionFile, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer) {
+    console.log(gameLogFiles[0]);
+    let logZipFile = new JSZip();
+    let timestamp = formatTimestamp(new Date());
+
+    // Generate ZIP file name.
+    let zipFileName = gameType + "_" + promptType + "_" + firstPlayer + "_" + secondPlayer + "_" + timestamp + ".zip";
+
+    // Add each game's text, JSON, and CSV files to ZIP file.
+    for (let gameLogs of gameLogFiles) {
+        logZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
+        logZipFile.file(gameLogs.getJsonFileName(), gameLogs.getJsonFileContent());
+        logZipFile.file(gameLogs.getCsvFileName(), gameLogs.getCsvFileContent());
     }
 
-    // Create an invisible HTML anchor element that contains the text content.
-    let downloadAnchor = window.document.createElement('a');
-    downloadAnchor.href = window.URL.createObjectURL(new Blob([content], {type: type}));
-    downloadAnchor.download = fileName;
+    // Add final submission JSON to Zip file. submissionFile[0] = file name, submissionFile[1] = file content.
+    logZipFile.file(submissionFile[0], submissionFile[1]);
 
-    // Append the downloader anchor element to the HTML body and emulate a click on it to download the file.
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-
-    // Remove the downloader anchor element from the HTML body.
-    document.body.removeChild(downloadAnchor);
+    logZipFile.generateAsync({type:"blob"}).then(function (blob) {
+        saveAs(blob, zipFileName);
+    });
 }
 
 // 'Move' class which contains the LLM name and move outcome ("Y" for valid moves, or explanations of invalid move types)
@@ -903,14 +922,117 @@ class Model {
     }
 }
 
+class gameLogFiles {
+    #textFileName;
+    #textFileContent;
+    #jsonFileName;
+    #jsonFileContent;
+    #csvFileName;
+    #csvFileContent;
+
+    constructor(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent) {
+        this.#textFileName = textFileName;
+        this.#textFileContent = textFileContent;
+        this.#jsonFileName = jsonFileName;
+        this.#jsonFileContent = jsonFileContent;
+        this.#csvFileName = csvFileName;
+        this.#csvFileContent = csvFileContent;
+    }
+
+    getTextFileName() {
+        return this.#textFileName;
+    }
+    getTextFileContent() {
+        return this.#textFileContent;
+    }
+    getJsonFileName() {
+        return this.#jsonFileName;
+    }
+    getJsonFileContent() {
+        return this.#jsonFileContent;
+    }
+    getCsvFileName() {
+        return this.#csvFileName;
+    }
+    getCsvFileContent() {
+        return this.#csvFileContent;
+    }
+}
+
 // Add a model to the list of models available for gameplay, and update the LLM dropdowns accordingly.
 function addModel(model) {
     models.push(model);
+    updateModelLists();
+}
 
-    document.getElementById("first-player").innerHTML +=
-        "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
-    document.getElementById("second-player").innerHTML +=
-        "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+function removeModel(buttonId) {
+    let index = buttonId.slice(15); // Remove "remove-btn-id-" from ID. We just want to retrieve the index of the model to remove.
+    console.log("Removing model " + index);
+    models.splice(index, 1);  // Remove matching model from models array.
+    updateModelLists();
+}
+
+// Update "Add/Edit LLMs" options depending on which type (company) is selected.
+function updateAddOptions(event) {
+    if (event.target.value === "OpenAI") {
+        document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
+                "<option value=\"gpt-4\">gpt-4</option>" +
+                "<option value=\"gpt-4-turbo\">gpt-4-turbo</option>" +
+                "<option value=\"gpt-4o\">gpt-4o</option>" +
+                "<option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>" +
+            "</select>";
+    }
+    else if (event.target.value === "Google") {
+        document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
+                "<option value=\"gemini-pro\">gemini-pro</option>" +
+                "<option value=\"gemini-pro-vision\">gemini-pro-vision</option>" +
+            "</select>";
+    }
+    else {
+        document.getElementById("llm-name-container").innerHTML = "<input type=\"text\" id=\"llm-name\" name=\"llm-name\">";
+    }
+}
+
+// Update "Add/Edit LLMs" table and "1st/2nd Player LLM" dropdowns with current model list.
+function updateModelLists() {
+    // Write table header.
+    document.getElementById("llm-table-body").innerHTML = "<div class=\"llm-table-row\" id=\"llm-table-header\">" +
+            "<div class=\"llm-table-cell\">Type</div>" +
+            "<div class=\"llm-table-cell\">Name</div>" +
+            "<div class=\"llm-table-cell\">URL</div>" +
+            "<div class=\"llm-table-cell\">API Key</div>" +
+            "<div class=\"llm-table-cell\">Supports Images?</div>" +
+            "<div class=\"llm-table-cell\"></div>" +
+        "</div>";
+
+    // Append a table row with every LLM in the model list, and update dropdowns.
+    document.getElementById("first-player").innerHTML = "";
+    document.getElementById("second-player").innerHTML = "";
+    let index = 0;
+    for (let model of models) {
+        document.getElementById("llm-table-body").innerHTML += "<div class=\"llm-table-row\">\n" +
+                "<div class=\"llm-table-cell\">" + model.getType() + "</div>" +
+                "<div class=\"llm-table-cell\">" + model.getName() + "</div>" +
+                "<div class=\"llm-table-cell\"><input type=\"text\" value=\"" + model.getUrl() + "\"></div>" +
+                "<div class=\"llm-table-cell\"><input type=\"text\" value=\"" + model.getApiKey() + "\"></div>" +
+                "<div class=\"llm-table-cell\">" + model.getSupportsImages() + "</div>" +
+                "<button class=\"remove-llm-btn\" id=\"remove-llm-btn-" + index + "\">X</button>" +
+            "</div>";
+
+        document.getElementById("first-player").innerHTML +=
+            "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+        document.getElementById("second-player").innerHTML +=
+            "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+
+        index++;
+    }
+
+    // Add event listeners for newly-added buttons.
+    for (let removeButton of document.getElementsByClassName("remove-llm-btn")) {
+        removeButton.addEventListener("click", (event) => {
+            removeModel(event.srcElement.id);
+        });
+    }
 }
 
 // If both LLMs selected by the user support images as input, allow it as an option in the "prompt type" field.
@@ -932,11 +1054,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     addModel(new Model("OpenAI", "gpt-4", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_API_KEY, OPENAI_URL, true));
-    addModel(new Model("Google", "gemini-pro", GOOGLE_API_KEY, null, false));
-    addModel(new Model("Google", "gemini-pro-vision", GOOGLE_API_KEY, null, true));
+    addModel(new Model("Google", "gemini-pro", GOOGLE_API_KEY, "", false));
+    addModel(new Model("Google", "gemini-pro-vision", GOOGLE_API_KEY, "", true));
 
-    // Use initialized model list to initialize add/edit LLMs page.
 
+
+    // Use initialized model list to initialize LLM table and player dropdowns.
+    updateModelLists();
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;

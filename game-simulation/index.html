@@ -466,7 +466,7 @@
         <div class="popup" id="edit-llms">
             <strong><em>Add/Edit LLMS Page: </em></strong> This page displays all LLMs that will be listed as players in the current dropdown box. Model name, URL, API key fields are editable in the list below.<br>
             <strong><u>Add/Edit LLMs</u></strong>
-            <div>
+            <div id="add-llm-options">
                 <label for="llm-type">Type: </label>
                 <select id="llm-type">
                     <option value="OpenAI">OpenAI</option>
@@ -475,9 +475,11 @@
                     <option value="Other">Other</option>
                 </select>
                 <label for="llm-name">Name: </label>
-                <input type="text" id="llm-name" name="llm-name">
-                <label for="llm-id">ID: </label>
-                <input type="text" id="llm-id" name="llm-id">
+                <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
+                <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
+                <div id="llm-name-container">
+                    <input type="text" id="llm-name" name="llm-name">
+                </div>
                 <label for="llm-supports-images">Supports Images: </label>
                 <select id="llm-supports-images">
                     <option value="false">No</option>
@@ -495,16 +497,8 @@
                         <div class="llm-table-cell">Supports Images?</div>
                         <div class="llm-table-cell"></div>
                     </div>
-                    <div class="llm-table-row">
-                        <div class="llm-table-cell">OpenAI</div>
-                        <div class="llm-table-cell">gpt-4</div>
-                        <div class="llm-table-cell"><input type="text" value="https://api.openai.com/v1/chat/completions"></div>
-                        <div class="llm-table-cell"><input type="text" value="sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il"></div>
-                        <div class="llm-table-cell">true</div>
-                        <button>X</button>
-                    </div>
+                    <!-- Models in the model list will be added here. -->
                 </div>
-
             </div>
 
             <!-- Prompt list button -->
@@ -546,5 +540,7 @@
             </div>
         </div>
         <script type="module" src="game-simulation.js"></script>
+        <script type="text/javascript" src="jszip.js"></script>
+        <script type="text/javascript" src="FileSaver.js"></script>
     </body>
 </html>
