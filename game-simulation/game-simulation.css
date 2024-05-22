@@ -24,7 +24,7 @@ select, button {
 #game-count {
     width: 50px;
 }
-#game-stats, #prompt-info, #edit-llms {
+#game-stats, #prompt-info {
     display: flex;
     align-items: center;
     background-color: #f1f1f1;
@@ -32,10 +32,7 @@ select, button {
     padding: 5px;
     border: 3px solid black;
 }
-#prompt-info {
-    display: none;
-}
-#edit-llms {
+.popup {
     display: none;
     position: fixed;
     top: 0;
@@ -45,9 +42,16 @@ select, button {
     width: 1250px;
     height: 500px;
     margin: auto;
-    background-color: lightgrey;
+    align-items: center;
+    background-color: #f1f1f1;
     font-size: large;
+    padding: 5px;
+    border: 3px solid black;
 }
+#prompt-info {
+    display: none;
+}
+
 #llm-table {
     display: table;
 }
