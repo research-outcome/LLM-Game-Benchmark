@@ -51,9 +51,15 @@ select, button {
 #prompt-info {
     display: none;
 }
-
+#llm-name-container {
+    display: inline;
+}
 #llm-table {
-    display: table;
+    display: block;
+    width: 800px;
+    height: 300px;
+    margin-top: 10px;
+    overflow: auto;
 }
 #llm-table-body {
     display: table-row-group;
@@ -69,7 +75,9 @@ select, button {
     color: white;
     background-color: black;
     padding: 10px;
-
+}
+.remove-llm-btn {
+    margin-right: 10px;
 }
 #start-btn, #stop-btn {
     display: block;
