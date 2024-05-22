@@ -86,6 +86,89 @@ document.getElementById("second-player").addEventListener("change", () => {
     checkImageCompatibility();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    // Example JSON data as a string
+    const jsonData = `
+    [
+        {
+          "Game Type": "Tic-Tac-Toe",
+          "Prompt Type": "list",
+          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game."
+        },
+        {
+          "Game Type": "Connect4",
+          "Prompt Type": "list",
+          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally."
+        },
+        {
+          "Game Type": "Gomoku",
+          "Prompt Type": "list",
+          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally."
+        },
+        {
+          "Game Type": "Tic-Tac-Toe",
+          "Prompt Type": "illustration",
+          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally."
+        },
+        {
+          "Game Type": "Connect4",
+          "Prompt Type": "illustration",
+          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. "
+        },
+        {
+          "Game Type": "Gomoku",
+          "Prompt Type": "illustration",
+          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid."
+        }
+       ]`;
+
+    // Parse the JSON string to a JavaScript object
+    const promptData = JSON.parse(jsonData);
+
+    // Function to populate the table
+    function populateTable(data) {
+        const tableBody = document.querySelector("#promptTable tbody");
+
+        data.forEach(item => {
+            const row = document.createElement("tr");
+
+            const gameTypeCell = document.createElement("td");
+            gameTypeCell.textContent = item["Game Type"];
+            row.appendChild(gameTypeCell);
+
+            const promptTypeCell = document.createElement("td");
+            promptTypeCell.textContent = item["Prompt Type"];
+            row.appendChild(promptTypeCell);
+
+            const promptExampleCell = document.createElement("td");
+            promptExampleCell.textContent = item["Prompt Example"];
+            row.appendChild(promptExampleCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Populate the table with data
+    populateTable(promptData);
+
+    // Event listener for the prompt list button
+    document.getElementById("promptListButton").addEventListener("click", () => {
+        document.getElementById("promptListPopup").style.display = "block";
+    });
+
+    // Event listener for the close button in the modal
+    document.querySelector("#promptListPopup .close").addEventListener("click", () => {
+        document.getElementById("promptListPopup").style.display = "none";
+    });
+
+    // Event listener to close the modal when clicking outside of it
+    window.addEventListener("click", (event) => {
+        let modal = document.getElementById("promptListPopup");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+});
 
 async function playGame() {
     // Obtain existing user selections and initialize current game count to 0.

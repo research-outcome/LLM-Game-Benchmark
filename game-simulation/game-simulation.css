@@ -164,3 +164,47 @@ select, button {
     margin-left: 10px;
     cursor: pointer;
 }
+
+/*Syling for prompt list pop up*/
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.table-container {
+    margin: 0 auto; /* Center the container */
+    box-sizing: border-box; 
+}
+
+#promptTable {
+    width: 100%;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Styling for prompt list button */
+.promptList-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}

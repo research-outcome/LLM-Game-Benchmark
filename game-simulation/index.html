@@ -504,45 +504,29 @@
                         <button>X</button>
                     </div>
                 </div>
-
             </div>
-
-            <!-- Prompt list button -->
-            <button id="promptListButton" class="promptList-btn">View Prompt List</button>
-
-           <!-- Modal structure for prompt list popup-->
-    <div id="Modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="table-container">
-                <table id="promptTable">
-                    <thead>
-                        <tr>
-                            <th>Game Type</th>
-                            <th>Prompt Type</th>
-                            <th>Prompt Example</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows can be dynamically added here -->
-                        <tr>
-                            <td>Tic-Tac-Toe</td>
-                            <td>List</td>
-                            <td>"Start a game of Tic-Tac-Toe"</td>
-                        </tr>
-                        <tr>
-                            <td>Connect-Four</td>
-                            <td>List</td>
-                            <td>"Drop a disc in column 3"</td>
-                        </tr>
-                        <tr>
-                            <td>Gomoku</td>
-                            <td>Illustration</td>
-                            <td>"Declare a winner for Gomoku"</td>
-                        </tr>
+        </div>
+        <!-- Prompt list button -->
+        <button id="promptListButton" class="promptList-btn">View Prompt List</button>
+    
+        <!-- Modal structure for prompt list popup -->
+        <div id="promptListPopup" class="popup">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="promptTable">
+                        <thead>
+                            <tr>
+                                <th>Game Type</th>
+                                <th>Prompt Type</th>
+                                <th>Prompt Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Rows will be dynamically added here -->
                     </tbody>
-                </table>
-            </div>
+                    </table>
+                </div>
             </div>
         </div>
         <script type="module" src="game-simulation.js"></script>
