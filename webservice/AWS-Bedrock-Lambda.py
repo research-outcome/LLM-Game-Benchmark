@@ -19,10 +19,19 @@ def lambda_handler(event, context):
     prompt = event['prompt']
     modelId = event['modelId']
     modelType = event['type']
+
+    imageBase64 = ""
+    
+    #If no image parameter exists, expected error: [ERROR] KeyError: 'image'
+    try:
+        imageBase64 = event['image']
+    except Exception:
+        pass
     
     print("prompt: ", prompt )
     print("modelId: ", modelId )
     print("type: ", modelType )
+    print("image: ", imageBase64 )
     
     body = " "
     
@@ -35,17 +44,39 @@ def lambda_handler(event, context):
                 "max_tokens_to_sample": 512
                 })
         else: #the following is Claude3 that uses Message API
-            body = json.dumps({
-                    "anthropic_version": "bedrock-2023-05-31", #BE AWARE that anthropic_version might need to be updated later
-                    "max_tokens": 512, #BE AWARE if the text is too long this might need to be updated
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": [{"type": "text", "text": prompt}],
-                        }
-                        ],
-                    
-                })
+            if len(imageBase64) > 1:
+                body = json.dumps({
+                        "anthropic_version": "bedrock-2023-05-31", #BE AWARE that anthropic_version might need to be updated later
+                        "max_tokens": 4096, #BE AWARE if the text is too long this might need to be updated
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {
+                                        "type": "image",
+                                        "source": {
+                                            "type": "base64",
+                                            "media_type": "image/png",
+                                            "data": imageBase64,
+                                        },
+                                    },
+                                    {"type": "text", "text": prompt}
+                                    ],
+                            }
+                            ],
+                    })
+            else:
+                body = json.dumps({
+                        "anthropic_version": "bedrock-2023-05-31", #BE AWARE that anthropic_version might need to be updated later
+                        "max_tokens": 512, #BE AWARE if the text is too long this might need to be updated
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [{"type": "text", "text": prompt}],
+                            }
+                            ],
+                        
+                    })
 
     # Currently, amazon LLMs do not work with this code.
     if (modelType == 'amazon'):
