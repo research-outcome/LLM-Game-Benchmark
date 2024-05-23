@@ -49,7 +49,8 @@ $(document).ready(function() {
             dom: 'frtlpi',
             columnDefs: [
                 { targets: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16], className: 'dt-body-right' },
-                { targets: [0, 1, 2, 3, 15], className: 'dt-body-center' }
+                { targets: [0, 1, 2, 3, 15], className: 'dt-body-center' },
+                {targets: [17], visible: false}
             ]
         });
 

@@ -10,6 +10,12 @@ body {
     padding-top: 0; /* Remove default padding */
 }
 
+#containerDropDowns
+{
+    margin-left: 10px;
+}
+
+
 /* container for drop downs */
 .container {
     position: relative; 
@@ -103,6 +109,7 @@ body {
 }
 h1 {
     color: purple;
+    margin-left: 10px;
 }
 /* Move search bar to the left */
 .dataTables_filter {
