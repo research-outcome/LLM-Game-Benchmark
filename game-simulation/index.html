@@ -400,9 +400,9 @@
             </div>
         </div>
         <div id="game-info-buttons">
-            <button class="info-button" id="prompt-info-btn">Prompt Details</button>
-            <button class="info-button" id="game-info-btn">Game Details</button>
-            <button class="info-button" id="edit-llms-btn">Add/Edit LLMs</button>
+            <button class="large-button" id="prompt-info-btn">Prompt Details</button>
+            <button class="large-button" id="game-info-btn">Game Details</button>
+            <button class="large-button" id="edit-llms-btn">Add/Edit LLMs</button>
         </div>
         <div id="prompt-info">
             <p>
@@ -463,69 +463,55 @@
                 <strong>Request for Next Move (Used by All Games):</strong> You are the (<em>first/second</em>) player. What would be your next move?
             </p>
         </div>
-        <div class="popup" id="edit-llms">
-            <strong><em>Add/Edit LLMS Page: </em></strong> This page displays all LLMs that will be listed as players in the current dropdown box. Model name, URL, API key fields are editable in the list below.<br>
-            <strong><u>Add/Edit LLMs</u></strong>
-            <div id="add-llm-options">
-                <label for="llm-type">Type: </label>
-                <select id="llm-type">
-                    <option value="OpenAI">OpenAI</option>
-                    <option value="Google">Google</option>
-                    <option value="AWS Bedrock">AWS Bedrock</option>
-                    <option value="Other">Other</option>
-                </select>
-                <label for="llm-name">Name: </label>
-                <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
-                <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
-                <div id="llm-name-container">
-                    <input type="text" id="llm-name" name="llm-name">
-                </div>
-                <label for="llm-supports-images">Supports Images: </label>
-                <select id="llm-supports-images">
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
-                </select>
-                <button id="add-llm-btn">Add</button>
-            </div>
-            <div id="llm-table">
-                <div id="llm-table-body">
-                    <div class="llm-table-row" id="llm-table-header">
-                        <div class="llm-table-cell">Type</div>
-                        <div class="llm-table-cell">Name</div>
-                        <div class="llm-table-cell">URL</div>
-                        <div class="llm-table-cell">API Key</div>
-                        <div class="llm-table-cell">Supports Images?</div>
-                        <div class="llm-table-cell"></div>
+        <div id="edit-llms-container">
+            <div class="popup" id="edit-llms">
+                <strong><em>Add/Edit LLMS Page: </em></strong> This page displays all LLMs that will be listed as players in the current dropdown box. Model name, URL, API key fields are editable in the list below.<br>
+                <strong><u>Add/Edit LLMs</u></strong>
+                <div id="add-llm-options">
+                    <label for="llm-type">Type: </label>
+                    <select id="llm-type">
+                        <option value="OpenAI">OpenAI</option>
+                        <option value="Google">Google</option>
+                        <option value="AWS Bedrock">AWS Bedrock</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <label for="llm-name">Name: </label>
+                    <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
+                    <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
+                    <div id="llm-name-container">
+                        <select id="llm-name">
+                            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                            <option value="gpt-4">gpt-4</option>
+                            <option value="gpt-4-turbo">gpt-4-turbo</option>
+                            <option value="gpt-4o">gpt-4o</option>
+                        </select>
                     </div>
-                    <!-- Models in the model list will be added here. -->
+                    <label for="llm-supports-images">Supports Images: </label>
+                    <select id="llm-supports-images">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                    <button id="add-llm-btn">Add</button>
                 </div>
-            </div>
-        </div>
-        <!-- Prompt list button -->
-        <button id="promptListButton" class="promptList-btn">View Prompt List</button>
-    
-        <!-- Modal structure for prompt list popup -->
-        <div id="promptListPopup" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div class="table-container">
-                    <table id="promptTable">
-                        <thead>
-                            <tr>
-                                <th>Game Type</th>
-                                <th>Prompt Type</th>
-                                <th>Prompt Example</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <!-- Rows will be dynamically added here -->
-                    </tbody>
-                    </table>
+                <div id="llm-table">
+                    <div id="llm-table-body">
+                        <div class="llm-table-row" id="llm-table-header">
+                            <div class="llm-table-cell">Type</div>
+                            <div class="llm-table-cell">Name</div>
+                            <div class="llm-table-cell">URL</div>
+                            <div class="llm-table-cell">API Key</div>
+                            <div class="llm-table-cell">Supports Images?</div>
+                            <div class="llm-table-cell"></div>
+                        </div>
+                        <!-- Models in the model list will be added here. -->
+                    </div>
                 </div>
+                <button class="large-button" id="edit-llms-close-btn">Close</button>
             </div>
         </div>
         <script type="module" src="game-simulation.js"></script>
         <script type="text/javascript" src="jszip.js"></script>
         <script type="text/javascript" src="FileSaver.js"></script>
+        <script type="text/javascript" src="html2canvas.js"></script>
     </body>
 </html>
