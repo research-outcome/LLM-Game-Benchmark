@@ -43,7 +43,7 @@ $(document).ready(function() {
                 { title: "Total Moves (2nd)" },
                 { title: "Provider Email" },
                 { title: "Submission Date" },
-                { title: "UUID" },
+                { title: "UUID" }
             ],
             // Adjust positioning of dom
             dom: 'frtlpi',
