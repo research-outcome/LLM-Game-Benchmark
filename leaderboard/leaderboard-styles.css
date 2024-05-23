@@ -4,12 +4,13 @@ body {
     font-family: 'Kanit', serif, sans-serif;
     font-style: normal;
     font-weight: 500;
-    font-size: small;
+    font-size: x-small;
     background-color: #ffffff;
     margin: 0; /* Remove default margin */
     padding-top: 0; /* Remove default padding */
-    padding-left: 1.5%;
 }
+
+/* container for drop downs */
 .container {
     position: relative; 
     max-width: 200px;
@@ -17,6 +18,7 @@ body {
     margin: 10px auto; 
     float: left;
 }
+
 .select-btn {
     display: flex;
     height: 35px; 
@@ -48,7 +50,7 @@ body {
 }
 
 .list-items {
-    position: absolute; /* Change to absolute positioning */
+    position: absolute; 
     margin-top: 15px;
     border-radius: 8px;
     padding: 16px;
@@ -102,18 +104,21 @@ body {
 h1 {
     color: purple;
 }
+/* Move search bar to the left */
 .dataTables_filter {
     float: left !important;
  }
 
  .table-container {
-    max-width: 95%; /* Adjust the max-width */
-    padding-right: 1.5%; /* Add right padding */
+    width: 100%; /* Adjust the width */
+    padding: 0 5%; /* Add padding on both sides */
     margin: 0 auto; /* Center the container */
-    box-sizing: border-box; 
+    box-sizing: border-box;
+    overflow-x: auto; /* Enable horizontal scrolling */
 }
 
-#mytable{
+#mytable {
+    width: 100%; /* Ensure the table takes full width of its container */
     margin-bottom: 5px;
     font-size: 12px;
 }
