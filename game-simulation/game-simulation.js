@@ -76,11 +76,21 @@ document.getElementById("prompt-info-btn").addEventListener("click", () => {
 });
 
 document.getElementById("edit-llms-btn").addEventListener("click", () => {
+    document.getElementById("edit-llms-container").style.display = "inline-block";
     document.getElementById("edit-llms").style.display = "inline-block";
 });
 
+document.getElementById("llm-name").addEventListener("change", (event) => {
+    updateSupportsImagesField(event);
+});
+
+document.getElementById("edit-llms-close-btn").addEventListener("click", () => {
+    document.getElementById("edit-llms-container").style.display = "none";
+    document.getElementById("edit-llms").style.display = "none";
+})
+
 document.getElementById("llm-type").addEventListener("change", (event) => {
-    updateAddOptions(event);
+    updateNameField(event);
 });
 
 document.getElementById("add-llm-btn").addEventListener("click", () => {
@@ -103,89 +113,6 @@ document.getElementById("second-player").addEventListener("change", () => {
     checkImageCompatibility();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Example JSON data as a string
-    const jsonData = `
-    [
-        {
-          "Game Type": "Tic-Tac-Toe",
-          "Prompt Type": "list",
-          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game. The game's progress is noted by recording each move in a specific format: moves are delineated with a semicolon (';'), and within each move, the row and column are indicated by a comma (','). If no moves were taken by the player, 'None' is noted. The current state of the game as indicated by the previous moves is as follows:The moves by the first player (marked by X): ... The moves by the second player (marked by O):...Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. You are the first/second player. What would be your next move?"
-        },
-        {
-          "Game Type": "Connect-Four",
-          "Prompt Type": "list",
-          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game.The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:The locations occupied by the first player (marked by R for red discs): ... The locations occupied by the second player (marked by Y for yellow discs): ... Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response.You are the first/second player. What would be your next move?"
-        },
-        {
-          "Game Type": "Gomoku",
-          "Prompt Type": "list",
-          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally."
-        },
-        {
-          "Game Type": "Tic-Tac-Toe",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally."
-        },
-        {
-          "Game Type": "Connect4",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. "
-        },
-        {
-          "Game Type": "Gomoku",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid."
-        }
-       ]`;
-
-    // Parse the JSON string to a JavaScript object
-    const promptData = JSON.parse(jsonData);
-
-    // Function to populate the table
-    function populateTable(data) {
-        const tableBody = document.querySelector("#promptTable tbody");
-
-        data.forEach(item => {
-            const row = document.createElement("tr");
-
-            const gameTypeCell = document.createElement("td");
-            gameTypeCell.textContent = item["Game Type"];
-            row.appendChild(gameTypeCell);
-
-            const promptTypeCell = document.createElement("td");
-            promptTypeCell.textContent = item["Prompt Type"];
-            row.appendChild(promptTypeCell);
-
-            const promptExampleCell = document.createElement("td");
-            promptExampleCell.textContent = item["Prompt Example"];
-            row.appendChild(promptExampleCell);
-
-            tableBody.appendChild(row);
-        });
-    }
-
-    // Populate the table with data
-    populateTable(promptData);
-
-    // Event listener for the prompt list button
-    document.getElementById("promptListButton").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "block";
-    });
-
-    // Event listener for the close button in the modal
-    document.querySelector("#promptListPopup .close").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "none";
-    });
-
-    // Event listener to close the modal when clicking outside of it
-    window.addEventListener("click", (event) => {
-        let modal = document.getElementById("promptListPopup");
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-});
 
 async function playGame() {
     // Obtain existing user selections and initialize current game count to 0.
@@ -505,7 +432,7 @@ function escapeStringForJson(input) {
 }
 
 // Generate a prompt given the game type, prompt type, and player number.
-function createPrompt(promptType, gameType, currentPlayer) {
+async function createPrompt(promptType, gameType, currentPlayer) {
     let prompt = "";
     if (gameType === "tic-tac-toe") {
         prompt += PROMPT_EXPLAIN_TIC_TAC_TOE; // Prepend tic-tac-toe explanation.
@@ -525,6 +452,9 @@ function createPrompt(promptType, gameType, currentPlayer) {
     }
     else if (promptType === "illustration") {
         prompt += drawBoard(gameType);
+    }
+    else if (promptType === "image") {
+        prompt += await screenshotBoard(gameType);
     }
 
     if (currentPlayer === 1) {
@@ -597,6 +527,35 @@ function drawBoard(gameType) {
     return gameStatus;
 }
 
+async function screenshotBoard(gameType) {
+    let gameStatus = '';
+    if (gameType === "tic-tac-toe") {
+        return new Promise((resolve, reject) => {
+            html2canvas(document.querySelector("#tic-tac-toe-board")).then((canvas) => {
+                canvas.toBlob(function(blob) {
+                    saveAs(blob, "Tic Tac Toe Game Board.png");
+                });
+
+                let imageData = canvas.toDataURL("image/png;base64");
+
+                gameStatus += "The current state of the game is displayed on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player. Here is a screenshot of the current board: \n\n";
+                gameStatus += imageData;
+                return gameStatus;
+            }).then(data => {
+                resolve(data);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+    else if (gameType === "connect-four") {
+
+    }
+    else if (gameType === "gomoku") {
+
+    }
+}
+
 // Reset the board for a given game type.
 function resetBoard(gameType) {
     if (gameType === "tic-tac-toe") {
@@ -610,7 +569,7 @@ function resetBoard(gameType) {
 
 // Generate a prompt, call the LLM, and return its response.
 async function getMove(promptType, gameType, currentPlayer, model) {
-    let prompt = createPrompt(promptType, gameType, currentPlayer);
+    let prompt = await createPrompt(promptType, gameType, currentPlayer);
     let systemPrompt = createSystemPrompt();
     return await asynchronousWebServiceCall(prompt, systemPrompt, model);
 }
@@ -704,6 +663,7 @@ function cleanResponse(content) {
             content = content.substring(0, content.lastIndexOf("}") + 1);
         }
     }
+    console.log(content);
     return JSON.parse(content);
 }
 
@@ -712,6 +672,8 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
     let modelType = model.getType();
     let modelName = model.getName();
     let apiKey = model.getApiKey();
+
+    console.log(prompt);
 
     if (modelType === "Google") {
         let genAI = new GoogleGenerativeAI(apiKey);
@@ -724,12 +686,13 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
         let url = new URL(model.getUrl());
         let requestBody;
 
+        // If the current model is an OpenAI model that supports image input, generate a prompt with an image.
         if (modelType === "OpenAI") {
             requestBody = JSON.stringify({
                 "model": modelName,
                 "messages": [{
                     "role": "user",
-                    "content": prompt
+                    "content": prompt,
                 }]
             });
         }
@@ -750,7 +713,7 @@ async function asynchronousWebServiceCall(prompt, systemPrompt, model) {
         }).then(data => {
             resolve(JSON.stringify(data));
         }).catch(error => {
-            reject(error)
+            reject(error);
         });
     });
 }
@@ -1003,6 +966,14 @@ class Model {
     getSupportsImages() {
         return this.#supportsImages;
     }
+
+    setUrl(url) {
+        this.#url = url;
+    }
+
+    setApiKey(apiKey) {
+        this.#apiKey = apiKey;
+    }
 }
 
 class gameLogFiles {
@@ -1048,6 +1019,20 @@ function addModel(model) {
     updateModelLists();
 }
 
+function updateUrl(urlInputId) {
+    let updatedUrl = document.getElementById(urlInputId).value;
+    let index = urlInputId.slice(8) // Remove "llm-url-" from ID. We just want to retrieve the index of the model to update.
+    console.log("Updating URL of model " + index + " to " + updatedUrl);
+    models[index].setUrl(updatedUrl);
+}
+
+function updateApiKey(apiKeyInputId) {
+    let updatedApiKey = document.getElementById(apiKeyInputId).value;
+    let index = apiKeyInputId.slice(12) // Remove "llm-api-key-" from ID. We just want to retrieve the index of the model to update.
+    console.log("Updating API Key of model " + index + " to " + updatedApiKey);
+    models[index].setApiKey(updatedApiKey);
+}
+
 function removeModel(buttonId) {
     let index = buttonId.slice(15); // Remove "remove-btn-id-" from ID. We just want to retrieve the index of the model to remove.
     console.log("Removing model " + index);
@@ -1055,14 +1040,14 @@ function removeModel(buttonId) {
     updateModelLists();
 }
 
-// Update "Add/Edit LLMs" options depending on which type (company) is selected.
-function updateAddOptions(event) {
+// Update "Add/Edit LLMs" name entry options depending on which type (company) is selected.
+function updateNameField(event) {
     if (event.target.value === "OpenAI") {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
+                "<option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>" +
                 "<option value=\"gpt-4\">gpt-4</option>" +
                 "<option value=\"gpt-4-turbo\">gpt-4-turbo</option>" +
                 "<option value=\"gpt-4o\">gpt-4o</option>" +
-                "<option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>" +
             "</select>";
     }
     else if (event.target.value === "Google") {
@@ -1071,8 +1056,40 @@ function updateAddOptions(event) {
                 "<option value=\"gemini-pro-vision\">gemini-pro-vision</option>" +
             "</select>";
     }
-    else {
+    else if (event.target.value === "Bedrock") {
+        document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
+                "<option value=\"meta.llama2-13b-chat-v1\">meta.llama2-13b-chat-v1</option>" +
+                "<option value=\"meta.llama2-70b-chat-v1\">meta.llama2-70b-chat-v1</option>" +
+                "<option value=\"meta.llama3-70b-instruct-v1:0\">meta.llama3-70b-instruct-v1:0</option>" +
+                "<option value=\"meta.llama3-8b-instruct-v1:0\">meta.llama3-8b-instruct-v1:0</option>" +
+                "<option value=\"anthropic.claude-v2\">anthropic.claude-v2</option>" +
+                "<option value=\"anthropic.claude-v2:1\">anthropic.claude-v2:1</option>" +
+                "<option value=\"anthropic.claude-3-sonnet-20240229-v1:0\">anthropic.claude-3-sonnet-20240229-v1:0</option>" +
+                "<option value=\"anthropic.claude-3-haiku-20240307-v1:0\">anthropic.claude-3-haiku-20240307-v1:0</option>" +
+                "<option value=\"mistral.mistral-large-2402-v1:0\">mistral.mistral-large-2402-v1:0</option>" +
+                "<option value=\"ai21.j2-ultra-v1\">ai21.j2-ultra-v1</option>" +
+            "</select>";
+    }
+    else if (event.target.value === "Other") {
         document.getElementById("llm-name-container").innerHTML = "<input type=\"text\" id=\"llm-name\" name=\"llm-name\">";
+
+    }
+    document.getElementById("llm-name").addEventListener("change", (event) => {
+        updateSupportsImagesField(event);
+    });
+}
+
+// If the current model name supports images, update it accordingly. Otherwise, set "supports images" to "No".
+function updateSupportsImagesField(event) {
+    console.log(event.target.value);
+    if(event.target.value === "gpt-4" ||
+        event.target.value === "gpt-4-turbo" ||
+        event.target.value === "gpt-4o" ||
+        event.target.value === "gemini-pro-vision"
+    ) {
+        document.getElementById("llm-supports-images").selectedIndex = 1;
+    } else {
+        document.getElementById("llm-supports-images").selectedIndex = 0;
     }
 }
 
@@ -1096,8 +1113,8 @@ function updateModelLists() {
         document.getElementById("llm-table-body").innerHTML += "<div class=\"llm-table-row\">\n" +
                 "<div class=\"llm-table-cell\">" + model.getType() + "</div>" +
                 "<div class=\"llm-table-cell\">" + model.getName() + "</div>" +
-                "<div class=\"llm-table-cell\"><input type=\"text\" value=\"" + model.getUrl() + "\"></div>" +
-                "<div class=\"llm-table-cell\"><input type=\"text\" value=\"" + model.getApiKey() + "\"></div>" +
+                "<div class=\"llm-table-cell\"><input class=\"llm-url\" type=\"text\" value=\"" + model.getUrl() + "\" id=\"llm-url-" + index + "\"></div>" +
+                "<div class=\"llm-table-cell\"><input class=\"llm-api-key\" type=\"text\" value=\"" + model.getApiKey() + "\" id=\"llm-api-key-" + index + "\"></div>" +
                 "<div class=\"llm-table-cell\">" + model.getSupportsImages() + "</div>" +
                 "<button class=\"remove-llm-btn\" id=\"remove-llm-btn-" + index + "\">X</button>" +
             "</div>";
@@ -1110,10 +1127,24 @@ function updateModelLists() {
         index++;
     }
 
+    // Add event listeners for URL input fields in table.
+    for (let urlInputField of document.getElementsByClassName("llm-url")) {
+        urlInputField.addEventListener("change", (event) => {
+            updateUrl(event.target.id);
+        });
+    }
+
+    // Add event listeners for
+    for (let apiKeyInputField of document.getElementsByClassName("llm-api-key")) {
+        apiKeyInputField.addEventListener("change", (event) => {
+            updateApiKey(event.target.id);
+        });
+    }
+
     // Add event listeners for newly-added buttons.
     for (let removeButton of document.getElementsByClassName("remove-llm-btn")) {
         removeButton.addEventListener("click", (event) => {
-            removeModel(event.srcElement.id);
+            removeModel(event.target.id);
         });
     }
 }
@@ -1139,8 +1170,16 @@ document.addEventListener("DOMContentLoaded", async function() {
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_API_KEY, OPENAI_URL, true));
     addModel(new Model("Google", "gemini-pro", GOOGLE_API_KEY, "", false));
     addModel(new Model("Google", "gemini-pro-vision", GOOGLE_API_KEY, "", true));
-
-
+    addModel(new Model("Bedrock", "meta.llama2-13b-chat-v1", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "meta.llama2-70b-chat-v1", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "anthropic.claude-v2", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "anthropic.claude-v2:1", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_SECRET, BEDROCK_URL, false));
+    addModel(new Model("Bedrock", "ai21.j2-ultra-v1", BEDROCK_SECRET, BEDROCK_URL, false));
 
     // Use initialized model list to initialize LLM table and player dropdowns.
     updateModelLists();
@@ -1152,6 +1191,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
     let promptType = document.getElementById("prompt-type").value;
+
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount);
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 });
