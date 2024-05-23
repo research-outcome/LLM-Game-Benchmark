@@ -19,7 +19,8 @@ $(document).ready(function() {
             item["TotalMoves-1st"],
             item["TotalMoves-2nd"],
             item.ProviderEmail,
-            item.SubmissionDate
+            item.SubmissionDate,
+            item.UUID
         ]);
 
         const table = $('#mytable').DataTable({
@@ -41,7 +42,8 @@ $(document).ready(function() {
                 { title: "Total Moves (1st)" },
                 { title: "Total Moves (2nd)" },
                 { title: "Provider Email" },
-                { title: "Submission Date" }
+                { title: "Submission Date" },
+                { title: "UUID" }
             ],
             // Adjust positioning of dom
             dom: 'frtlpi',

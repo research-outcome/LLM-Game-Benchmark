@@ -501,6 +501,29 @@
                 </div>
             </div>
         </div>
+        <!-- Prompt list button -->
+        <button id="promptListButton" class="promptList-btn">View Prompt List</button>
+    
+        <!-- Modal structure for prompt list popup -->
+        <div id="promptListPopup" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="promptTable">
+                        <thead>
+                            <tr>
+                                <th>Game Type</th>
+                                <th>Prompt Type</th>
+                                <th>Prompt Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <script type="module" src="game-simulation.js"></script>
         <script type="text/javascript" src="jszip.js"></script>
         <script type="text/javascript" src="FileSaver.js"></script>

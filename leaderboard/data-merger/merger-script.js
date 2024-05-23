@@ -59,6 +59,10 @@ function mergeAndRecalculate(allData, newSubmission) {
         existingData["Wins-2nd"] += newSubmission["Wins-2nd"];
         existingData.Draws += newSubmission.Draws;
 
+        // Update Disqualifications
+        existingData["Disqualifications-1st"] += newSubmission["Disqualifications-1st"];
+        existingData["Disqualifications-2nd"] += newSubmission["Disqualifications-2nd"];
+
         // Calculate total games
         const totalGames = existingData["Wins-1st"] + existingData["Wins-2nd"] + existingData.Draws;
 
@@ -79,14 +83,15 @@ function mergeAndRecalculate(allData, newSubmission) {
         existingData["TotalMoves-2nd"] = totalMoves2nd;
 
         // Update ProviderEmail by adding new emails if they don't already exist
-        const existingEmails = existingData.ProviderEmail.split(',').map(email => email.trim());
-        const newEmails = newSubmission.ProviderEmail.split(',').map(email => email.trim());
-        newEmails.forEach(email => {
-            if (!existingEmails.includes(email)) {
-                existingEmails.push(email);
-            }
-        });
-        existingData.ProviderEmail = existingEmails.join(', ');
+        let emails = new Set(existingData.ProviderEmail.split(', ').concat(newSubmission.ProviderEmail.split(', ')));
+        existingData.ProviderEmail = Array.from(emails).join(', ');
+
+        // Handle multiple submission dates and UUIDs
+        let dates = new Set(existingData.SubmissionDate.split(', ').concat(newSubmission.SubmissionDate.split(', ')));
+        existingData.SubmissionDate = Array.from(dates).join(', ');
+
+        let uuids = new Set(existingData.UUID.split(', ').concat(newSubmission.UUID.split(', ')));
+        existingData.UUID = Array.from(uuids).join(', ');
 
         allData[existingIndex] = existingData;
     } else {
@@ -113,4 +118,12 @@ document.getElementById('mergeAndDownloadBtn').addEventListener('click', functio
     a.click();
     URL.revokeObjectURL(url);
     alert("Files merged and downloaded successfully.");
+
+     //after files are merged reset the state
+     allDataJSON = [];
+     receivedSubmissionsJSON = []
+     document.getElementById('allDataTextArea').value = '';
+     document.getElementById('receivedSubmissionsTextArea').value = ''; 
+     document.getElementById('allDataFileInput').value = '';
+     document.getElementById('receivedSubmissionsFileInput').value = '';
 });
