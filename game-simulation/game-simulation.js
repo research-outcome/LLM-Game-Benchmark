@@ -158,8 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const linkCell = document.createElement("td");
             const link = document.createElement("a");
-            link.href = item["More Info"];
+            link.href = item["More Info"].startsWith("http") ? item["More Info"] : "http://" + item["More Info"];
             link.textContent = "More Info";
+            link.target = "_blank"; // Open the link for more info in a new tab
             linkCell.appendChild(link);
             row.appendChild(linkCell);
 
