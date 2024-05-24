@@ -173,7 +173,7 @@ select, button {
     cursor: pointer;
 }
 
-/*Syling for prompt list pop up*/
+/* Styling for pop up modals */
 .modal {
     display: none;
     position: fixed;
@@ -195,6 +195,7 @@ select, button {
     border: 1px solid #888;
     width: 80%;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    overflow-x: auto; /* Add this to allow horizontal scrolling if needed */
 }
 
 .close {
@@ -202,6 +203,7 @@ select, button {
     float: right;
     font-size: 28px;
     font-weight: bold;
+    position: relative;
 }
 
 .close:hover,
@@ -213,15 +215,15 @@ select, button {
 
 .table-container {
     margin: 0 auto; /* Center the container */
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
-#promptTable {
+#promptTable, #LLMTable {
     width: 100%;
-    border: 1px solid #ddd; 
+    border: 1px solid #ddd;
 }
 
-#promptTable tbody td {
+#promptTable tbody td, #LLMTable tbody td {
     padding: 12px 8px;  /* Vertical and horizontal padding */
 }
 
@@ -229,8 +231,8 @@ th {
     background-color: #f2f2f2;
 }
 
-/* Styling for prompt list button */
-.promptList-btn {
+/* Styling for prompt list and LLM list buttons */
+.promptList-btn, .LLMList-btn {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 16px;

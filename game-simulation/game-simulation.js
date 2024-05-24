@@ -105,19 +105,21 @@ document.getElementById("second-player").addEventListener("change", () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // URL of the JSON data
-    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
+    // URLs for JSON data
+    const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
+    const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
 
     // Function to fetch JSON data
-    async function fetchJSON() {
-        const response = await fetch(jsonURL);
+    async function fetchJSON(url) {
+        const response = await fetch(url);
         const data = await response.json();
         return data;
     }
 
-    // Function to populate the table
-    function populateTable(data) {
+    // Function to populate the prompt table
+    function populatePromptTable(data) {
         const tableBody = document.querySelector("#promptTable tbody");
+        tableBody.innerHTML = ''; // Clear existing rows
 
         data.forEach(item => {
             const row = document.createElement("tr");
@@ -138,26 +140,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Fetch and populate the table with data
-    fetchJSON().then(data => {
-        populateTable(data);
-    });
+    // Function to populate the LLM table
+    function populateLLMTable(data) {
+        const tableBody = document.querySelector("#LLMTable tbody");
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(item => {
+            const row = document.createElement("tr");
+
+            const companyCell = document.createElement("td");
+            companyCell.textContent = item["Company"];
+            row.appendChild(companyCell);
+
+            const modelCell = document.createElement("td");
+            modelCell.textContent = item["LLM Model"];
+            row.appendChild(modelCell);
+
+            const linkCell = document.createElement("td");
+            const link = document.createElement("a");
+            link.href = item["More Info"];
+            link.textContent = "More Info";
+            linkCell.appendChild(link);
+            row.appendChild(linkCell);
+
+            tableBody.appendChild(row);
+        });
+    }
 
     // Event listener for the prompt list button
     document.getElementById("promptListButton").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "block";
+        fetchJSON(promptListURL).then(data => {
+            populatePromptTable(data);
+            document.getElementById("promptListPopup").style.display = "block";
+        });
     });
 
-    // Event listener for the close button in the modal
-    document.querySelector("#promptListPopup .close").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "none";
+    // Event listener for the LLM list button
+    document.getElementById("LLMListButton").addEventListener("click", () => {
+        fetchJSON(LLMListURL).then(data => {
+            populateLLMTable(data);
+            document.getElementById("LLMListPopup").style.display = "block";
+        });
+    });
+
+    // Event listener for the close buttons in the modals
+    document.querySelectorAll(".modal .close").forEach(closeButton => {
+        closeButton.addEventListener("click", () => {
+            closeButton.closest(".modal").style.display = "none";
+        });
     });
 
     // Event listener to close the modal when clicking outside of it
     window.addEventListener("click", (event) => {
-        let modal = document.getElementById("promptListPopup");
-        if (event.target === modal) {
-            modal.style.display = "none";
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
         }
     });
 });
