@@ -4,6 +4,9 @@ body {
     font-weight: 500;
     font-size: small;
 }
+button {
+    cursor: pointer;
+}
 #options, #game-info {
     display: flex;
     background-color: #f1f1f1;
@@ -39,8 +42,6 @@ select, button {
     bottom: 0;
     left: 0;
     right: 0;
-    width: 1250px;
-    height: 500px;
     margin: auto;
     align-items: center;
     background-color: #f1f1f1;
@@ -48,22 +49,37 @@ select, button {
     padding: 5px;
     border: 3px solid black;
 }
+.popup-close-btn-container {
+    text-align: right;
+}
 #prompt-info {
     display: none;
 }
+#edit-llms {
+    width: 1250px;
+    height: 600px;
+}
 #edit-llms-container {
     display: none;
-    position:fixed;
-    padding:0;
-    margin:0;
-    top:0;
-    left:0;
+    position: fixed;
+    padding: 0;
+    margin: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background:rgba(0,0,0,0.75);
+    background: rgba(0,0,0,0.75);
 }
 #llm-name-container {
     display: inline;
+}
+#llm-supports-images, #llm-supports-images-label {
+    display: none;
+}
+#add-llm-btn {
+    font-size: large;
+    margin-top: 10px;
+    padding: 10px;
 }
 #llm-table {
     display: block;
@@ -121,7 +137,6 @@ select, button {
     margin-top: 10px;
     margin-left: auto;
     margin-right: auto;
-    cursor: pointer;
 }
 #start-btn {
     color: green;
@@ -205,7 +220,6 @@ select, button {
     font-size: 30px;
     margin-top: 10px;
     margin-left: 10px;
-    cursor: pointer;
 }
 
 /*Syling for prompt list pop up*/
@@ -246,7 +260,6 @@ select, button {
 .close:focus {
     color: black;
     text-decoration: none;
-    cursor: pointer;
 }
 
 .table-container {
@@ -272,5 +285,4 @@ th {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 16px;
-    cursor: pointer;
 }
