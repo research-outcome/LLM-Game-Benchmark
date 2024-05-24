@@ -114,47 +114,21 @@ document.getElementById("second-player").addEventListener("change", () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Example JSON data as a string
-    const jsonData = `
-    [
-        {
-          "Game Type": "Tic-Tac-Toe",
-          "Prompt Type": "list",
-          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game. The game's progress is noted by recording each move in a specific format: moves are delineated with a semicolon (';'), and within each move, the row and column are indicated by a comma (','). If no moves were taken by the player, 'None' is noted. The current state of the game as indicated by the previous moves is as follows:The moves by the first player (marked by X): ... The moves by the second player (marked by O):...Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. You are the first/second player. What would be your next move?"
-        },
-        {
-          "Game Type": "Connect-Four",
-          "Prompt Type": "list",
-          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game.The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:The locations occupied by the first player (marked by R for red discs): ... The locations occupied by the second player (marked by Y for yellow discs): ... Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response.You are the first/second player. What would be your next move?"
-        },
-        {
-          "Game Type": "Gomoku",
-          "Prompt Type": "list",
-          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally."
-        },
-        {
-          "Game Type": "Tic-Tac-Toe",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally."
-        },
-        {
-          "Game Type": "Connect4",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. "
-        },
-        {
-          "Game Type": "Gomoku",
-          "Prompt Type": "illustration",
-          "Prompt Example": "Gomoku, a classic two-player game, is played on a 15 by 15 grid."
-        }
-       ]`;
+    // URLs for JSON data
+    const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
+    const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
 
-    // Parse the JSON string to a JavaScript object
-    const promptData = JSON.parse(jsonData);
+    // Function to fetch JSON data
+    async function fetchJSON(url) {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+    }
 
-    // Function to populate the table
-    function populateTable(data) {
+    // Function to populate the prompt table
+    function populatePromptTable(data) {
         const tableBody = document.querySelector("#promptTable tbody");
+        tableBody.innerHTML = ''; // Clear existing rows
 
         data.forEach(item => {
             const row = document.createElement("tr");
@@ -175,24 +149,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Populate the table with data
-    populateTable(promptData);
+    // Function to populate the LLM table
+    function populateLLMTable(data) {
+        const tableBody = document.querySelector("#LLMTable tbody");
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(item => {
+            const row = document.createElement("tr");
+
+            const companyCell = document.createElement("td");
+            companyCell.textContent = item["Company"];
+            row.appendChild(companyCell);
+
+            const modelCell = document.createElement("td");
+            modelCell.textContent = item["LLM Model"];
+            row.appendChild(modelCell);
+
+            const linkCell = document.createElement("td");
+            const link = document.createElement("a");
+            link.href = item["More Info"].startsWith("http") ? item["More Info"] : "http://" + item["More Info"];
+            link.textContent = "More Info";
+            link.target = "_blank"; // Open the link for more info in a new tab
+            linkCell.appendChild(link);
+            row.appendChild(linkCell);
+
+            tableBody.appendChild(row);
+        });
+    }
 
     // Event listener for the prompt list button
     document.getElementById("promptListButton").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "block";
+        fetchJSON(promptListURL).then(data => {
+            populatePromptTable(data);
+            document.getElementById("promptListPopup").style.display = "block";
+        });
     });
 
-    // Event listener for the close button in the modal
-    document.querySelector("#promptListPopup .close").addEventListener("click", () => {
-        document.getElementById("promptListPopup").style.display = "none";
+    // Event listener for the LLM list button
+    document.getElementById("LLMListButton").addEventListener("click", () => {
+        fetchJSON(LLMListURL).then(data => {
+            populateLLMTable(data);
+            document.getElementById("LLMListPopup").style.display = "block";
+        });
+    });
+
+    // Event listener for the close buttons in the modals
+    document.querySelectorAll(".modal .close").forEach(closeButton => {
+        closeButton.addEventListener("click", () => {
+            closeButton.closest(".modal").style.display = "none";
+        });
     });
 
     // Event listener to close the modal when clicking outside of it
     window.addEventListener("click", (event) => {
-        let modal = document.getElementById("promptListPopup");
-        if (event.target === modal) {
-            modal.style.display = "none";
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
         }
     });
 });
