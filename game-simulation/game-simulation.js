@@ -1,7 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import {uuidv7} from "./uuidv7.js";
-
-
+import { uuidv7 } from "./uuidv7.js";
 
 // Initialize variables
 let GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
