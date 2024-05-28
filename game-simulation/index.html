@@ -465,17 +465,23 @@
         </div>
         <div id="edit-llms-container">
             <div class="popup" id="edit-llms">
-                <strong><em>Add/Edit LLMS Page: </em></strong> This page displays all LLMs that will be listed as players in the current dropdown box. Model name, URL, API key fields are editable in the list below.<br>
-                <strong><u>Add/Edit LLMs</u></strong>
+                <div class="popup-close-btn-container">
+                    <button class="popup-close-btn" id="edit-llms-close-btn">X</button>
+                </div>
+                <strong><u>Add/Edit LLMs</u></strong><br>
+                The LLMs that can be selected in the current ‘Player LLM’ dropdown are listed below.<br>
+                To add a new LLM to the list, make your selection and then click 'Add'.<br>
+                To change an LLM's URL or API Key, edit it in the corresponding textbox.<br>
+                To remove an LLM, use the 'X' button.<br>
                 <div id="add-llm-options">
                     <label for="llm-type">Type: </label>
                     <select id="llm-type">
                         <option value="OpenAI">OpenAI</option>
                         <option value="Google">Google</option>
-                        <option value="AWS Bedrock">AWS Bedrock</option>
+                        <option value="Bedrock">Bedrock</option>
                         <option value="Other">Other</option>
                     </select>
-                    <label for="llm-name">Name: </label>
+                    <label for="llm-name">LLM: </label>
                     <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
                     <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
                     <div id="llm-name-container">
@@ -486,13 +492,17 @@
                             <option value="gpt-4o">gpt-4o</option>
                         </select>
                     </div>
-                    <label for="llm-supports-images">Supports Images: </label>
+                    <label for="llm-url" id="llm-url-label">URL: </label>
+                    <input type="text" id="llm-url">
+                    <label for="llm-api-key" id="llm-api-key-label">API Key: </label>
+                    <input type="text" id="llm-api-key">
+                    <label id="llm-supports-images-label" for="llm-supports-images">Supports Images: </label>
                     <select id="llm-supports-images">
                         <option value="false">No</option>
                         <option value="true">Yes</option>
                     </select>
-                    <button id="add-llm-btn">Add</button>
                 </div>
+                <button id="add-llm-btn">Add</button>
                 <div id="llm-table">
                     <div id="llm-table-body">
                         <div class="llm-table-row" id="llm-table-header">
@@ -506,7 +516,6 @@
                         <!-- Models in the model list will be added here. -->
                     </div>
                 </div>
-                <button class="large-button" id="edit-llms-close-btn">Close</button>
             </div>
         </div>
 
