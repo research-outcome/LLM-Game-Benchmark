@@ -1,0 +1,199 @@
+import { Move } from "./classes.js";
+
+export class TicTacToe {
+    static explainGame() {
+        return "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game. ";
+    }
+    static formatNextMove() {
+        return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
+    }
+    static systemPrompt() {
+        return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
+    }
+    
+    static listPlayerMoves(player) {
+        let movesList = [];
+        let playerSymbol = (player === 1) ? "X" : "O";
+        for (let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                if (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === playerSymbol) {
+                    movesList.push((i + 1) + "," + (j + 1));
+                }
+            }
+        }
+        return movesList;
+    }
+
+    static listBoard(firstPlayerMoves, secondPlayerMoves) {
+        let gameStatus = "";
+        gameStatus += "The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:\n";
+        gameStatus += "The locations occupied by the first player (marked by X): ";
+        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + "\n";
+        gameStatus += "The locations occupied by the second player (marked by O): ";
+        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + "\n";
+        return gameStatus;
+    }
+    
+    static drawBoard() {
+        let gameStatus = "";
+        gameStatus += " The current state of the game is displayed on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                gameStatus += (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
+            }
+            gameStatus += "\n";
+        }
+        return gameStatus;
+    }
+    
+    static async screenshotBoard() {
+        return new Promise((resolve, reject) => {
+            html2canvas(document.querySelector("#tic-tac-toe-board")).then((canvas) => {
+                // Download screenshot of board (for testing purposes).
+                //canvas.toBlob(function(blob) {
+                //saveAs(blob, "Tic Tac Toe Game Board.png");
+                //});
+
+                // Return base64-encoded board screeenshot.
+                return canvas.toDataURL("image/png;base64");
+            }).then(data => {
+                resolve(data);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+    
+    static processMove(currentMoveCount, currentPlayer, row, col, model, currentStatus, response) {
+        let symbol = (currentPlayer === 1) ? "X" : "O";
+        console.log("RESPONSE: " + response);
+
+        // Validate row and column
+        if (row >= 1 && row <= 3 && col >= 1 && col <= 3) {
+            if (document.getElementById("tic-tac-toe-" + row + "-" + col).innerText === "") {
+                // Use 'X' for player 1 and 'O' for player 2.
+                document.getElementById("tic-tac-toe-" + row + "-" + col).innerText = symbol;
+
+                // Make X blue and O red.
+                if(document.getElementById("tic-tac-toe-" + row + "-" + col).innerText === 'X') {
+                    document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = "blue";
+                }
+                else {
+                    document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = "red";
+                }
+
+                // Return successful move.
+                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
+                return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, response);
+            }
+            else {
+                // Return unsuccessful move because AI attempted to play in a space that was already taken.
+                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
+                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, response);
+            }
+        }
+        else {
+            // Return unsuccessful move because AI attempted to play in a space that was out of bounds.
+            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
+            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, response);
+        }
+    }
+
+    static visualizeBoardState() {
+        let boardState = "";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let cellValue = document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
+                boardState += (cellValue === "") ? "." : cellValue;
+                if (j < 3 - 1) {
+                    boardState += "|";
+                }
+            }
+            boardState += "\n";
+        }
+        return boardState + "\n";
+    }
+
+    static checkForWin() {
+        let field = [3];
+        for (let i = 0; i < 3; i++) {
+            field[i] = [];
+        }
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                field[i][j] = document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
+            }
+        }
+
+        for (let i = 0; i < 3; i++) {
+            // Check rows
+            if (field[i][0] !== "") {
+                let firstMark = field[i][0];
+                let allSame = true;
+                for (let j = 1; j < 3; j++) {
+                    if (firstMark !== field[i][j]) {
+                        allSame = false;
+                    }
+                }
+                if (allSame) return true;
+            }
+
+            // Check columns
+            if (field[0][i] !== "") {
+                let firstMark = field[0][i];
+                let allSame = true;
+                for (let j = 1; j < 3; j++) {
+                    if (firstMark !== field[j][i]) {
+                        allSame = false;
+                    }
+                }
+                if (allSame) return true;
+            }
+        }
+
+        // Check top-left to bottom-right diagonal
+        if (field[0][0] !== "") {
+            let firstMark = field[0][0];
+            let allSame = true;
+            for (let i = 1; i < 3; i++) {
+                if (firstMark !== field[i][i]) {
+                    allSame = false;
+                }
+            }
+            if (allSame) return true;
+        }
+
+        // Check top-right to bottom-left diagonal
+        if (field[0][3 - 1] !== "") {
+            let firstMark = field[0][3 - 1];
+            let allSame = true;
+            for (let i = 1; i < 3; i++) {
+                if (firstMark !== field[i][3 - i - 1]) {
+                    allSame = false;
+                }
+            }
+            if (allSame) return true;
+        }
+        return false;
+    }
+
+    static checkForFullBoard() {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    static async resetBoard() {
+        for (let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText = "";
+            }
+        }
+    }
+}

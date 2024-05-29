@@ -463,22 +463,24 @@
                 <strong>Request for Next Move (Used by All Games):</strong> You are the (<em>first/second</em>) player. What would be your next move?
             </p>
         </div>
-        <div id="edit-llms-container">
+        <div class="popup-container" id="edit-llms-container">
             <div class="popup" id="edit-llms">
                 <div class="popup-close-btn-container">
                     <button class="popup-close-btn" id="edit-llms-close-btn">X</button>
                 </div>
                 <strong><u>Add/Edit LLMs</u></strong><br>
-                The LLMs that can be selected in the current ‘Player LLM’ dropdown are listed below.<br>
-                To add a new LLM to the list, make your selection and then click 'Add'.<br>
-                To change an LLM's URL or API Key, edit it in the corresponding textbox.<br>
-                To remove an LLM, use the 'X' button.<br>
+                The LLMs that can be selected in the current ‘Player LLM’ dropdown are listed below.
+                <ul>
+                    <li>To add a new LLM to the list, make your selection and then click 'Add'.</li>
+                    <li>To change an LLM's URL or API Key, edit it in the corresponding textbox.</li>
+                    <li>To remove an LLM, use the <button id="dummy-remove-llm-btn" style="display: inline">X</button>button.</li>
+                </ul>
                 <div id="add-llm-options">
                     <label for="llm-type">Type: </label>
                     <select id="llm-type">
                         <option value="OpenAI">OpenAI</option>
                         <option value="Google">Google</option>
-                        <option value="Bedrock">Bedrock</option>
+                        <option value="AWS Bedrock">AWS Bedrock</option>
                         <option value="Other">Other</option>
                     </select>
                     <label for="llm-name">LLM: </label>
@@ -501,8 +503,8 @@
                         <option value="false">No</option>
                         <option value="true">Yes</option>
                     </select>
+                    <button id="add-llm-btn">Add</button>
                 </div>
-                <button id="add-llm-btn">Add</button>
                 <div id="llm-table">
                     <div id="llm-table-body">
                         <div class="llm-table-row" id="llm-table-header">
@@ -515,6 +517,15 @@
                         </div>
                         <!-- Models in the model list will be added here. -->
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-container" id="confirm-removal-popup-container">
+            <div class="popup" id="confirm-removal-popup">
+                Are you sure you want to remove this LLM?<br>
+                <div id="confirm-removal-button-container">
+                    <button id="confirm-removal-btn">Yes</button>
+                    <button id="cancel-removal-btn">Cancel</button>
                 </div>
             </div>
         </div>
