@@ -16,16 +16,17 @@ export class ConnectFour {
 
     static listPlayerMoves(player) {
         let movesList = [];
-        let playerSymbol = (player === 1) ? 'R' : 'Y'; 
-        // Loop through each row and column, assuming a 6x7 grid for Connect Four
+        let playerColor = (player === 1) ? 'red' : 'yellow'; 
+        // Loop through each row and column
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 7; j++) {
-                if (document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText === playerSymbol) {
+                let cell = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space');
+                if (cell.style.backgroundColor === playerColor) {
                     movesList.push((i + 1) + "," + (j + 1));
                 }
             }
         }
-
+    
         return movesList;
     }
 
@@ -102,8 +103,16 @@ export class ConnectFour {
         let boardState = "";
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 7; j++) {
-                let cellValue = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText;
-                boardState += (cellValue === "") ? "." : cellValue;
+                let cell = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space');
+                let cellColor = cell.style.backgroundColor;
+                // Assign symbols based on color
+                let symbol = '.';
+                if (cellColor === "red") {
+                    symbol = 'R';
+                } else if (cellColor === "yellow") {
+                    symbol = 'Y';
+                }
+                boardState += symbol;
                 if (j < 7 - 1) {
                     boardState += "|";
                 }
