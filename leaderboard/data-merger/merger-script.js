@@ -9,38 +9,51 @@ document.getElementById('openReceivedSubmissionsBtn').addEventListener('click', 
 let allDataJSON = [];
 let receivedSubmissionsJSON = [];
 
-document.getElementById('allDataFileInput').addEventListener('change', function(event) {
+function validateData(jsonData) {
+    const requiredFields = [
+        'GameType', 'Prompt', 'LLM1stPlayer', 'LLM2ndPlayer', 'WinRatio-1st',
+        'WinRatio-2nd', 'Wins-1st', 'Wins-2nd', 'Disqualifications-1st',
+        'Disqualifications-2nd', 'Draws', 'InvalidMovesRatio-1st',
+        'InvalidMovesRatio-2nd', 'TotalMoves-1st', 'TotalMoves-2nd',
+        'ProviderEmail', 'SubmissionDate', 'UUID'
+    ];
+
+    return jsonData.every(entry => requiredFields.every(field => field in entry));
+}
+
+function handleFileInput(event, jsonStorage, textAreaId) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                allDataJSON = JSON.parse(e.target.result);
-                document.getElementById('allDataTextArea').value = JSON.stringify(allDataJSON, null, 2);
-                console.log("All Data JSON:", allDataJSON);
+                const jsonData = JSON.parse(e.target.result);
+                if (!validateData(jsonData)) {
+                    alert("The uploaded file does not contain all required fields.");
+                    event.target.value = ''; // Reset the input after alert
+                    return; // Stop further execution
+                }
+                jsonStorage.splice(0, jsonStorage.length, ...jsonData); // Clear and update the original array
+                document.getElementById(textAreaId).value = JSON.stringify(jsonData, null, 2);
+                console.log("Loaded JSON:", jsonData);
             } catch (error) {
-                alert("Error parsing All Data JSON file");
+                alert("Error parsing JSON file: " + error.message);
+                event.target.value = ''; // Reset the input after alert
             }
+            event.target.value = ''; // Reset the input after successful load
         };
         reader.readAsText(file);
+    } else {
+        event.target.value = ''; // Reset the input if no file was selected
     }
+}
+
+document.getElementById('allDataFileInput').addEventListener('change', function(event) {
+    handleFileInput(event, allDataJSON, 'allDataTextArea');
 });
 
 document.getElementById('receivedSubmissionsFileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                receivedSubmissionsJSON = JSON.parse(e.target.result);
-                document.getElementById('receivedSubmissionsTextArea').value = JSON.stringify(receivedSubmissionsJSON, null, 2);
-                console.log("Received Submissions JSON:", receivedSubmissionsJSON);
-            } catch (error) {
-                alert("Error parsing Received Submissions JSON file");
-            }
-        };
-        reader.readAsText(file);
-    }
+    handleFileInput(event, receivedSubmissionsJSON, 'receivedSubmissionsTextArea');
 });
 
 function mergeAndRecalculate(allData, newSubmission) {
