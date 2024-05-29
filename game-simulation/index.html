@@ -513,7 +513,7 @@
                             <div class="llm-table-cell">URL</div>
                             <div class="llm-table-cell">API Key</div>
                             <div class="llm-table-cell">Supports Images?</div>
-                            <div class="llm-table-cell"></div>
+                            <div class="llm-table-cell"><!-- Placeholder for 'X' button column --></div>
                         </div>
                         <!-- Models in the model list will be added here. -->
                     </div>
@@ -540,15 +540,15 @@
                 <div class="table-container">
                     <table id="promptTable">
                         <thead>
-                            <tr>
-                                <th>Game Type</th>
-                                <th>Prompt Type</th>
-                                <th>Prompt Example</th>
-                            </tr>
+                        <tr>
+                            <th>Game Type</th>
+                            <th>Prompt Type</th>
+                            <th>Prompt Example</th>
+                        </tr>
                         </thead>
                         <tbody>
                         <!-- Rows will be dynamically added here -->
-                    </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -575,27 +575,7 @@
                  </div>
              </div>
          </div>
-                 <!-- LLM list button -->
-                 <button id="gameDetailsButton" class="gameDetails-btn">Game Details</button>
-                 <!-- Modal structure for LLm list popup -->
-                 <div id="gameDetailsPopup" class="modal">
-                     <div class="modal-content">
-                         <span class="close">&times;</span>
-                         <div class="table-container">
-                             <table id="gameDetailsTable">
-                                 <thead>
-                                     <tr>
-                                         <th>Game Type</th>
-                                         <th>Details</th>
-                                     </tr>
-                                 </thead>
-                                 <tbody>
-                                 <!-- Rows will be dynamically added here -->
-                             </tbody>
-                             </table>
-                         </div>
-                     </div>
-                 </div>
+        </div>
         <script type="module" src="game-simulation.js"></script>
         <script type="text/javascript" src="jszip.js"></script>
         <script type="text/javascript" src="FileSaver.js"></script>
