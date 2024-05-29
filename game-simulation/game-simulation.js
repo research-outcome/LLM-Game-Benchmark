@@ -208,20 +208,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         data.forEach(item => {
             const row = document.createElement("tr");
-
+    
             const gameTypeCell = document.createElement("td");
             gameTypeCell.textContent = item["Game type"];
             row.appendChild(gameTypeCell);
-
+    
             const detailsCell = document.createElement("td");
-            detailsCell.textContent = item["Details"];
+            const detailsText = item["Details"];
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+            // Split the details text to extract URLs and other text parts
+            const parts = detailsText.split(urlRegex);
+    
+            parts.forEach(part => {
+                if (urlRegex.test(part)) {
+                    // If the part is a URL, create a clickable link
+                    const link = document.createElement("a");
+                    link.href = part;
+                    link.textContent = part;
+                    link.target = "_blank"; // Open the link in a new tab
+                    detailsCell.appendChild(link);
+                } else {
+                    // Otherwise, append the text part
+                    detailsCell.appendChild(document.createTextNode(part));
+                }
+            });
+    
             row.appendChild(detailsCell);
-
-            tableBody.appendChild(row);
-        });
-    }
-
-
+        tableBody.appendChild(row);
+    });
+}
     // Event listener for the prompt list button
     document.getElementById("promptListButton").addEventListener("click", () => {
         fetchJSON(promptListURL).then(data => {
