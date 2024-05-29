@@ -24,7 +24,7 @@ function formatGameDuration(durationInMillis) {
 }
 
 // Write information about the current game to .txt, .json, and .csv formats.
-export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid) {
+export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid) {
     let gameDuration = formatGameDuration(Date.now() - gameStartTime);
     let sanitizedFirstPlayer = firstPlayer.replace("/", "_");
     let sanitizedSecondPlayer = secondPlayer.replace("/", "_");
@@ -46,7 +46,6 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
             ", \"Row\": " + move.getRow() +
             ", \"Col\": " + move.getCol() +
             ", \"Outcome\": \"" + move.getOutcome() +
-            "\", \"PromptType\": \"" + promptType +
             "\", \"CurrentStatus\": \"" + move.getCurrentStatus() +
             "\", \"Response\": \"" + move.getResponse().replace(new RegExp("\n", "g"), "\\n").replace(new RegExp("\"", "g"), "'") +
             "\"},";
@@ -77,7 +76,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
     jsonMoves = jsonMoves.replace(new RegExp("\n", "g"), "\\n");
     jsonMoves = jsonMoves.replace(new RegExp("\"row\"", "g"), "'row'");
     jsonMoves = jsonMoves.replace(new RegExp("\"column\"", "g"), "'column'");
-    jsonMoves = jsonMoves.substring(0, jsonMoves.length - 1); // Remove last ',' from string.
+    jsonMoves = jsonMoves.substring(0, jsonMoves.length - 1); // Remove last ',' from moves string.
     jsonMoves += "]";
 
     // Name the output files.
@@ -92,6 +91,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "Game Type: " + gameType + "\n" +
         "Game #: " + (currentGameCount + 1) + "\n" +
         "Prompt Type: " + promptType + "\n" +
+        "Prompt Version: " + promptVersion + "\n" +
         "Player 1: " + sanitizedFirstPlayer + "\n" +
         "Player 2: " + sanitizedSecondPlayer + "\n" +
         "Date and time (yyMMdd-HHmmss): " + timestamp + "\n" +
@@ -112,6 +112,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "\", \"Timestamp\": \"" + timestamp +
         "\", \"GameType\": \"" + gameType +
         "\", \"PromptType\": \"" + promptType +
+        "\", \"PromptVersion\": \"" + promptVersion +
         "\", \"Player1\": \"" + firstPlayer +
         "\", \"Player2\": \"" + secondPlayer +
         "\", \"Result\": \"" + result +
@@ -127,8 +128,8 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "}";
 
     // Generate the CSV file content.
-    let csvFileContent = "UUID,Timestamp,GameType,PromptType,Player1,Player2,Result,TotalTime,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat, Player2InvalidFormat, Player1OutOfBounds, Player2OutOfBounds\n" +
-        uuid + "," + timestamp + "," + gameType + "," + promptType + "," + firstPlayer + "," + secondPlayer + "," + result + "," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
+    let csvFileContent = "UUID,Timestamp,GameType,PromptType,PromptVersion,Player1,Player2,Result,TotalTime,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat, Player2InvalidFormat, Player1OutOfBounds, Player2OutOfBounds\n" +
+        uuid + "," + timestamp + "," + gameType + "," + promptType + "," + promptVersion + "," + firstPlayer + "," + secondPlayer + "," + result + "," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
 
     // Add each of the generated files to the log ZIP file, which will be downloaded after gameplay concludes.
     return new GameLogFiles(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent);
