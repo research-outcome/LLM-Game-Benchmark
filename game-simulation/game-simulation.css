@@ -35,6 +35,17 @@ select, button {
     padding: 5px;
     border: 3px solid black;
 }
+.popup-container {
+    display: none;
+    position: fixed;
+    padding: 0;
+    margin: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+}
 .popup {
     display: none;
     position: fixed;
@@ -52,6 +63,12 @@ select, button {
 .popup-close-btn-container {
     text-align: right;
 }
+.popup-close-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    color: red;
+}
 #prompt-info {
     display: none;
 }
@@ -59,19 +76,11 @@ select, button {
     width: 1250px;
     height: 600px;
 }
-#edit-llms-container {
-    display: none;
-    position: fixed;
-    padding: 0;
-    margin: 0;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.75);
-}
 #llm-name-container {
     display: inline;
+}
+#llm-url-label, #llm-url {
+    display: none;
 }
 #llm-supports-images, #llm-supports-images-label {
     display: none;
@@ -101,10 +110,10 @@ select, button {
     padding: 10px;
 }
 .llm-table-cell:nth-child(1) {
-    width: 10%;
+    width: 15%;
 }
 .llm-table-cell:nth-child(2) {
-    width: 20%;
+    width: 15%;
 }
 .llm-table-cell:nth-child(3) {
     width: 30%;
@@ -126,8 +135,12 @@ select, button {
 .llm-url, .llm-api-key {
     width: 100%;
 }
-.remove-llm-btn {
+.remove-llm-btn, #dummy-remove-llm-btn {
     margin-right: 10px;
+}
+#confirm-removal-popup {
+    width: fit-content;
+    height: fit-content;
 }
 #start-btn, #stop-btn {
     display: block;
@@ -209,7 +222,7 @@ select, button {
     left: 0;
     transform: translate(-50%, -50%);
 }
-#game-info-buttons {
+#game-info-buttons, #confirm-removal-button-container {
     text-align: center;
     margin-top: 10px;
     padding: 5px;
