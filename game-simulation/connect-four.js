@@ -16,7 +16,16 @@ export class ConnectFour {
 
     static listPlayerMoves(player) {
         let movesList = [];
-        // Connect Four move retrieval logic here.
+        let playerSymbol = (player === 1) ? 'R' : 'Y'; 
+        // Loop through each row and column, assuming a 6x7 grid for Connect Four
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 7; j++) {
+                if (document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText === playerSymbol) {
+                    movesList.push((i + 1) + "," + (j + 1));
+                }
+            }
+        }
+
         return movesList;
     }
 
@@ -32,8 +41,13 @@ export class ConnectFour {
 
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is displayed on a 7 by 6 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
-        // Connect Four board drawing logic here.
+        gameStatus += " The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 7; j++) {
+                gameStatus += (document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText;
+            }
+            gameStatus += "\n";
+        }
         return gameStatus;
     }
 
@@ -53,5 +67,124 @@ export class ConnectFour {
                 reject(error);
             });
         });
+    }
+
+    static processMove(currentMoveCount, currentPlayer, col, model, currentStatus, response) {
+        let color = (currentPlayer === 1) ? "red" : "yellow";
+        console.log("RESPONSE: " + response);
+    
+        // Validate the column
+        if (col >= 1 && col <= 7) {
+            // Check from the bottom of the column up to find the first empty space
+            for (let row = 6; row > 0; row--) {
+                if (document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor === "white") {
+                    // Update the background color to red or yellow.
+                    document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor = color;
+    
+                    // Return successful move.
+                    console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
+                    return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, response);
+                }
+            }
+    
+            // Return unsuccessful move because the column is full
+            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Column Full", currentStatus, response);
+        }
+        else {
+            // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
+            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, response);
+        }
+    }
+
+    static visualizeBoardState() {
+        let boardState = "";
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 7; j++) {
+                let cellValue = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText;
+                boardState += (cellValue === "") ? "." : cellValue;
+                if (j < 7 - 1) {
+                    boardState += "|";
+                }
+            }
+            boardState += "\n";
+        }
+        return boardState + "\n";
+    }
+
+    static checkForWin() {
+        let rows = 6;
+        let cols = 7;
+        let field = new Array(rows);
+        for (let i = 0; i < rows; i++) {
+            field[i] = new Array(cols);
+        }
+    
+        // Populate the field array with the background colors of the cells
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                let cell = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space');
+                field[i][j] = cell.style.backgroundColor;  // Get the background color
+            }
+        }
+    
+        // Check horizontal lines
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols - 3; j++) {
+                if (field[i][j] !== "white" && field[i][j] === field[i][j + 1] && field[i][j] === field[i][j + 2] && field[i][j] === field[i][j + 3]) {
+                    return true; // Found a win
+                }
+            }
+        }
+    
+        // Check vertical lines
+        for (let j = 0; j < cols; j++) {
+            for (let i = 0; i < rows - 3; i++) {
+                if (field[i][j] !== "white" && field[i][j] === field[i + 1][j] && field[i][j] === field[i + 2][j] && field[i][j] === field[i + 3][j]) {
+                    return true; // Found a win
+                }
+            }
+        }
+    
+        // Check diagonal (top-left to bottom-right)
+        for (let i = 0; i < rows - 3; i++) {
+            for (let j = 0; j < cols - 3; j++) {
+                if (field[i][j] !== "white" && field[i][j] === field[i + 1][j + 1] && field[i][j] === field[i + 2][j + 2] && field[i][j] === field[i + 3][j + 3]) {
+                    return true; // Found a win
+                }
+            }
+        }
+    
+        // Check diagonal (bottom-left to top-right)
+        for (let i = 3; i < rows; i++) {
+            for (let j = 0; j < cols - 3; j++) {
+                if (field[i][j] !== "white" && field[i][j] === field[i - 1][j + 1] && field[i][j] === field[i - 2][j + 2] && field[i][j] === field[i - 3][j + 3]) {
+                    return true; // Found a win
+                }
+            }
+        }
+    
+        return false; // No win found
+    }
+
+    static checkForFullBoard() {
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 7; j++) {
+                let cellColor = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space').style.backgroundColor;
+                if (cellColor === "white") {
+                    return false;  // Board is not full
+                }
+            }
+        }
+        return true;  // Board is full
+    }
+    
+    static resetBoard() {
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 7; j++) {
+                document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space').style.backgroundColor = "white";
+            }
+        }
     }
 }
