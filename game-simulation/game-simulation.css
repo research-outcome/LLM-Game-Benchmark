@@ -301,3 +301,8 @@ th {
     padding: 10px 20px;
     font-size: 16px;
 }
+
+/* Adjust width for game type column */
+.game-type-column {
+    width: 90px; /* Adjust this width as needed */
+}
