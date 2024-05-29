@@ -244,7 +244,7 @@ select, button {
     left: 0;
     top: 0;
     width: 100%;
-    height: 100%;
+    height: 100%;       
     overflow: auto;
     background-color: rgba(0,0,0,0.4);
     padding-top: 60px;
@@ -257,8 +257,9 @@ select, button {
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
+    max-width: 90%;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    overflow-x: auto; /* Add this to allow horizontal scrolling if needed */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
 .close {
@@ -280,21 +281,22 @@ select, button {
     box-sizing: border-box;
 }
 
-#promptTable, #LLMTable {
+#promptTable, #LLMTable, #gameDetailsTable {
     width: 100%;
     border: 1px solid #ddd;
 }
 
-#promptTable tbody td, #LLMTable tbody td {
+#promptTable tbody td, #LLMTable tbody td, #gameDetailsTable tbody td {
     padding: 12px 8px;  /* Vertical and horizontal padding */
 }
+
 
 th {
     background-color: #f2f2f2;
 }
 
-/* Styling for prompt list and LLM list buttons */
-.promptList-btn, .LLMList-btn {
+/* Styling for prompt list, LLM list, and game details buttons */
+.promptList-btn, .LLMList-btn, .gameDetails-btn {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 16px;

@@ -34,8 +34,8 @@ $(document).ready(function() {
                 { title: "Win Ratio (2nd)"} ,
                 { title: "Wins (1st)" },
                 { title: "Wins (2nd)" },
-                { title: "DQ (1st) " },
-                { title: "DQ (2nd) " },
+                { title: "DQ (1st)" },
+                { title: "DQ (2nd)" },
                 { title: "Draws" },
                 { title: "Invalid Moves Ratio (1st)" },
                 { title: "Invalid Moves Ratio (2nd)" },
@@ -45,7 +45,7 @@ $(document).ready(function() {
                 { title: "Submission Date" },
                 { title: "UUID" }
             ],
-            // Adjust positioning of dom
+            // Adjust positioning of dom to move search bar and 
             dom: 'frtlpi',
             columnDefs: [
                 { targets: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16], className: 'dt-body-right' },

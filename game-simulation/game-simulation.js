@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // URLs for JSON data
     const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
     const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
+    const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/gameDetails.json'
 
     // Function to fetch JSON data
     async function fetchJSON(url) {
@@ -219,6 +220,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Function to populate the Game Details table
+    function populateGameDetailsTable(data) {
+        const tableBody = document.querySelector("#gameDetailsTable tbody");
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(item => {
+            const row = document.createElement("tr");
+
+            const gameTypeCell = document.createElement("td");
+            gameTypeCell.textContent = item["Game type"];
+            row.appendChild(gameTypeCell);
+
+            const detailsCell = document.createElement("td");
+            detailsCell.textContent = item["Details"];
+            row.appendChild(detailsCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+
+
     // Event listener for the prompt list button
     document.getElementById("promptListButton").addEventListener("click", () => {
         fetchJSON(promptListURL).then(data => {
@@ -232,6 +254,14 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchJSON(LLMListURL).then(data => {
             populateLLMTable(data);
             document.getElementById("LLMListPopup").style.display = "block";
+        });
+    });
+
+    // Event listener for the Game Details button
+    document.getElementById("gameDetailsButton").addEventListener("click", () => {
+        fetchJSON(gameDetailsURL).then(data => {
+            populateGameDetailsTable(data);
+            document.getElementById("gameDetailsPopup").style.display = "block";
         });
     });
 
