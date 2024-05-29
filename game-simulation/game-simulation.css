@@ -1,5 +1,11 @@
+/* Disable scrolling on main page. */
+html, body {
+    height: 100%;
+    overflow: hidden
+}
+
 body {
-    font-family: 'Kanit', serif, sans-serif;
+    font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
     font-size: small;
@@ -19,7 +25,7 @@ button {
     margin-right: auto;
 }
 select, button {
-    font-family: 'Kanit', serif, sans-serif;
+    font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
     font-size: small;
@@ -161,59 +167,60 @@ select, button {
 }
 #tic-tac-toe-board, #connect-four-board, #gomoku-board {
     display: table;
+    width: 400px;
+    height: 400px;
     background-color: black;
     margin-right: auto;
     margin-left: auto;
     margin-top: 10px;
     border-spacing: 3px;
 }
-#connect-four-board {
-    display: none;
-}
-#gomoku-board {
+#connect-four-board, #gomoku-board {
     display: none;
 }
 .row {
     display: table-row;
 }
 #tic-tac-toe-board .cell, #connect-four-board .cell, #gomoku-board .cell {
-    width: 100px;
-    height: 100px;
-    font-size: 60px;
-    background-color: lightgrey;
     display: table-cell;
     text-align: center;
     vertical-align: middle;
 }
+#tic-tac-toe-board .cell {
+    width: 129px;
+    height: 129px;
+    font-size: 80px;
+    background-color: lightgrey;
+}
 #connect-four-board {
+    width: fit-content;
     background-color: #1965dd;
-    position: relative;
 }
 #connect-four-board .cell {
-    width: 80px;
-    height: 80px;
-    font-size: 64px;
+    width: 63px;
+    height: 63px;
     background-color: #1965dd;
 }
 .connect-four-space {
-    width: 60px;
-    height: 60px;
+    width: 45px;
+    height: 45px;
     background-color: white;
     border-radius: 50%;
     display: inline-block;
+    position: relative;
 }
 #gomoku-board {
     background-color: #562509;
 }
 #gomoku-board .cell {
-    width: 40px;
-    height: 40px;
+    width: 12px;
+    height: 12px;
     background-color: #e7ae75;
     position: relative;
 }
 .black-stone {
-    width: 35px;
-    height: 35px;
+    width: 20px;
+    height: 20px;
     background-color: black;
     border-radius: 50%;
     display: inline-block;
@@ -222,7 +229,7 @@ select, button {
     left: 0;
     transform: translate(-50%, -50%);
 }
-#game-info-buttons, #confirm-removal-button-container {
+#confirm-removal-button-container {
     text-align: center;
     margin-top: 10px;
     padding: 5px;

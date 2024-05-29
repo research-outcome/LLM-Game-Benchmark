@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Generate a prompt given the game type, prompt type, and player number.
 import {Move} from "./classes.js";
 import {TicTacToe} from "./tic-tac-toe.js";
+import {ConnectFour} from "./connect-four.js";
+import {Gomoku} from "./gomoku.js";
 
 let currentStatus = "";
 
@@ -13,12 +15,12 @@ async function createPrompt(promptType, gameType, currentPlayer) {
         prompt += TicTacToe.formatNextMove();
     }
     else if (gameType === "connect-four") {
-        prompt += PROMPT_EXPLAIN_CONNECT_FOUR;
-        prompt += PROMPT_RESPONSE_FORMAT_NEXT_MOVE_CONNECT_FOUR;
+        prompt += ConnectFour.explainGame();
+        prompt += ConnectFour.formatNextMove();
     }
     else if (gameType === "gomoku") {
-        prompt += PROMPT_EXPLAIN_GOMOKU;
-        prompt += PROMPT_RESPONSE_FORMAT_NEXT_MOVE_GOMOKU;
+        prompt += Gomoku.explainGame();
+        prompt += Gomoku.formatNextMove();
     }
 
     if (promptType === "list") {
@@ -30,7 +32,7 @@ async function createPrompt(promptType, gameType, currentPlayer) {
         prompt += currentStatus;
     }
     else if (promptType === "image") {
-        prompt += "The current state of the game is given in the attached image.\n";
+        prompt += " The current state of the game is given in the attached image. ";
     }
 
     if (currentPlayer === 1) {
@@ -61,10 +63,10 @@ function listPlayerMoves(gameType, player) {
         return TicTacToe.listPlayerMoves(player);
     }
     else if (gameType === "connect-four") {
-        // Connect four move retrieval logic here
+        return ConnectFour.listPlayerMoves(player);
     }
     else if (gameType === "gomoku") {
-        // Gomoku move retrieval logic here
+        return Gomoku.listPlayerMoves(player);
     }
 }
 
@@ -77,18 +79,10 @@ function listBoard(gameType) {
         return TicTacToe.listBoard(firstPlayerMoves, secondPlayerMoves);
     }
     else if (gameType === "connect-four") {
-        gameStatus += " The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:\n";
-        gameStatus += "The locations occupied by the first player (marked by R for red discs): ";
-        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + "\n";
-        gameStatus += "The locations occupied by the second player (marked by Y for yellow discs): ";
-        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + "\n";
+        return ConnectFour.listBoard(firstPlayerMoves, secondPlayerMoves);
     }
     else if (gameType === "gomoku") {
-        gameStatus += " The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:\n";
-        gameStatus += "The locations occupied by the first player (marked by B for black stones): ";
-        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + "\n";
-        gameStatus += "The locations occupied by the second player (marked by W for white stones): ";
-        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + "\n";
+        return Gomoku.listBoard(firstPlayerMoves, secondPlayerMoves);
     }
 }
 
@@ -98,12 +92,10 @@ function drawBoard(gameType) {
         return TicTacToe.drawBoard();
     }
     else if (gameType === "connect-four") {
-        gameStatus += " The current state of the game is displayed on a 7 by 6 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
-        // Connect four game drawing logic here
+        return ConnectFour.drawBoard();
     }
     else if (gameType === "gomoku") {
-        gameStatus += " The current state of the game is displayed on a 15 by 15 grid. 'B' represents positions taken by the first player (using black stones) and 'W' represents positions taken by the second player (using white stones), while '.' indicates an available position. The current layout is as follows:\n";
-        // Gomoku game drawing logic here
+        return Gomoku.drawBoard();
     }
 }
 
@@ -112,10 +104,10 @@ async function screenshotBoard(gameType) {
         return await TicTacToe.screenshotBoard();
     }
     else if (gameType === "connect-four") {
-
+        return await ConnectFour.screenshotBoard();
     }
     else if (gameType === "gomoku") {
-
+        return await Gomoku.screenshotBoard();
     }
 }
 
@@ -160,7 +152,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
 
         // Generate a request for an OpenAI model.
         if (modelType === "OpenAI") {
-            if (model.getSupportsImages() === true) {
+            if (model.getSupportsImageInput() === true) {
                 requestBody = JSON.stringify({
                     "model": modelName,
                     "messages": [{

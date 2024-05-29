@@ -104,7 +104,7 @@ export function updateAddModelFields(event) {
     }
 }
 
-// Update "Add/Edit LLMs" table and "1st/2nd Player LLM" dropdowns with current model list.
+// Update "Add/Edit LLMs" table and "Player" dropdowns with current model list.
 export function updateModelLists() {
     // Write table header.
     document.getElementById("llm-table-body").innerHTML = "<div class=\"llm-table-row\" id=\"llm-table-header\">" +
@@ -126,17 +126,15 @@ export function updateModelLists() {
             "<div class=\"llm-table-cell\">" + model.getName() + "</div>" +
             "<div class=\"llm-table-cell\"><input class=\"llm-url\" type=\"text\" value=\"" + model.getUrl() + "\" id=\"llm-url-" + index + "\"></div>" +
             "<div class=\"llm-table-cell\"><input class=\"llm-api-key\" type=\"text\" value=\"" + model.getApiKey() + "\" id=\"llm-api-key-" + index + "\"></div>" +
-            "<div class=\"llm-table-cell\">" + model.getSupportsImages() + "</div>" +
+            "<div class=\"llm-table-cell\">" + model.getSupportsImageInput() + "</div>" +
             "<button class=\"remove-llm-btn\" id=\"remove-llm-btn-" + index + "\">X</button>" +
             "</div>";
 
-        document.getElementById("first-player").innerHTML +=
-            "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
-        document.getElementById("second-player").innerHTML +=
-            "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
-
         index++;
     }
+
+    // Update '1st Player' and '2nd' Player dropdowns with new model.
+    updatePlayerDropdowns();
 
     // Add event listeners for URL input fields in table.
     for (let urlInputField of document.getElementsByClassName("llm-url")) {
@@ -145,7 +143,7 @@ export function updateModelLists() {
         });
     }
 
-    // Add event listeners for
+    // Add event listeners for API key input fields in table.
     for (let apiKeyInputField of document.getElementsByClassName("llm-api-key")) {
         apiKeyInputField.addEventListener("change", (event) => {
             updateApiKey(event.target.id);
@@ -164,27 +162,30 @@ export function getCurrentModel(currentPlayer) {
     return (currentPlayer === 1) ? models[document.getElementById("first-player").selectedIndex] : models[document.getElementById("second-player").selectedIndex];
 }
 
-// If both LLMs selected by the user support images as input, allow it as an option in the "prompt type" field.
-export function updatePromptTypeDropdowns() {
-    if (models[document.getElementById("first-player").selectedIndex].getSupportsImages() && models[document.getElementById("second-player").selectedIndex].getSupportsImages()) {
-        // gemini-pro-vision ONLY supports images, so if either selected model is gemini-pro-vision, the only possible prompt is 'image'.
-        if (models[document.getElementById("first-player").selectedIndex].getName() === "gemini-pro-vision" || models[document.getElementById("second-player").selectedIndex].getName() === "gemini-pro-vision") {
-            document.getElementById("prompt-type").innerHTML = "<option value=\"image\">Image</option>";
-        }
-        else {
-            document.getElementById("prompt-type").innerHTML = "<option value=\"list\">List</option>" +
-                "<option value=\"illustration\">Illustration</option>" +
-                "<option value=\"image\">Image</option>";
+export function updatePlayerDropdowns() {
+    let promptType = document.getElementById("prompt-type").value;
+    document.getElementById("first-player").innerHTML = "";
+    document.getElementById("second-player").innerHTML = "";
+
+    if (promptType === "list" || promptType === "illustration") {
+        for (let model of models) {
+            if (model.getSupportsTextInput()) {
+                document.getElementById("first-player").innerHTML +=
+                    "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+                document.getElementById("second-player").innerHTML +=
+                    "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+            }
         }
     }
-    // If the selected models don't BOTH support images, and one of the models is gemini-vision-pro (which ONLY supports images), there are no prompt types available for this scenario.
-    else if (models[document.getElementById("first-player").selectedIndex].getName() === "gemini-pro-vision" || models[document.getElementById("second-player").selectedIndex].getName() === "gemini-pro-vision") {
-        document.getElementById("prompt-type").innerHTML = "";
-    }
-    // If the selected models don't BOTH support images, and neither selected model is gemini-pro-vision, only 'list' and 'illustration' prompts are available.
-    else {
-        document.getElementById("prompt-type").innerHTML = "<option value=\"list\">List</option>" +
-            "<option value=\"illustration\">Illustration</option>";
+    else if (promptType === "image") {
+        for (let model of models) {
+            if (model.getSupportsImageInput()) {
+                document.getElementById("first-player").innerHTML +=
+                    "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+                document.getElementById("second-player").innerHTML +=
+                    "<option value=\"" + model.getName() + "\">" + model.getName() + "</option>";
+            }
+        }
     }
 }
 

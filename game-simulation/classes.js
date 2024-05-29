@@ -47,14 +47,16 @@ export class Model {
     #name;
     #url;
     #apiKey;
-    #supportsImages;
+    #supportsTextInput;
+    #supportsImageInput;
 
-    constructor(type, name, url, apiKey, supportsImages) {
+    constructor(type, name, url, apiKey, supportsTextInput, supportsImageInput) {
         this.#type = type;
         this.#name = name;
         this.#url = url;
         this.#apiKey = apiKey;
-        this.#supportsImages = supportsImages;
+        this.#supportsTextInput = supportsTextInput;
+        this.#supportsImageInput = supportsImageInput;
     }
 
     getType() {
@@ -69,8 +71,11 @@ export class Model {
     getApiKey() {
         return this.#apiKey;
     }
-    getSupportsImages() {
-        return this.#supportsImages;
+    getSupportsTextInput() {
+        return this.#supportsTextInput;
+    }
+    getSupportsImageInput() {
+        return this.#supportsImageInput;
     }
 
     setUrl(url) {

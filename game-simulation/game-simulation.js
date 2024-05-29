@@ -1,9 +1,11 @@
 import {uuidv7} from "./uuidv7.js";
 import {Model} from "./classes.js";
 import {TicTacToe} from "./tic-tac-toe.js";
+import {ConnectFour} from "./connect-four.js";
+import {Gomoku} from "./gomoku.js";
 import {getMove, processMove} from "./web-service-communication.js";
 import {generateGameLogFiles, generateSubmissionJson, downloadZipFile} from "./logging.js";
-import {updateModelLists, checkForDuplicateModel, updatePromptTypeDropdowns, updateAddModelFields, addModel, modelSupportsImages, checkForEmptyApiKeys, getCurrentModel} from "./add-edit-llms.js";
+import {checkForDuplicateModel, updateAddModelFields, updatePlayerDropdowns, addModel, modelSupportsImages, checkForEmptyApiKeys, getCurrentModel} from "./add-edit-llms.js";
 
 // Initialize variables
 let GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -14,14 +16,6 @@ let OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 let GOOGLE_API_KEY = "AIzaSyC-xij8Mk7bdlh0HDQUbNaSseqkqY4nTBE";
 let BEDROCK_SECRET = "LLM-GameOn";
 let BEDROCK_URL = "https://v5fb43ch74.execute-api.us-east-1.amazonaws.com/devpost/bedrockllms";
-
-let PROMPT_EXPLAIN_CONNECT_FOUR = "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game. ";
-let PROMPT_RESPONSE_FORMAT_NEXT_MOVE_CONNECT_FOUR = " Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response. "
-let SYSTEM_PROMPT_CONNECT_FOUR = " Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response. "
-
-let PROMPT_EXPLAIN_GOMOKU = "Gomoku, a classic two-player game, is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for five in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their stones on an empty intersection of the grid. You are a skilled strategic Gomoku player, currently engaged in a game. ";
-let PROMPT_RESPONSE_FORMAT_NEXT_MOVE_GOMOKU = " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 15, as the grid is 15 by 15. ";
-let SYSTEM_PROMPT_GOMOKU = " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 15, as the grid is 15 by 15. ";
 
 let MAX_ALLOWED_MOVES = 20;
 
@@ -34,43 +28,22 @@ document.getElementById("game-type").addEventListener("change", (event) => {
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     if (event.target.value === "tic-tac-toe") {
-        document.getElementById("tic-tac-toe-board").style.display = "table";
-        document.getElementById("connect-four-board").style.display = "none";
-        document.getElementById("gomoku-board").style.display = "none";
+        showBoardWithId("tic-tac-toe-board");
     }
     else if (event.target.value === "connect-four") {
-        document.getElementById("tic-tac-toe-board").style.display = "none";
-        document.getElementById("connect-four-board").style.display = "table";
-        document.getElementById("gomoku-board").style.display = "none";
+        showBoardWithId("connect-four-board");
     }
     else if (event.target.value === "gomoku") {
-        document.getElementById("tic-tac-toe-board").style.display = "none";
-        document.getElementById("connect-four-board").style.display = "none";
-        document.getElementById("gomoku-board").style.display = "table";
+        showBoardWithId("gomoku-board");
     }
 });
 
-document.getElementById("start-btn").addEventListener("click", (event) => {
-    playGame();
+document.getElementById("prompt-type").addEventListener("change", () => {
+    updatePlayerDropdowns();
 });
 
-document.getElementById("reset-btn").addEventListener("click", () => {
-    resetStats = true;
-    updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-});
-
-document.getElementById("stop-btn").addEventListener("click", (event) => {
-    console.log("Stopping gameplay...");
-    gameStopped = true;
-});
-
-document.getElementById("prompt-info-btn").addEventListener("click", () => {
-    if (document.getElementById("prompt-info").style.display === "none") {
-        document.getElementById("prompt-info").style.display = "flex";
-    }
-    else {
-        document.getElementById("prompt-info").style.display = "none";
-    }
+document.getElementById("llm-type").addEventListener("change", (event) => {
+    updateAddModelFields(event);
 });
 
 document.getElementById("edit-llms-btn").addEventListener("click", () => {
@@ -81,16 +54,27 @@ document.getElementById("edit-llms-btn").addEventListener("click", () => {
 document.getElementById("edit-llms-close-btn").addEventListener("click", () => {
     document.getElementById("edit-llms-container").style.display = "none";
     document.getElementById("edit-llms").style.display = "none";
-})
+});
 
-document.getElementById("llm-type").addEventListener("change", (event) => {
-    updateAddModelFields(event);
+document.getElementById("reset-btn").addEventListener("click", () => {
+    resetStats = true;
+    updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+});
+
+document.getElementById("start-btn").addEventListener("click", (event) => {
+    playGame();
+});
+
+document.getElementById("stop-btn").addEventListener("click", (event) => {
+    console.log("Stopping gameplay...");
+    gameStopped = true;
 });
 
 document.getElementById("add-llm-btn").addEventListener("click", () => {
     let modelType = document.getElementById("llm-type").value;
     let modelName = document.getElementById("llm-name").value;
     let modelApiKey = document.getElementById("llm-api-key").value;
+
     let modelUrl;
     if (modelType === "OpenAI") {
         modelUrl = OPENAI_URL;
@@ -101,13 +85,17 @@ document.getElementById("add-llm-btn").addEventListener("click", () => {
     else {
         modelUrl = document.getElementById("llm-url").value
     }
-    let supportsImages;
 
+    // This should be updated to support additional models.
+    let supportsTextInput;
+    supportsTextInput = modelType !== "gemini-pro-vision";
+
+    let supportsImageInput;
     // If model is a predefined model, check if model supports images. If model is a user-defined model ("Other" type), get the value of the "supports images" input field.
     if (modelType !== "Other") {
-        supportsImages = modelSupportsImages(modelName);
+        supportsImageInput = modelSupportsImages(modelName);
     } else {
-        supportsImages = document.getElementById("llm-supports-images").value;
+        supportsImageInput = document.getElementById("llm-supports-images").value;
     }
 
     let model = new Model(
@@ -115,7 +103,8 @@ document.getElementById("add-llm-btn").addEventListener("click", () => {
         modelName,
         modelUrl,
         modelApiKey,
-        supportsImages
+        supportsTextInput,
+        supportsImageInput
     );
 
     // If this model already exists in the model list, do not add it; alert the user.
@@ -145,14 +134,6 @@ document.getElementById("add-llm-btn").addEventListener("click", () => {
 document.getElementById("cancel-removal-btn").addEventListener("click", (event) => {
     document.getElementById("confirm-removal-popup-container").style.display = "none";
     document.getElementById("confirm-removal-popup").style.display = "none";
-});
-
-document.getElementById("first-player").addEventListener("change", () => {
-    updatePromptTypeDropdowns();
-});
-
-document.getElementById("second-player").addEventListener("change", () => {
-    updatePromptTypeDropdowns();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -304,10 +285,10 @@ async function playGame() {
 
     // Obtain existing user selections and initialize current game count to 0.
     let gameType = document.getElementById("game-type").value;
+    let promptType = document.getElementById("prompt-type").value;
     let gameCount = document.getElementById("game-count").value;
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
-    let promptType = document.getElementById("prompt-type").value;
     let currentGameCount = 0;
     let uuid = uuidv7();
     let gameLogFiles = [];
@@ -322,8 +303,18 @@ async function playGame() {
     let secondPlayerDisqualifications= parseInt(document.getElementById("second-player-disqualifications").innerText.split(': ')[1]);
     let firstPlayerTotalInvalidMoves = parseInt(document.getElementById("first-player-invalid-moves").innerText.split(': ')[1]);
     let secondPlayerTotalInvalidMoves = parseInt(document.getElementById("second-player-invalid-moves").innerText.split(': ')[1]);
-    let firstPlayerMovesPerWin = parseFloat(document.getElementById("first-player-moves-per-win").innerText.split(': ')[1]);
-    let secondPlayerMovesPerWin = parseFloat(document.getElementById("second-player-moves-per-win").innerText.split(': ')[1]);
+
+    // Get prompt version from game object.
+    let promptVersion = "";
+    if (gameType === "tic-tac-toe") {
+        promptVersion = TicTacToe.promptVersion();
+    }
+    else if (gameType === "connect-four") {
+        promptVersion = ConnectFour.promptVersion();
+    }
+    else if (gameType === "gomokou") {
+        promptVersion = Gomoku.promptVersion();
+    }
 
     // If the user has pressed the "reset stats" button, reset the stats.
     if (resetStats) {
@@ -336,21 +327,23 @@ async function playGame() {
         secondPlayerTotalMoveCount = 0;
         firstPlayerTotalInvalidMoves = 0;
         secondPlayerTotalInvalidMoves = 0;
-        firstPlayerMovesPerWin = 0;
-        secondPlayerMovesPerWin = 0;
         resetStats = false;
     }
 
     document.getElementById("start-btn").style.display = "none";  // Hide start button
     document.getElementById("stop-btn").style.display = "block";  // Show stop button
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount); // Initialize game information field.
-    updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin); // Update statistics field.
+    updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, 0, 0); // Update statistics field.
     disableInputs(true); // Disable selection input fields.
 
     while(currentGameCount < gameCount) {
         let isGameActive = true;
         gameStopped = false;
         let currentMoveCount = 1;
+        let firstPlayerCurrentMoveCount = 0;
+        let secondPlayerCurrentMoveCount = 0;
+        let firstPlayerMovesPerWin = 0;
+        let secondPlayerMovesPerWin = 0;
         let currentPlayer = 1;
         let moves = [];
         let firstPlayerCurrentInvalidMoves = 0;
@@ -396,24 +389,33 @@ async function playGame() {
                     if (currentPlayer === 1) {
                         winner = "1st";
                         firstPlayerWins++;
-                        firstPlayerMovesPerWin = firstPlayerTotalMoveCount / firstPlayerWins;
+                        firstPlayerMovesPerWin = firstPlayerCurrentMoveCount;
                     } else {
                         winner = "2nd";
                         secondPlayerWins++;
-                        secondPlayerMovesPerWin = secondPlayerTotalMoveCount / secondPlayerWins;
+                        secondPlayerMovesPerWin = secondPlayerCurrentMoveCount;
                     }
 
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "winner" + winner, gameStartTime, gameType, promptType, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "winner" + winner, gameStartTime, gameType, promptType, promptVersion, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log(winner + " player wins!");
                     isGameActive = false;
                 }
                 // If a draw has taken place, process it accordingly.
                 else if (checkForFullBoard(gameType)) {
                     draws++;
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "draw", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "draw", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Draw");
                     isGameActive = false;
+                }
+
+                if (currentPlayer === 1) {
+                    firstPlayerCurrentMoveCount++
+                    firstPlayerTotalMoveCount++;
+                }
+                else {
+                    secondPlayerCurrentMoveCount++;
+                    secondPlayerTotalMoveCount++;
                 }
 
                 currentPlayer = (currentPlayer === 1) ? 2 : 1;  // Swap players since the move was valid.
@@ -421,32 +423,29 @@ async function playGame() {
             // An invalid move was made, process it accordingly.
             else {
                 if (currentPlayer === 1) {
+                    firstPlayerCurrentMoveCount++
+                    firstPlayerTotalMoveCount++;
                     firstPlayerCurrentInvalidMoves++;
                     firstPlayerTotalInvalidMoves++;
                 }
                 else {
+                    secondPlayerCurrentMoveCount++;
+                    secondPlayerTotalMoveCount++;
                     secondPlayerCurrentInvalidMoves++;
                     secondPlayerTotalInvalidMoves++;
                 }
 
                 // If a player's invalid move count is above the threshold, disqualify the player.
                 if (firstPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified1st", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified1st", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified2nd", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified2nd", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
-            }
-
-            if (currentPlayer === 1) {
-                firstPlayerTotalMoveCount++;
-            }
-            else {
-                secondPlayerTotalMoveCount++;
             }
 
             // If gameplay was stopped, exit prior to updating game statistics.
@@ -461,7 +460,7 @@ async function playGame() {
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
             if (currentMoveCount >= MAX_ALLOWED_MOVES) {
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
@@ -508,9 +507,9 @@ function updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, 
     document.getElementById("game-info").innerHTML =
         "<div><strong><em>Current Selections:</em></strong></div>" +
         "<div class='info'><strong>Game Type: </strong>" + gameType + "</div>" +
+        "<div class='info'><strong>Prompt Type: </strong>" + promptType + "</div>" +
         "<div class='info'><strong>1st Player: </strong>" + firstPlayer + "</div>" +
         "<div class='info'><strong>2nd Player: </strong>" + secondPlayer + "</div>" +
-        "<div class='info'><strong>Prompt Type: </strong>" + promptType + "</div>" +
         "<div class='info'><strong>Number of Games: </strong>" + gameCount + "</div>" +
         "<div class='info'><strong>Current Game: </strong>" + adjustedGameCount + "</div>";
 }
@@ -536,10 +535,10 @@ function checkForWin(gameType) {
         return TicTacToe.checkForWin();
     }
     else if (gameType === "connect-four") {
-
+        return ConnectFour.checkForWin();
     }
     else if (gameType === "gomoku") {
-
+        return Gomoku.checkForWin();
     }
 }
 
@@ -549,10 +548,10 @@ function checkForFullBoard(gameType) {
         return TicTacToe.checkForFullBoard();
     }
     else if (gameType === "connect-four") {
-
+        return ConnectFour.checkForFullBoard();
     }
     else if (gameType === "gomoku") {
-
+        return Gomoku.checkForFullBoard();
     }
 }
 
@@ -562,10 +561,10 @@ function resetBoard(gameType) {
         TicTacToe.resetBoard();
     }
     else if (gameType === "connect-four") {
-
+        ConnectFour.resetBoard();
     }
     else if (gameType === "gomoku") {
-
+        Gomoku.resetBoard();
     }
 }
 
@@ -574,33 +573,41 @@ function visualizeBoardState(gameType) {
     if (gameType === "tic-tac-toe") {
         return TicTacToe.visualizeBoardState();
     } else if (gameType === "connect-four") {
-
+        return ConnectFour.visualizeBoardState();
     } else if (gameType === "gomoku") {
-
+        return Gomoku.visualizeBoardState();
     }
+}
+
+// Show a game board with a specific HTML ID, hiding all other boards.
+function showBoardWithId(boardId) {
+    // Hide all boards.
+    for (let boardDiv of document.getElementById("board-container").children) {
+        document.getElementById(boardDiv.id).style.display = "none";
+    }
+
+    // Show board with desired board ID.
+    document.getElementById(boardId).style.display = "table";
 }
 
 document.addEventListener("DOMContentLoaded", async function() {
     // Add initial models to model list.
-    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, false));
-    addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, false));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true));
-    addModel(new Model("Google", "gemini-pro", "", GOOGLE_API_KEY, false));
-    addModel(new Model("Google", "gemini-pro-vision", "", GOOGLE_API_KEY, true));
-    addModel(new Model("AWS Bedrock", "meta.llama2-13b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "meta.llama2-70b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-v2", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-v2:1", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true));
-    addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, false));
-    addModel(new Model("AWS Bedrock", "ai21.j2-ultra-v1", BEDROCK_URL, BEDROCK_SECRET, false));
-
-    // Use initialized model list to initialize LLM table and player dropdowns.
-    updateModelLists();
+    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("Google", "gemini-pro", "", GOOGLE_API_KEY, true, false));
+    addModel(new Model("Google", "gemini-pro-vision", "", GOOGLE_API_KEY, false, true));
+    addModel(new Model("AWS Bedrock", "meta.llama2-13b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama2-70b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-v2", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-v2:1", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "ai21.j2-ultra-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;

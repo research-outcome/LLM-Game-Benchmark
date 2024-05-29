@@ -10,6 +10,9 @@ export class TicTacToe {
     static systemPrompt() {
         return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
     }
+    static promptVersion() {
+        return "2024-05-29";
+    }
     
     static listPlayerMoves(player) {
         let movesList = [];
