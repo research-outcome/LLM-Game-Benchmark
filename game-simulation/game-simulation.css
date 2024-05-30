@@ -13,12 +13,20 @@ body {
 button {
     cursor: pointer;
 }
-#options, #game-info {
-    display: flex;
+#options-and-info {
     background-color: #f1f1f1;
-    padding: 5px;
+    justify-content: center;
     border: 3px solid black;
     margin-bottom: 10px;
+}
+#options-and-info-divider {
+    background-color: black;
+    width: 100%;
+    height: 1px;
+}
+#options, #game-info {
+    display: flex;
+    padding: 5px;
 }
 .option, .info {
     margin-left: auto;
@@ -40,6 +48,24 @@ select, button {
     margin-top: 10px;
     padding: 5px;
     border: 3px solid black;
+}
+.stats-table {
+    width: 90%;
+    display: table;
+}
+.stats-row {
+    display: table-row;
+}
+.stats-header {
+    background-color: black;
+    color: white;
+    padding: 3px;
+    display: table-cell;
+}
+.stats-cell {
+    text-align: center;
+    display: table-cell;
+    border: 1px solid black;
 }
 .popup-container {
     display: none;
@@ -94,7 +120,7 @@ select, button {
 #add-llm-btn {
     font-size: large;
     margin-top: 10px;
-    padding: 10px;
+    padding: 5px;
 }
 #llm-table {
     display: block;
@@ -165,6 +191,22 @@ select, button {
     display: none;
     color: red;
 }
+#gameplay-area {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    height: 400px;
+}
+#first-player-game-progress, #second-player-game-progress {
+    background-color: lightgrey;
+    width: 30%;
+    font-size: medium;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding: 10px;
+    border: 3px solid black;
+    overflow: auto;
+}
 #tic-tac-toe-board, #connect-four-board, #gomoku-board {
     display: table;
     width: 400px;
@@ -172,7 +214,6 @@ select, button {
     background-color: black;
     margin-right: auto;
     margin-left: auto;
-    margin-top: 10px;
     border-spacing: 3px;
 }
 #connect-four-board, #gomoku-board {
