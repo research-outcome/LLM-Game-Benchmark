@@ -56,15 +56,16 @@ select, button {
 .stats-row {
     display: table-row;
 }
+.stats-header, .stats-cell {
+    display: table-cell;
+    text-align: center;
+    padding: 3px;
+}
 .stats-header {
     background-color: black;
     color: white;
-    padding: 3px;
-    display: table-cell;
 }
 .stats-cell {
-    text-align: center;
-    display: table-cell;
     border: 1px solid black;
 }
 .popup-container {
