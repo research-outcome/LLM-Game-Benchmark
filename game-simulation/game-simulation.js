@@ -42,13 +42,21 @@ document.getElementById("prompt-type").addEventListener("change", () => {
     updatePlayerDropdowns();
 });
 
-document.getElementById("llm-type").addEventListener("change", (event) => {
-    updateAddModelFields(event);
+document.getElementById("first-player").addEventListener("change", () => {
+    resetProgressDisplays();
+});
+
+document.getElementById("second-player").addEventListener("change", (event) => {
+    resetProgressDisplays();
 });
 
 document.getElementById("edit-llms-btn").addEventListener("click", () => {
     document.getElementById("edit-llms-container").style.display = "inline-block";
     document.getElementById("edit-llms").style.display = "inline-block";
+});
+
+document.getElementById("llm-type").addEventListener("change", (event) => {
+    updateAddModelFields(event);
 });
 
 document.getElementById("edit-llms-close-btn").addEventListener("click", () => {
@@ -294,15 +302,15 @@ async function playGame() {
     let gameLogFiles = [];
 
     // Obtain existing statistics from the "stats" box.
-    let firstPlayerWins = parseInt(document.getElementById("first-player-wins").innerText.split(': ')[1]);
-    let secondPlayerWins = parseInt(document.getElementById("second-player-wins").innerText.split(': ')[1]);
-    let draws = parseInt(document.getElementById("draws").innerText.split(': ')[1]);
-    let firstPlayerTotalMoveCount = parseInt(document.getElementById("first-player-moves").innerText.split(': ')[1]);
-    let secondPlayerTotalMoveCount= parseInt(document.getElementById("second-player-moves").innerText.split(': ')[1]);
-    let firstPlayerDisqualifications= parseInt(document.getElementById("first-player-disqualifications").innerText.split(': ')[1]);
-    let secondPlayerDisqualifications= parseInt(document.getElementById("second-player-disqualifications").innerText.split(': ')[1]);
-    let firstPlayerTotalInvalidMoves = parseInt(document.getElementById("first-player-invalid-moves").innerText.split(': ')[1]);
-    let secondPlayerTotalInvalidMoves = parseInt(document.getElementById("second-player-invalid-moves").innerText.split(': ')[1]);
+    let firstPlayerWins = document.getElementById("first-player-wins").innerHTML;
+    let secondPlayerWins = document.getElementById("second-player-wins").innerHTML;
+    let draws = document.getElementById("draws").innerHTML;
+    let firstPlayerTotalMoveCount = document.getElementById("first-player-total-move-count").innerHTML;
+    let secondPlayerTotalMoveCount= document.getElementById("second-player-total-move-count").innerHTML;
+    let firstPlayerDisqualifications= document.getElementById("first-player-disqualifications").innerHTML;
+    let secondPlayerDisqualifications= document.getElementById("second-player-disqualifications").innerHTML;
+    let firstPlayerTotalInvalidMoves = document.getElementById("first-player-invalid-moves").innerHTML;
+    let secondPlayerTotalInvalidMoves = document.getElementById("second-player-invalid-moves").innerHTML;
 
     // Get prompt version from game object.
     let promptVersion = "";
@@ -330,6 +338,10 @@ async function playGame() {
         resetStats = false;
     }
 
+    // Initialize game progress displays.
+    document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
+    document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
+
     document.getElementById("start-btn").style.display = "none";  // Hide start button
     document.getElementById("stop-btn").style.display = "block";  // Show stop button
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount); // Initialize game information field.
@@ -350,6 +362,14 @@ async function playGame() {
         let secondPlayerCurrentInvalidMoves = 0;
         let gameLog = "";
         let gameStartTime = Date.now();
+        let result = "";
+
+        // Initialize current game's progress information for each player's progress window.
+        document.getElementById("first-player-game-progress").innerHTML += "<strong>Game " + (currentGameCount + 1) + "</strong><br>" +
+            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-first-player\"><em>Match in progress...</em></span><br>";
+        document.getElementById("second-player-game-progress").innerHTML += "<strong>Game " + (currentGameCount + 1) + "</strong><br>" +
+            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-second-player\"><em>Match in progress...</em></span><br>";
+
 
         while(isGameActive) {
             // If gameplay was stopped, exit before attempting to fetch move.
@@ -381,30 +401,39 @@ async function playGame() {
 
             // If a valid move was made, process it.
             if(move.getOutcome() === "Y") {
-                gameLog += visualizeBoardState(gameType); // Append new move to visual game log.
+                let boardState = visualizeBoardState(gameType);
+                gameLog += boardState; // Append new move to visual game log.
+
+                // If player 1 is playing, append the board state to the first player's progress log. Otherwise, append it to the second player's log.
+                if (currentPlayer === 1) {
+                    document.getElementById("first-player-game-progress").innerHTML += boardState.replace(new RegExp("\n", "g"), "<br>");
+                }
+                else {
+                    document.getElementById("second-player-game-progress").innerHTML += boardState.replace(new RegExp("\n", "g"), "<br>");
+                }
 
                 // If a player has won the game, process it accordingly.
                 if (checkForWin(gameType)) {
-                    let winner;
                     if (currentPlayer === 1) {
-                        winner = "1st";
+                        result = "winner1st";
                         firstPlayerWins++;
                         firstPlayerMovesPerWin = firstPlayerCurrentMoveCount;
                     } else {
-                        winner = "2nd";
+                        result = "winner2nd";
                         secondPlayerWins++;
                         secondPlayerMovesPerWin = secondPlayerCurrentMoveCount;
                     }
 
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "winner" + winner, gameStartTime, gameType, promptType, promptVersion, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
-                    console.log(winner + " player wins!");
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
+                    console.log(result);
                     isGameActive = false;
                 }
                 // If a draw has taken place, process it accordingly.
                 else if (checkForFullBoard(gameType)) {
+                    result = "draw";
                     draws++;
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "draw", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Draw");
                     isGameActive = false;
                 }
@@ -437,12 +466,14 @@ async function playGame() {
 
                 // If a player's invalid move count is above the threshold, disqualify the player.
                 if (firstPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified1st", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    result = "disqualified1st";
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves >= INVALID_MOVE_THRESHOLD) {
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "disqualified2nd", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    result = "disqualified2nd";
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
@@ -465,6 +496,13 @@ async function playGame() {
                 isGameActive = false;
             }
         }
+
+        // Update game results for progress windows. Do not update progress if stop button was clicked.
+        if (!gameStopped) {
+            document.getElementById("game-" + currentGameCount + "-result-first-player").textContent = result;
+            document.getElementById("game-" + currentGameCount + "-result-second-player").textContent = result;
+        }
+
 
         // Pause game to allow user to view results. Then, reset the board and update game information.
         await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
@@ -489,6 +527,7 @@ function disableInputs(disableFlag) {
     document.getElementById("first-player").disabled = disableFlag;
     document.getElementById("second-player").disabled = disableFlag;
     document.getElementById("prompt-type").disabled = disableFlag;
+    document.getElementById("edit-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
 }
 
@@ -506,27 +545,27 @@ function updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, 
 
     document.getElementById("game-info").innerHTML =
         "<div><strong><em>Current Selections:</em></strong></div>" +
-        "<div class='info'><strong>Game Type: </strong>" + gameType + "</div>" +
-        "<div class='info'><strong>Prompt Type: </strong>" + promptType + "</div>" +
-        "<div class='info'><strong>1st Player: </strong>" + firstPlayer + "</div>" +
-        "<div class='info'><strong>2nd Player: </strong>" + secondPlayer + "</div>" +
-        "<div class='info'><strong>Number of Games: </strong>" + gameCount + "</div>" +
-        "<div class='info'><strong>Current Game: </strong>" + adjustedGameCount + "</div>";
+        "<div class=\"info\"><strong>Game Type: </strong>" + gameType + "</div>" +
+        "<div class=\"info\"><strong>Prompt Type: </strong>" + promptType + "</div>" +
+        "<div class=\"info\"><strong>1st Player: </strong>" + firstPlayer + "</div>" +
+        "<div class=\"info\"><strong>2nd Player: </strong>" + secondPlayer + "</div>" +
+        "<div class=\"info\"><strong>Number of Games: </strong>" + gameCount + "</div>" +
+        "<div class=\"info\"><strong>Current Game: </strong>" + adjustedGameCount + "</div>";
 }
 
 // Display game statistics to the user.
 function updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin) {
-    document.getElementById("first-player-wins").innerHTML = "<div class='info' id='first-player-wins'><strong>1st Player Wins: </strong>" + firstPlayerWins + "</div>";
-    document.getElementById("second-player-wins").innerHTML = "<div class='info' id='second-player-wins'><strong>2nd Player Wins: </strong>" + secondPlayerWins + "</div>";
-    document.getElementById("draws").innerHTML = "<div class='info' id='draws'><strong>Draws: </strong>" + draws + "</div>";
-    document.getElementById("first-player-moves").innerHTML = "<div class='info' id='first-player-moves'><strong>1st Player Moves: </strong>" + firstPlayerTotalMoveCount + "</div>";
-    document.getElementById("second-player-moves").innerHTML = "<div class='info' id='second-player-moves'><strong>2nd Player Moves: </strong>" + secondPlayerTotalMoveCount + "</div>";
-    document.getElementById("first-player-disqualifications").innerHTML = "<div class='info' id='first-player-disqualifications'><strong>1st Player Disqual.: </strong>" + firstPlayerDisqualifications + "</div>";
-    document.getElementById("second-player-disqualifications").innerHTML = "<div class='info' id='second-player-disqualifications'><strong>2nd Player Disqual.: </strong>" + secondPlayerDisqualifications + "</div>";
-    document.getElementById("first-player-invalid-moves").innerHTML = "<div class='info' id='first-player-invalid-moves'><strong>1st Player Invalid Moves: </strong>" + firstPlayerTotalInvalidMoves + "</div>";
-    document.getElementById("second-player-invalid-moves").innerHTML = "<div class='info' id='second-player-invalid-moves'><strong>2nd Player Invalid Moves: </strong>" + secondPlayerTotalInvalidMoves + "</div>";
-    document.getElementById("first-player-moves-per-win").innerHTML = "<div class='info' id='first-player-moves-per-win'><strong>1st Player Moves per Win: </strong>" + firstPlayerMovesPerWin + "</div>";
-    document.getElementById("second-player-moves-per-win").innerHTML = "<div class='info' id='second-player-moves-per-win'><strong>2nd Player Moves per Win: </strong>" + secondPlayerMovesPerWin + "</div>";
+    document.getElementById("first-player-wins").innerHTML = firstPlayerWins;
+    document.getElementById("second-player-wins").innerHTML = secondPlayerWins;
+    document.getElementById("draws").innerHTML = draws;
+    document.getElementById("first-player-total-move-count").innerHTML = firstPlayerTotalMoveCount;
+    document.getElementById("second-player-total-move-count").innerHTML = secondPlayerTotalMoveCount;
+    document.getElementById("first-player-disqualifications").innerHTML = firstPlayerDisqualifications;
+    document.getElementById("second-player-disqualifications").innerHTML = secondPlayerDisqualifications;
+    document.getElementById("first-player-invalid-moves").innerHTML = firstPlayerTotalInvalidMoves;
+    document.getElementById("second-player-invalid-moves").innerHTML = secondPlayerTotalInvalidMoves;
+    document.getElementById("first-player-moves-per-win").innerHTML = firstPlayerMovesPerWin;
+    document.getElementById("second-player-moves-per-win").innerHTML = secondPlayerMovesPerWin;
 }
 
 // Check if a win has taken place in the given game type.
@@ -590,6 +629,11 @@ function showBoardWithId(boardId) {
     document.getElementById(boardId).style.display = "table";
 }
 
+function resetProgressDisplays() {
+    document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
+    document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
+}
+
 document.addEventListener("DOMContentLoaded", async function() {
     // Add initial models to model list.
     addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
@@ -617,6 +661,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     let secondPlayer = document.getElementById("second-player").value;
     let promptType = document.getElementById("prompt-type").value;
 
+    resetProgressDisplays();
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount);
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 });

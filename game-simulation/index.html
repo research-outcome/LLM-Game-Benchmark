@@ -16,391 +16,419 @@
               }
             }
         </script>
-        <div id="options">
-            <div class="option">
-                <label for="game-type">Game Type: </label>
-                <select id="game-type" name="game-type">
-                    <option value="tic-tac-toe">Tic-Tac-Toe</option>
-                    <option value="connect-four">Connect Four</option>
-                    <option value="gomoku">Gomoku</option>
-                </select>
+        <div id="options-and-info">
+            <div id="options">
+                <div class="option">
+                    <label for="game-type">Game Type: </label>
+                    <select id="game-type" name="game-type">
+                        <option value="tic-tac-toe">Tic-Tac-Toe</option>
+                        <option value="connect-four">Connect Four</option>
+                        <option value="gomoku">Gomoku</option>
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="prompt-type">Prompt Type: </label>
+                    <select id="prompt-type" name="prompt-type">
+                        <option value="list">List</option>
+                        <option value="illustration">Illustration</option>
+                        <option value="image">Image</option>
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="first-player">1st Player LLM: </label>
+                    <select id="first-player" name="first-player">
+                        <!-- Pre-implemented models and models added by the user will appear here. -->
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="second-player">2nd Player LLM: </label>
+                    <select id="second-player" name="second-player">
+                        <!-- Pre-implemented models and models added by the user will appear here. -->
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="game-count">Number of Games: </label>
+                    <input type="text" id="game-count" name="game-count" value=3>
+                </div>
+                <button id="edit-llms-btn">Manage LLMs</button>
             </div>
-            <div class="option">
-                <label for="prompt-type">Prompt Type: </label>
-                <select id="prompt-type" name="prompt-type">
-                    <option value="list">List</option>
-                    <option value="illustration">Illustration</option>
-                    <option value="image">Image</option>
-                </select>
+            <div id="options-and-info-divider"></div>
+            <div id="game-info">
+                <!-- User's selected game options will be displayed here. -->
             </div>
-            <div class="option">
-                <label for="first-player">1st Player LLM: </label>
-                <select id="first-player" name="first-player">
-                    <!-- Pre-implemented models and models added by the user will appear here. -->
-                </select>
-            </div>
-            <div class="option">
-                <label for="second-player">2nd Player LLM: </label>
-                <select id="second-player" name="second-player">
-                    <!-- Pre-implemented models and models added by the user will appear here. -->
-                </select>
-            </div>
-            <div class="option">
-                <label for="game-count">Number of Games: </label>
-                <input type="text" id="game-count" name="game-count" value=3>
-            </div>
-            <button id="edit-llms-btn">Manage LLMs</button>
-        </div>
-        <div id="game-info">
-            <!-- Game information (settings) will go here once the game starts -->
         </div>
         <div id="game-stats">
-            <div><strong><em>Stats:</em></strong></div>
-            <div class='info' id='first-player-wins'><strong>1st Player Wins: </strong>0</div>
-            <div class='info' id='second-player-wins'><strong>2nd Player Wins: </strong>0</div>
-            <div class='info' id='draws'><strong>Draws: </strong>0</div>
-            <div class='info' id='first-player-moves'><strong>1st Player Moves: </strong>0</div>
-            <div class='info' id='second-player-moves'><strong>2nd Player Moves: </strong>0</div>
-            <div class='info' id='first-player-disqualifications'><strong>1st Player Disqual.: </strong>0</div>
-            <div class='info' id='second-player-disqualifications'><strong>2nd Player Disqual.: </strong>0</div>
-            <div class='info' id='first-player-invalid-moves'><strong>1st Player Invalid Moves: </strong>0</div>
-            <div class='info' id='second-player-invalid-moves'><strong>2nd Player Invalid Moves: </strong>0</div>
-            <div class='info' id='first-player-moves-per-win'><strong>1st Player Moves per Win: </strong>0</div>
-            <div class='info' id='second-player-moves-per-win'><strong>2nd Player Moves per Win: </strong>0</div>
-            <button id='reset-btn'>Reset Stats</button>
+            <div style="margin-right: auto"><strong><em>Stats:</em></strong></div>
+            <div class="stats-table">
+                <div class="stats-row">
+                    <div class="stats-header">1st Player Wins</div>
+                    <div class="stats-header">2nd Player Wins</div>
+                    <div class="stats-header">Draws</div>
+                    <div class="stats-header">1st Player Total Move Count</div>
+                    <div class="stats-header">2nd Player Total Move Count</div>
+                    <div class="stats-header">1st Player Disqualifications</div>
+                    <div class="stats-header">2nd Player Disqualifications</div>
+                    <div class="stats-header">1st Player Invalid Moves</div>
+                    <div class="stats-header">2nd Player Invalid Moves</div>
+                    <div class="stats-header">1st Player Moves per Win</div>
+                    <div class="stats-header">2nd Player Moves per Win</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell" id="first-player-wins">0</div>
+                    <div class="stats-cell" id="second-player-wins">0</div>
+                    <div class="stats-cell" id="draws">0</div>
+                    <div class="stats-cell" id="first-player-total-move-count">0</div>
+                    <div class="stats-cell" id="second-player-total-move-count">0</div>
+                    <div class="stats-cell" id="first-player-disqualifications">0</div>
+                    <div class="stats-cell" id="second-player-disqualifications">0</div>
+                    <div class="stats-cell" id="first-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="second-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="first-player-moves-per-win">0</div>
+                    <div class="stats-cell" id="second-player-moves-per-win">0</div>
+                </div>
+            </div>
+            <button id="reset-btn" style="margin-left: auto">Reset Stats</button>
         </div>
         <button id="start-btn">Start</button>
         <button id="stop-btn">Stop</button>
-        <div id="board-container">
-            <div id="tic-tac-toe-board">
-                <div class="row">
-                    <div class="cell" id="tic-tac-toe-1-1"></div>
-                    <div class="cell" id="tic-tac-toe-1-2"></div>
-                    <div class="cell" id="tic-tac-toe-1-3"></div>
+        <div id="gameplay-area">
+            <div id="first-player-game-progress">
+                <!-- First player's game progress will be displayed here. -->
+            </div>
+            <div id="board-container">
+                <div id="tic-tac-toe-board">
+                    <div class="row">
+                        <div class="cell" id="tic-tac-toe-1-1"></div>
+                        <div class="cell" id="tic-tac-toe-1-2"></div>
+                        <div class="cell" id="tic-tac-toe-1-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="tic-tac-toe-2-1"></div>
+                        <div class="cell" id="tic-tac-toe-2-2"></div>
+                        <div class="cell" id="tic-tac-toe-2-3"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="tic-tac-toe-3-1"></div>
+                        <div class="cell" id="tic-tac-toe-3-2"></div>
+                        <div class="cell" id="tic-tac-toe-3-3"></div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="cell" id="tic-tac-toe-2-1"></div>
-                    <div class="cell" id="tic-tac-toe-2-2"></div>
-                    <div class="cell" id="tic-tac-toe-2-3"></div>
+                <div id="connect-four-board">
+                    <div class="row">
+                        <div class="cell" id="connect-four-1-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-1-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="connect-four-2-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-2-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="connect-four-3-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-3-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="connect-four-4-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-4-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="connect-four-5-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-5-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="connect-four-6-1"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-2"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-3"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-4"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-5"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-6"><div class="connect-four-space"></div></div>
+                        <div class="cell" id="connect-four-6-7"><div class="connect-four-space"></div></div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="cell" id="tic-tac-toe-3-1"></div>
-                    <div class="cell" id="tic-tac-toe-3-2"></div>
-                    <div class="cell" id="tic-tac-toe-3-3"></div>
+                <div id="gomoku-board">
+                    <div class="row">
+                        <div class="cell" id="gomoku-1-1"><span class="black-stone"></span></div>
+                        <div class="cell" id="gomoku-1-2"></div>
+                        <div class="cell" id="gomoku-1-3"></div>
+                        <div class="cell" id="gomoku-1-4"></div>
+                        <div class="cell" id="gomoku-1-5"></div>
+                        <div class="cell" id="gomoku-1-6"></div>
+                        <div class="cell" id="gomoku-1-7"></div>
+                        <div class="cell" id="gomoku-1-8"></div>
+                        <div class="cell" id="gomoku-1-9"></div>
+                        <div class="cell" id="gomoku-1-10"></div>
+                        <div class="cell" id="gomoku-1-11"></div>
+                        <div class="cell" id="gomoku-1-12"></div>
+                        <div class="cell" id="gomoku-1-13"></div>
+                        <div class="cell" id="gomoku-1-14"></div>
+                        <div class="cell" id="gomoku-1-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-2-1"></div>
+                        <div class="cell" id="gomoku-2-2"></div>
+                        <div class="cell" id="gomoku-2-3"></div>
+                        <div class="cell" id="gomoku-2-4"></div>
+                        <div class="cell" id="gomoku-2-5"></div>
+                        <div class="cell" id="gomoku-2-6"></div>
+                        <div class="cell" id="gomoku-2-7"></div>
+                        <div class="cell" id="gomoku-2-8"></div>
+                        <div class="cell" id="gomoku-2-9"></div>
+                        <div class="cell" id="gomoku-2-10"></div>
+                        <div class="cell" id="gomoku-2-11"></div>
+                        <div class="cell" id="gomoku-2-12"></div>
+                        <div class="cell" id="gomoku-2-13"></div>
+                        <div class="cell" id="gomoku-2-14"></div>
+                        <div class="cell" id="gomoku-2-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-3-1"></div>
+                        <div class="cell" id="gomoku-3-2"></div>
+                        <div class="cell" id="gomoku-3-3"></div>
+                        <div class="cell" id="gomoku-3-4"></div>
+                        <div class="cell" id="gomoku-3-5"></div>
+                        <div class="cell" id="gomoku-3-6"></div>
+                        <div class="cell" id="gomoku-3-7"></div>
+                        <div class="cell" id="gomoku-3-8"></div>
+                        <div class="cell" id="gomoku-3-9"></div>
+                        <div class="cell" id="gomoku-3-10"></div>
+                        <div class="cell" id="gomoku-3-11"></div>
+                        <div class="cell" id="gomoku-3-12"></div>
+                        <div class="cell" id="gomoku-3-13"></div>
+                        <div class="cell" id="gomoku-3-14"></div>
+                        <div class="cell" id="gomoku-3-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-4-1"></div>
+                        <div class="cell" id="gomoku-4-2"></div>
+                        <div class="cell" id="gomoku-4-3"></div>
+                        <div class="cell" id="gomoku-4-4"></div>
+                        <div class="cell" id="gomoku-4-5"></div>
+                        <div class="cell" id="gomoku-4-6"></div>
+                        <div class="cell" id="gomoku-4-7"></div>
+                        <div class="cell" id="gomoku-4-8"></div>
+                        <div class="cell" id="gomoku-4-9"></div>
+                        <div class="cell" id="gomoku-4-10"></div>
+                        <div class="cell" id="gomoku-4-11"></div>
+                        <div class="cell" id="gomoku-4-12"></div>
+                        <div class="cell" id="gomoku-4-13"></div>
+                        <div class="cell" id="gomoku-4-14"></div>
+                        <div class="cell" id="gomoku-4-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-5-1"></div>
+                        <div class="cell" id="gomoku-5-2"></div>
+                        <div class="cell" id="gomoku-5-3"></div>
+                        <div class="cell" id="gomoku-5-4"></div>
+                        <div class="cell" id="gomoku-5-5"></div>
+                        <div class="cell" id="gomoku-5-6"></div>
+                        <div class="cell" id="gomoku-5-7"></div>
+                        <div class="cell" id="gomoku-5-8"></div>
+                        <div class="cell" id="gomoku-5-9"></div>
+                        <div class="cell" id="gomoku-5-10"></div>
+                        <div class="cell" id="gomoku-5-11"></div>
+                        <div class="cell" id="gomoku-5-12"></div>
+                        <div class="cell" id="gomoku-5-13"></div>
+                        <div class="cell" id="gomoku-5-14"></div>
+                        <div class="cell" id="gomoku-5-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-6-1"></div>
+                        <div class="cell" id="gomoku-6-2"></div>
+                        <div class="cell" id="gomoku-6-3"></div>
+                        <div class="cell" id="gomoku-6-4"></div>
+                        <div class="cell" id="gomoku-6-5"></div>
+                        <div class="cell" id="gomoku-6-6"></div>
+                        <div class="cell" id="gomoku-6-7"></div>
+                        <div class="cell" id="gomoku-6-8"></div>
+                        <div class="cell" id="gomoku-6-9"></div>
+                        <div class="cell" id="gomoku-6-10"></div>
+                        <div class="cell" id="gomoku-6-11"></div>
+                        <div class="cell" id="gomoku-6-12"></div>
+                        <div class="cell" id="gomoku-6-13"></div>
+                        <div class="cell" id="gomoku-6-14"></div>
+                        <div class="cell" id="gomoku-6-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-7-1"></div>
+                        <div class="cell" id="gomoku-7-2"></div>
+                        <div class="cell" id="gomoku-7-3"></div>
+                        <div class="cell" id="gomoku-7-4"></div>
+                        <div class="cell" id="gomoku-7-5"></div>
+                        <div class="cell" id="gomoku-7-6"></div>
+                        <div class="cell" id="gomoku-7-7"></div>
+                        <div class="cell" id="gomoku-7-8"></div>
+                        <div class="cell" id="gomoku-7-9"></div>
+                        <div class="cell" id="gomoku-7-10"></div>
+                        <div class="cell" id="gomoku-7-11"></div>
+                        <div class="cell" id="gomoku-7-12"></div>
+                        <div class="cell" id="gomoku-7-13"></div>
+                        <div class="cell" id="gomoku-7-14"></div>
+                        <div class="cell" id="gomoku-7-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-8-1"></div>
+                        <div class="cell" id="gomoku-8-2"></div>
+                        <div class="cell" id="gomoku-8-3"></div>
+                        <div class="cell" id="gomoku-8-4"></div>
+                        <div class="cell" id="gomoku-8-5"></div>
+                        <div class="cell" id="gomoku-8-6"></div>
+                        <div class="cell" id="gomoku-8-7"></div>
+                        <div class="cell" id="gomoku-8-8"></div>
+                        <div class="cell" id="gomoku-8-9"></div>
+                        <div class="cell" id="gomoku-8-10"></div>
+                        <div class="cell" id="gomoku-8-11"></div>
+                        <div class="cell" id="gomoku-8-12"></div>
+                        <div class="cell" id="gomoku-8-13"></div>
+                        <div class="cell" id="gomoku-8-14"></div>
+                        <div class="cell" id="gomoku-8-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-9-1"></div>
+                        <div class="cell" id="gomoku-9-2"></div>
+                        <div class="cell" id="gomoku-9-3"></div>
+                        <div class="cell" id="gomoku-9-4"></div>
+                        <div class="cell" id="gomoku-9-5"></div>
+                        <div class="cell" id="gomoku-9-6"></div>
+                        <div class="cell" id="gomoku-9-7"></div>
+                        <div class="cell" id="gomoku-9-8"></div>
+                        <div class="cell" id="gomoku-9-9"></div>
+                        <div class="cell" id="gomoku-9-10"></div>
+                        <div class="cell" id="gomoku-9-11"></div>
+                        <div class="cell" id="gomoku-9-12"></div>
+                        <div class="cell" id="gomoku-9-13"></div>
+                        <div class="cell" id="gomoku-9-14"></div>
+                        <div class="cell" id="gomoku-9-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-10-1"></div>
+                        <div class="cell" id="gomoku-10-2"></div>
+                        <div class="cell" id="gomoku-10-3"></div>
+                        <div class="cell" id="gomoku-10-4"></div>
+                        <div class="cell" id="gomoku-10-5"></div>
+                        <div class="cell" id="gomoku-10-6"></div>
+                        <div class="cell" id="gomoku-10-7"></div>
+                        <div class="cell" id="gomoku-10-8"></div>
+                        <div class="cell" id="gomoku-10-9"></div>
+                        <div class="cell" id="gomoku-10-10"></div>
+                        <div class="cell" id="gomoku-10-11"></div>
+                        <div class="cell" id="gomoku-10-12"></div>
+                        <div class="cell" id="gomoku-10-13"></div>
+                        <div class="cell" id="gomoku-10-14"></div>
+                        <div class="cell" id="gomoku-10-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-11-1"></div>
+                        <div class="cell" id="gomoku-11-2"></div>
+                        <div class="cell" id="gomoku-11-3"></div>
+                        <div class="cell" id="gomoku-11-4"></div>
+                        <div class="cell" id="gomoku-11-5"></div>
+                        <div class="cell" id="gomoku-11-6"></div>
+                        <div class="cell" id="gomoku-11-7"></div>
+                        <div class="cell" id="gomoku-11-8"></div>
+                        <div class="cell" id="gomoku-11-9"></div>
+                        <div class="cell" id="gomoku-11-10"></div>
+                        <div class="cell" id="gomoku-11-11"></div>
+                        <div class="cell" id="gomoku-11-12"></div>
+                        <div class="cell" id="gomoku-11-13"></div>
+                        <div class="cell" id="gomoku-11-14"></div>
+                        <div class="cell" id="gomoku-11-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-12-1"></div>
+                        <div class="cell" id="gomoku-12-2"></div>
+                        <div class="cell" id="gomoku-12-3"></div>
+                        <div class="cell" id="gomoku-12-4"></div>
+                        <div class="cell" id="gomoku-12-5"></div>
+                        <div class="cell" id="gomoku-12-6"></div>
+                        <div class="cell" id="gomoku-12-7"></div>
+                        <div class="cell" id="gomoku-12-8"></div>
+                        <div class="cell" id="gomoku-12-9"></div>
+                        <div class="cell" id="gomoku-12-10"></div>
+                        <div class="cell" id="gomoku-12-11"></div>
+                        <div class="cell" id="gomoku-12-12"></div>
+                        <div class="cell" id="gomoku-12-13"></div>
+                        <div class="cell" id="gomoku-12-14"></div>
+                        <div class="cell" id="gomoku-12-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-13-1"></div>
+                        <div class="cell" id="gomoku-13-2"></div>
+                        <div class="cell" id="gomoku-13-3"></div>
+                        <div class="cell" id="gomoku-13-4"></div>
+                        <div class="cell" id="gomoku-13-5"></div>
+                        <div class="cell" id="gomoku-13-6"></div>
+                        <div class="cell" id="gomoku-13-7"></div>
+                        <div class="cell" id="gomoku-13-8"></div>
+                        <div class="cell" id="gomoku-13-9"></div>
+                        <div class="cell" id="gomoku-13-10"></div>
+                        <div class="cell" id="gomoku-13-11"></div>
+                        <div class="cell" id="gomoku-13-12"></div>
+                        <div class="cell" id="gomoku-13-13"></div>
+                        <div class="cell" id="gomoku-13-14"></div>
+                        <div class="cell" id="gomoku-13-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-14-1"></div>
+                        <div class="cell" id="gomoku-14-2"></div>
+                        <div class="cell" id="gomoku-14-3"></div>
+                        <div class="cell" id="gomoku-14-4"></div>
+                        <div class="cell" id="gomoku-14-5"></div>
+                        <div class="cell" id="gomoku-14-6"></div>
+                        <div class="cell" id="gomoku-14-7"></div>
+                        <div class="cell" id="gomoku-14-8"></div>
+                        <div class="cell" id="gomoku-14-9"></div>
+                        <div class="cell" id="gomoku-14-10"></div>
+                        <div class="cell" id="gomoku-14-11"></div>
+                        <div class="cell" id="gomoku-14-12"></div>
+                        <div class="cell" id="gomoku-14-13"></div>
+                        <div class="cell" id="gomoku-14-14"></div>
+                        <div class="cell" id="gomoku-14-15"></div>
+                    </div>
+                    <div class="row">
+                        <div class="cell" id="gomoku-15-1"></div>
+                        <div class="cell" id="gomoku-15-2"></div>
+                        <div class="cell" id="gomoku-15-3"></div>
+                        <div class="cell" id="gomoku-15-4"></div>
+                        <div class="cell" id="gomoku-15-5"></div>
+                        <div class="cell" id="gomoku-15-6"></div>
+                        <div class="cell" id="gomoku-15-7"></div>
+                        <div class="cell" id="gomoku-15-8"></div>
+                        <div class="cell" id="gomoku-15-9"></div>
+                        <div class="cell" id="gomoku-15-10"></div>
+                        <div class="cell" id="gomoku-15-11"></div>
+                        <div class="cell" id="gomoku-15-12"></div>
+                        <div class="cell" id="gomoku-15-13"></div>
+                        <div class="cell" id="gomoku-15-14"></div>
+                        <div class="cell" id="gomoku-15-15"></div>
+                    </div>
                 </div>
             </div>
-            <div id="connect-four-board">
-                <div class="row">
-                    <div class="cell" id="connect-four-1-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-1-7"><div class="connect-four-space"></div></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="connect-four-2-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-2-7"><div class="connect-four-space"></div></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="connect-four-3-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-3-7"><div class="connect-four-space"></div></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="connect-four-4-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-4-7"><div class="connect-four-space"></div></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="connect-four-5-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-5-7"><div class="connect-four-space"></div></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="connect-four-6-1"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-2"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-3"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-4"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-5"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-6"><div class="connect-four-space"></div></div>
-                    <div class="cell" id="connect-four-6-7"><div class="connect-four-space"></div></div>
-                </div>
-            </div>
-            <div id="gomoku-board">
-                <div class="row">
-                    <div class="cell" id="gomoku-1-1"><span class="black-stone"></span></div>
-                    <div class="cell" id="gomoku-1-2"></div>
-                    <div class="cell" id="gomoku-1-3"></div>
-                    <div class="cell" id="gomoku-1-4"></div>
-                    <div class="cell" id="gomoku-1-5"></div>
-                    <div class="cell" id="gomoku-1-6"></div>
-                    <div class="cell" id="gomoku-1-7"></div>
-                    <div class="cell" id="gomoku-1-8"></div>
-                    <div class="cell" id="gomoku-1-9"></div>
-                    <div class="cell" id="gomoku-1-10"></div>
-                    <div class="cell" id="gomoku-1-11"></div>
-                    <div class="cell" id="gomoku-1-12"></div>
-                    <div class="cell" id="gomoku-1-13"></div>
-                    <div class="cell" id="gomoku-1-14"></div>
-                    <div class="cell" id="gomoku-1-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-2-1"></div>
-                    <div class="cell" id="gomoku-2-2"></div>
-                    <div class="cell" id="gomoku-2-3"></div>
-                    <div class="cell" id="gomoku-2-4"></div>
-                    <div class="cell" id="gomoku-2-5"></div>
-                    <div class="cell" id="gomoku-2-6"></div>
-                    <div class="cell" id="gomoku-2-7"></div>
-                    <div class="cell" id="gomoku-2-8"></div>
-                    <div class="cell" id="gomoku-2-9"></div>
-                    <div class="cell" id="gomoku-2-10"></div>
-                    <div class="cell" id="gomoku-2-11"></div>
-                    <div class="cell" id="gomoku-2-12"></div>
-                    <div class="cell" id="gomoku-2-13"></div>
-                    <div class="cell" id="gomoku-2-14"></div>
-                    <div class="cell" id="gomoku-2-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-3-1"></div>
-                    <div class="cell" id="gomoku-3-2"></div>
-                    <div class="cell" id="gomoku-3-3"></div>
-                    <div class="cell" id="gomoku-3-4"></div>
-                    <div class="cell" id="gomoku-3-5"></div>
-                    <div class="cell" id="gomoku-3-6"></div>
-                    <div class="cell" id="gomoku-3-7"></div>
-                    <div class="cell" id="gomoku-3-8"></div>
-                    <div class="cell" id="gomoku-3-9"></div>
-                    <div class="cell" id="gomoku-3-10"></div>
-                    <div class="cell" id="gomoku-3-11"></div>
-                    <div class="cell" id="gomoku-3-12"></div>
-                    <div class="cell" id="gomoku-3-13"></div>
-                    <div class="cell" id="gomoku-3-14"></div>
-                    <div class="cell" id="gomoku-3-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-4-1"></div>
-                    <div class="cell" id="gomoku-4-2"></div>
-                    <div class="cell" id="gomoku-4-3"></div>
-                    <div class="cell" id="gomoku-4-4"></div>
-                    <div class="cell" id="gomoku-4-5"></div>
-                    <div class="cell" id="gomoku-4-6"></div>
-                    <div class="cell" id="gomoku-4-7"></div>
-                    <div class="cell" id="gomoku-4-8"></div>
-                    <div class="cell" id="gomoku-4-9"></div>
-                    <div class="cell" id="gomoku-4-10"></div>
-                    <div class="cell" id="gomoku-4-11"></div>
-                    <div class="cell" id="gomoku-4-12"></div>
-                    <div class="cell" id="gomoku-4-13"></div>
-                    <div class="cell" id="gomoku-4-14"></div>
-                    <div class="cell" id="gomoku-4-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-5-1"></div>
-                    <div class="cell" id="gomoku-5-2"></div>
-                    <div class="cell" id="gomoku-5-3"></div>
-                    <div class="cell" id="gomoku-5-4"></div>
-                    <div class="cell" id="gomoku-5-5"></div>
-                    <div class="cell" id="gomoku-5-6"></div>
-                    <div class="cell" id="gomoku-5-7"></div>
-                    <div class="cell" id="gomoku-5-8"></div>
-                    <div class="cell" id="gomoku-5-9"></div>
-                    <div class="cell" id="gomoku-5-10"></div>
-                    <div class="cell" id="gomoku-5-11"></div>
-                    <div class="cell" id="gomoku-5-12"></div>
-                    <div class="cell" id="gomoku-5-13"></div>
-                    <div class="cell" id="gomoku-5-14"></div>
-                    <div class="cell" id="gomoku-5-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-6-1"></div>
-                    <div class="cell" id="gomoku-6-2"></div>
-                    <div class="cell" id="gomoku-6-3"></div>
-                    <div class="cell" id="gomoku-6-4"></div>
-                    <div class="cell" id="gomoku-6-5"></div>
-                    <div class="cell" id="gomoku-6-6"></div>
-                    <div class="cell" id="gomoku-6-7"></div>
-                    <div class="cell" id="gomoku-6-8"></div>
-                    <div class="cell" id="gomoku-6-9"></div>
-                    <div class="cell" id="gomoku-6-10"></div>
-                    <div class="cell" id="gomoku-6-11"></div>
-                    <div class="cell" id="gomoku-6-12"></div>
-                    <div class="cell" id="gomoku-6-13"></div>
-                    <div class="cell" id="gomoku-6-14"></div>
-                    <div class="cell" id="gomoku-6-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-7-1"></div>
-                    <div class="cell" id="gomoku-7-2"></div>
-                    <div class="cell" id="gomoku-7-3"></div>
-                    <div class="cell" id="gomoku-7-4"></div>
-                    <div class="cell" id="gomoku-7-5"></div>
-                    <div class="cell" id="gomoku-7-6"></div>
-                    <div class="cell" id="gomoku-7-7"></div>
-                    <div class="cell" id="gomoku-7-8"></div>
-                    <div class="cell" id="gomoku-7-9"></div>
-                    <div class="cell" id="gomoku-7-10"></div>
-                    <div class="cell" id="gomoku-7-11"></div>
-                    <div class="cell" id="gomoku-7-12"></div>
-                    <div class="cell" id="gomoku-7-13"></div>
-                    <div class="cell" id="gomoku-7-14"></div>
-                    <div class="cell" id="gomoku-7-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-8-1"></div>
-                    <div class="cell" id="gomoku-8-2"></div>
-                    <div class="cell" id="gomoku-8-3"></div>
-                    <div class="cell" id="gomoku-8-4"></div>
-                    <div class="cell" id="gomoku-8-5"></div>
-                    <div class="cell" id="gomoku-8-6"></div>
-                    <div class="cell" id="gomoku-8-7"></div>
-                    <div class="cell" id="gomoku-8-8"></div>
-                    <div class="cell" id="gomoku-8-9"></div>
-                    <div class="cell" id="gomoku-8-10"></div>
-                    <div class="cell" id="gomoku-8-11"></div>
-                    <div class="cell" id="gomoku-8-12"></div>
-                    <div class="cell" id="gomoku-8-13"></div>
-                    <div class="cell" id="gomoku-8-14"></div>
-                    <div class="cell" id="gomoku-8-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-9-1"></div>
-                    <div class="cell" id="gomoku-9-2"></div>
-                    <div class="cell" id="gomoku-9-3"></div>
-                    <div class="cell" id="gomoku-9-4"></div>
-                    <div class="cell" id="gomoku-9-5"></div>
-                    <div class="cell" id="gomoku-9-6"></div>
-                    <div class="cell" id="gomoku-9-7"></div>
-                    <div class="cell" id="gomoku-9-8"></div>
-                    <div class="cell" id="gomoku-9-9"></div>
-                    <div class="cell" id="gomoku-9-10"></div>
-                    <div class="cell" id="gomoku-9-11"></div>
-                    <div class="cell" id="gomoku-9-12"></div>
-                    <div class="cell" id="gomoku-9-13"></div>
-                    <div class="cell" id="gomoku-9-14"></div>
-                    <div class="cell" id="gomoku-9-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-10-1"></div>
-                    <div class="cell" id="gomoku-10-2"></div>
-                    <div class="cell" id="gomoku-10-3"></div>
-                    <div class="cell" id="gomoku-10-4"></div>
-                    <div class="cell" id="gomoku-10-5"></div>
-                    <div class="cell" id="gomoku-10-6"></div>
-                    <div class="cell" id="gomoku-10-7"></div>
-                    <div class="cell" id="gomoku-10-8"></div>
-                    <div class="cell" id="gomoku-10-9"></div>
-                    <div class="cell" id="gomoku-10-10"></div>
-                    <div class="cell" id="gomoku-10-11"></div>
-                    <div class="cell" id="gomoku-10-12"></div>
-                    <div class="cell" id="gomoku-10-13"></div>
-                    <div class="cell" id="gomoku-10-14"></div>
-                    <div class="cell" id="gomoku-10-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-11-1"></div>
-                    <div class="cell" id="gomoku-11-2"></div>
-                    <div class="cell" id="gomoku-11-3"></div>
-                    <div class="cell" id="gomoku-11-4"></div>
-                    <div class="cell" id="gomoku-11-5"></div>
-                    <div class="cell" id="gomoku-11-6"></div>
-                    <div class="cell" id="gomoku-11-7"></div>
-                    <div class="cell" id="gomoku-11-8"></div>
-                    <div class="cell" id="gomoku-11-9"></div>
-                    <div class="cell" id="gomoku-11-10"></div>
-                    <div class="cell" id="gomoku-11-11"></div>
-                    <div class="cell" id="gomoku-11-12"></div>
-                    <div class="cell" id="gomoku-11-13"></div>
-                    <div class="cell" id="gomoku-11-14"></div>
-                    <div class="cell" id="gomoku-11-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-12-1"></div>
-                    <div class="cell" id="gomoku-12-2"></div>
-                    <div class="cell" id="gomoku-12-3"></div>
-                    <div class="cell" id="gomoku-12-4"></div>
-                    <div class="cell" id="gomoku-12-5"></div>
-                    <div class="cell" id="gomoku-12-6"></div>
-                    <div class="cell" id="gomoku-12-7"></div>
-                    <div class="cell" id="gomoku-12-8"></div>
-                    <div class="cell" id="gomoku-12-9"></div>
-                    <div class="cell" id="gomoku-12-10"></div>
-                    <div class="cell" id="gomoku-12-11"></div>
-                    <div class="cell" id="gomoku-12-12"></div>
-                    <div class="cell" id="gomoku-12-13"></div>
-                    <div class="cell" id="gomoku-12-14"></div>
-                    <div class="cell" id="gomoku-12-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-13-1"></div>
-                    <div class="cell" id="gomoku-13-2"></div>
-                    <div class="cell" id="gomoku-13-3"></div>
-                    <div class="cell" id="gomoku-13-4"></div>
-                    <div class="cell" id="gomoku-13-5"></div>
-                    <div class="cell" id="gomoku-13-6"></div>
-                    <div class="cell" id="gomoku-13-7"></div>
-                    <div class="cell" id="gomoku-13-8"></div>
-                    <div class="cell" id="gomoku-13-9"></div>
-                    <div class="cell" id="gomoku-13-10"></div>
-                    <div class="cell" id="gomoku-13-11"></div>
-                    <div class="cell" id="gomoku-13-12"></div>
-                    <div class="cell" id="gomoku-13-13"></div>
-                    <div class="cell" id="gomoku-13-14"></div>
-                    <div class="cell" id="gomoku-13-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-14-1"></div>
-                    <div class="cell" id="gomoku-14-2"></div>
-                    <div class="cell" id="gomoku-14-3"></div>
-                    <div class="cell" id="gomoku-14-4"></div>
-                    <div class="cell" id="gomoku-14-5"></div>
-                    <div class="cell" id="gomoku-14-6"></div>
-                    <div class="cell" id="gomoku-14-7"></div>
-                    <div class="cell" id="gomoku-14-8"></div>
-                    <div class="cell" id="gomoku-14-9"></div>
-                    <div class="cell" id="gomoku-14-10"></div>
-                    <div class="cell" id="gomoku-14-11"></div>
-                    <div class="cell" id="gomoku-14-12"></div>
-                    <div class="cell" id="gomoku-14-13"></div>
-                    <div class="cell" id="gomoku-14-14"></div>
-                    <div class="cell" id="gomoku-14-15"></div>
-                </div>
-                <div class="row">
-                    <div class="cell" id="gomoku-15-1"></div>
-                    <div class="cell" id="gomoku-15-2"></div>
-                    <div class="cell" id="gomoku-15-3"></div>
-                    <div class="cell" id="gomoku-15-4"></div>
-                    <div class="cell" id="gomoku-15-5"></div>
-                    <div class="cell" id="gomoku-15-6"></div>
-                    <div class="cell" id="gomoku-15-7"></div>
-                    <div class="cell" id="gomoku-15-8"></div>
-                    <div class="cell" id="gomoku-15-9"></div>
-                    <div class="cell" id="gomoku-15-10"></div>
-                    <div class="cell" id="gomoku-15-11"></div>
-                    <div class="cell" id="gomoku-15-12"></div>
-                    <div class="cell" id="gomoku-15-13"></div>
-                    <div class="cell" id="gomoku-15-14"></div>
-                    <div class="cell" id="gomoku-15-15"></div>
-                </div>
+            <div id="second-player-game-progress">
+                <!-- Second player's game progress will be displayed here. -->
             </div>
         </div>
         <div class="popup-container" id="edit-llms-container">
