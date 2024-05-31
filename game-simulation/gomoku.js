@@ -13,10 +13,24 @@ export class Gomoku {
     static promptVersion() {
         return "2024-05-29";
     }
+    static getMaxMoves() {
+        return 400;
+    }
+    static getMaxInvalidMoves() {
+        // Invalid Moves formula: (rows + columns)
+        return 30;
+    }
 
     static listPlayerMoves(player) {
         let movesList = [];
-        // Gomoku move retrieval logic here.
+        let playerStoneColor = (player === 1) ? 'black' : 'white';
+        for (let row = 1; row <= 15; row++) {
+            for (let col = 1; col <= 15; col++) {
+                if(document.getElementById("gomoku-" + row + "-" + col).innerHTML.indexOf(playerStoneColor) !== -1) {
+                    movesList.push(row + "," + col);
+                }
+            }
+        }
         return movesList;
     }
 
@@ -33,7 +47,20 @@ export class Gomoku {
     static drawBoard() {
         let gameStatus = "";
         gameStatus += " The current state of the game is displayed on a 15 by 15 grid. 'B' represents positions taken by the first player (using black stones) and 'W' represents positions taken by the second player (using white stones), while '.' indicates an available position. The current layout is as follows:\n";
-        // Gomoku board drawing logic here.
+        for (let row = 1; row <= 15; row++) {
+            for (let col = 1; col <= 15; col++) {
+                if(document.getElementById("gomoku-" + row + "-" + col).innerHTML.indexOf("black") !== -1) {
+                    gameStatus += "B";
+                }
+                else if (document.getElementById("gomoku-" + row + "-" + col).innerHTML.indexOf("white") !== -1) {
+                    gameStatus += "W";
+                }
+                else {
+                    gameStatus += ".";
+                }
+            }
+            gameStatus += "\n";
+        }
         return gameStatus;
     }
 
@@ -42,7 +69,7 @@ export class Gomoku {
             html2canvas(document.querySelector("#gomoku-board")).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
-                //saveAs(blob, "Tic Tac Toe Game Board.png");
+                //saveAs(blob, "Gomoku Game Board.png");
                 //});
 
                 // Return base64-encoded board screeenshot.
@@ -55,25 +82,157 @@ export class Gomoku {
         });
     }
 
-    static processMove() {
-        // Gomoku move processing logic here.
+    static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
+        let row;
+        let col;
+        let color = (currentPlayer === 1) ? "black" : "white";
+
+        if (jsonResponse.row !== undefined && typeof jsonResponse.row === "number") {
+            row = jsonResponse.row;
+            console.log("ROW: " + row);
+
+        } else {
+            throw new Error();
+        }
+
+        if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
+            col = jsonResponse.column;
+            console.log("COL: " + col);
+        } else {
+            throw new Error();
+        }
+
+        // Validate row and column
+        if (row >= 1 && row <= 15 && col >= 1 && col <= 15) {
+            console.log(document.getElementById("gomoku-" + row + "-" + col).innerHTML);
+            if (document.getElementById("gomoku-" + row + "-" + col).innerHTML === "") {
+                // Display move on board.
+                document.getElementById("gomoku-" + row + "-" + col).innerHTML = "<div class=\"" + color + "-stone\"></div>";
+
+                // Return successful move.
+                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at space (" + row + ", " + col + ").");
+                return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
+            }
+            else {
+                // Return unsuccessful move because AI attempted to play in a space that was already taken.
+                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
+                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
+            }
+        }
+        else {
+            // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
+            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
+            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
+        }
     }
 
     static visualizeBoardState() {
         let boardState = "";
-        // Gomoku board visualization logic here.
+        for (let row = 1; row <= 15; row++) {
+            for (let col = 1; col <= 15; col++) {
+                if(document.getElementById("gomoku-" + row + "-" + col).innerHTML.indexOf("black") !== -1) {
+                    boardState += "B";
+                }
+                else if (document.getElementById("gomoku-" + row + "-" + col).innerHTML.indexOf("white") !== -1) {
+                    boardState += "W";
+                }
+                else {
+                    boardState += ".";
+                }
+
+                if (col < 15) {
+                    boardState += "|";
+                }
+            }
+            boardState += "\n";
+        }
         return boardState += "\n";
     }
 
     static checkForWin() {
-        // Gomoku win checking logic here.
+        let rows = 15;
+        let cols = 15;
+        let field = [rows];
+        for (let i = 0; i < rows; i++) {
+            field[i] = [cols];
+        }
+
+        // Populate the field array with the colors of the stones placed on the board.
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                if(document.getElementById("gomoku-" + (row + 1) + "-" + (col + 1)).innerHTML.indexOf("black") !== -1) {
+                    field[row][col] = "B";
+                }
+                else if (document.getElementById("gomoku-" + (row + 1) + "-" + (col + 1)).innerHTML.indexOf("white") !== -1) {
+                    field[row][col] = "W";
+                }
+                else {
+                    field[row][col] = "";
+                }
+            }
+        }
+
+        // Check horizontal lines
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols - 4; j++) {
+                if (field[i][j] !== "" && field[i][j] === field[i][j + 1] && field[i][j] === field[i][j + 2] && field[i][j] === field[i][j + 3] && field[i][j] === field[i][j + 4]) {
+                    console.log("HORIZONTAL LINE WIN");
+                    return true; // Found a win
+                }
+            }
+        }
+
+        // Check vertical lines
+        for (let j = 0; j < cols; j++) {
+            for (let i = 0; i < rows - 4; i++) {
+                if (field[i][j] !== "" && field[i][j] === field[i + 1][j] && field[i][j] === field[i + 2][j] && field[i][j] === field[i + 3][j] && field[i][j] === field[i + 4][j]) {
+                    console.log("VERTICAL LINE WIN");
+
+                    return true; // Found a win
+                }
+            }
+        }
+
+        // Check diagonal (top-left to bottom-right)
+        for (let i = 0; i < rows - 4; i++) {
+            for (let j = 0; j < cols - 4; j++) {
+                if (field[i][j] !== "" && field[i][j] === field[i + 1][j + 1] && field[i][j] === field[i + 2][j + 2] && field[i][j] === field[i + 3][j + 3] && field[i][j] === field[i + 4][i + 4]) {
+                    console.log("TOP-LEFT TO BOTTOM-RIGHT DIAGONAL LINE WIN");
+                    return true; // Found a win
+                }
+            }
+        }
+
+        // Check diagonal (bottom-left to top-right)
+        for (let i = 4; i < rows; i++) {
+            for (let j = 0; j < cols - 4; j++) {
+                if (field[i][j] !== "" && field[i][j] === field[i - 1][j + 1] && field[i][j] === field[i - 2][j + 2] && field[i][j] === field[i - 3][j + 3] && field[i][j] === field[i - 4][j + 4]) {
+                    console.log("TOP-RIGHT TO BOTTOM-LEFT DIAGONAL LINE WIN");
+                    return true; // Found a win
+                }
+            }
+        }
+
+        return false; // No win found
     }
 
     static checkForFullBoard() {
-        // Gomoku full board checking logic here.
+        for (let row = 1; row <= 15; row++) {
+            for (let col = 1; col <= 15; col++) {
+                if (document.getElementById("gomoku-" + row + "-" + col).innerHTML !== "") {
+                    return false; // Board is not full
+                }
+            }
+        }
+
+        return true; // Board is full
     }
 
-    static async resetBoard() {
-        // Gomoku board resetting logic here.
+    static resetBoard() {
+        for (let row = 1; row <= 15; row++) {
+            for (let col = 1; col <= 15; col++) {
+                document.getElementById("gomoku-" + row + "-" + col).innerHTML = "";
+            }
+        }
     }
 }

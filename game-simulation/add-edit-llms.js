@@ -67,6 +67,7 @@ export function updateAddModelFields(event) {
     else if (event.target.value === "Google") {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
             "<option value=\"gemini-pro\">gemini-pro</option>" +
+            "<option value=\"gemini-1.5-pro\">gemini-1.5-pro</option>" +
             "<option value=\"gemini-pro-vision\">gemini-pro-vision</option>" +
             "</select>";
 
@@ -159,7 +160,15 @@ export function updateModelLists() {
 }
 
 export function getCurrentModel(currentPlayer) {
-    return (currentPlayer === 1) ? models[document.getElementById("first-player").selectedIndex] : models[document.getElementById("second-player").selectedIndex];
+    return (currentPlayer === 1) ? getModelWithName(document.getElementById("first-player").value) : getModelWithName(document.getElementById("second-player").value);
+}
+
+function getModelWithName(name) {
+    for (let model of models) {
+        if (model.getName() === name) {
+            return model;
+        }
+    }
 }
 
 export function updatePlayerDropdowns() {
@@ -201,5 +210,5 @@ export function checkForDuplicateModel(model) {
 
 // Return "true" if one of the LLMs selected has an empty API key.
 export function checkForEmptyApiKeys() {
-    return models[document.getElementById("first-player").selectedIndex].getApiKey() === "" || models[document.getElementById("second-player").selectedIndex].getApiKey() === "";
+    return getModelWithName(document.getElementById("first-player").value).getApiKey() === "" || getModelWithName(document.getElementById("second-player").value).getApiKey() === "";
 }
