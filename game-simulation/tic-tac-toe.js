@@ -13,6 +13,13 @@ export class TicTacToe {
     static promptVersion() {
         return "2024-05-29";
     }
+    static getMaxMoves() {
+        return 20;
+    }
+    static getMaxInvalidMoves() {
+        // Invalid Moves formula: (rows + columns)
+        return 6;
+    }
     
     static listPlayerMoves(player) {
         let movesList = [];
@@ -67,9 +74,22 @@ export class TicTacToe {
         });
     }
     
-    static processMove(currentMoveCount, currentPlayer, row, col, model, currentStatus, response) {
+    static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
+        let row;
+        let col;
         let symbol = (currentPlayer === 1) ? "X" : "O";
-        console.log("RESPONSE: " + response);
+
+        if (jsonResponse.row !== undefined && typeof jsonResponse.row === "number") {
+            row = jsonResponse.row;
+        } else {
+            throw new Error();
+        }
+
+        if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
+            col = jsonResponse.column;
+        } else {
+            throw new Error();
+        }
 
         // Validate row and column
         if (row >= 1 && row <= 3 && col >= 1 && col <= 3) {
@@ -87,18 +107,18 @@ export class TicTacToe {
 
                 // Return successful move.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, response);
+                return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
             }
             else {
                 // Return unsuccessful move because AI attempted to play in a space that was already taken.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, response);
+                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
             }
         }
         else {
             // Return unsuccessful move because AI attempted to play in a space that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, response);
+            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
         }
     }
 
@@ -192,7 +212,7 @@ export class TicTacToe {
         return true;
     }
     
-    static async resetBoard() {
+    static resetBoard() {
         for (let i = 0; i < 3; i++) {
             for(let j = 0; j < 3; j++) {
                 document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText = "";

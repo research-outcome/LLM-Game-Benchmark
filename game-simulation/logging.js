@@ -94,7 +94,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "Prompt Version: " + promptVersion + "\n" +
         "Player 1: " + sanitizedFirstPlayer + "\n" +
         "Player 2: " + sanitizedSecondPlayer + "\n" +
-        "Date and time (yyMMdd-HHmmss): " + timestamp + "\n" +
+        "Date and Time (yyMMdd-HHmmss): " + timestamp + "\n" +
         "Game Duration: " + gameDuration + "\n" +
         "Total Moves: " + currentMoveCount + "\n" +
         "Player 1 Invalid Format Moves: " + invalidMovesFirstPlayerInvalidFormat + "\n" +

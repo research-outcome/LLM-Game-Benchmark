@@ -186,7 +186,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             requestBody = JSON.stringify({
                 "prompt": prompt,
                 "modelId": modelName,
-                "secret": "LLM-GameOn",
+                "apiKey": model.getApiKey(),
                 "type": modelName.split('.')[0],
             })
         }
@@ -256,43 +256,23 @@ export async function processMove(gameType, initialContent, currentPlayer, model
     console.log("INITIAL CONTENT: " + initialContent);
     let jsonResponse = cleanResponse(initialContent);
 
-    if (gameType === "tic-tac-toe") {
-        let row;
-        let col;
-        let symbol = (currentPlayer === 1) ? "X" : "O";
-        try {
-            // NOTE: The code that validates a response could probably be moved into its own function.
-            if (jsonResponse === "Invalid Response") {
-                throw new Error();
-            }
-
-            if (jsonResponse.row !== undefined && typeof jsonResponse.row === "number") {
-                row = jsonResponse.row;
-            }
-            else {
-                throw new Error();
-            }
-
-            if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
-                col = jsonResponse.column;
-            }
-            else {
-                throw new Error();
-            }
-        }
-        catch (e) {
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ")'s given move had an invalid format.");
-            return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(jsonResponse));
+    try {
+        if (jsonResponse === "Invalid Response") {
+            throw new Error();
         }
 
-        // If the move had a valid format, process it using the methods defined in the TicTacToe class.
-        return TicTacToe.processMove(currentMoveCount, currentPlayer, row, col, model, currentStatus, JSON.stringify(jsonResponse));
+        if (gameType === "tic-tac-toe") {
+            // If the move had a valid format, process it using the methods defined in the TicTacToe class.
+            return TicTacToe.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
+        } else if (gameType === "connect-four") {
+            return ConnectFour.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
+        } else if (gameType === "gomoku") {
+            return Gomoku.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
+        }
     }
-    else if (gameType === "connect-four") {
-        // Connect Four move processing logic here
-    }
-    else if (gameType === "gomoku") {
-        // Gomoku move processing logic here
+    catch (e) {
+        console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
+        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(jsonResponse));
     }
 }
 

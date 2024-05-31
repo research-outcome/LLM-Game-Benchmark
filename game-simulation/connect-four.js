@@ -2,7 +2,7 @@ import { Move } from "./classes.js";
 
 export class ConnectFour {
     static explainGame() {
-        return "Connect-Four, a classic two-player game, is played on a 7 by 6 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game. ";
+        return "Connect-Four, a classic two-player game, is played on a 6 by 7 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game. ";
     }
     static formatNextMove() {
         return " Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response. "
@@ -12,6 +12,13 @@ export class ConnectFour {
     }
     static promptVersion() {
         return "2024-05-29";
+    }
+    static getMaxMoves() {
+        return 80;
+    }
+    static getMaxInvalidMoves() {
+        // Invalid Moves formula: (rows + columns)
+        return 13;
     }
 
     static listPlayerMoves(player) {
@@ -57,7 +64,7 @@ export class ConnectFour {
             html2canvas(document.querySelector("#connect-four-board")).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
-                //saveAs(blob, "Tic Tac Toe Game Board.png");
+                //saveAs(blob, "Connect Four Game Board.png");
                 //});
 
                 // Return base64-encoded board screeenshot.
@@ -70,32 +77,41 @@ export class ConnectFour {
         });
     }
 
-    static processMove(currentMoveCount, currentPlayer, col, model, currentStatus, response) {
+    static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
+        let col;
         let color = (currentPlayer === 1) ? "red" : "yellow";
-        console.log("RESPONSE: " + response);
-    
+        console.log("RESPONSE: " + JSON.stringify(jsonResponse));
+
+        if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
+            col = jsonResponse.column;
+        } else {
+            throw new Error();
+        }
+
         // Validate the column
         if (col >= 1 && col <= 7) {
             // Check from the bottom of the column up to find the first empty space
             for (let row = 6; row > 0; row--) {
+                console.log("connect-four-" + row + "-" + col)
+                console.log(document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style);
                 if (document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor === "white") {
                     // Update the background color to red or yellow.
                     document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor = color;
     
                     // Return successful move.
                     console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
-                    return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, response);
+                    return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
                 }
             }
     
             // Return unsuccessful move because the column is full
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Column Full", currentStatus, response);
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Column Full", currentStatus, JSON.stringify(jsonResponse));
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, response);
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
         }
     }
 

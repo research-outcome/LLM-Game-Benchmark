@@ -49,9 +49,11 @@ select, button {
     padding: 5px;
     border: 3px solid black;
 }
-.stats-table {
+#stats-table {
     width: 90%;
     display: table;
+    margin-left: auto;
+    margin-right: auto;
 }
 .stats-row {
     display: table-row;
@@ -105,9 +107,9 @@ select, button {
 #prompt-info {
     display: none;
 }
-#edit-llms {
-    width: 1250px;
-    height: 600px;
+#manage-llms {
+    width: 90%;
+    height: 75%;
 }
 #llm-name-container {
     display: inline;
@@ -125,10 +127,10 @@ select, button {
 }
 #llm-table {
     display: block;
-    width: 100%;
     height: 300px;
     margin-top: 10px;
     overflow: auto;
+    border: 3px solid black;
 }
 #llm-table-body {
     width: 100%;
@@ -175,22 +177,26 @@ select, button {
     width: fit-content;
     height: fit-content;
 }
-#start-btn, #stop-btn {
+.large-button {
     display: block;
-    width: 200px;
-    height: 50px;
+    width: 20%;
+    height: 10%;
     font-size: 30px;
     margin-top: 10px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 #start-btn {
     color: green;
+    margin-left: auto;
+    margin-right: auto;
 }
 #stop-btn {
     /* Stop button is hidden until play starts */
     display: none;
     color: red;
+    margin-left: auto;
+    margin-right: auto;
 }
 #gameplay-area {
     display: flex;
@@ -212,13 +218,15 @@ select, button {
     display: table;
     width: 400px;
     height: 400px;
-    background-color: black;
     margin-right: auto;
     margin-left: auto;
-    border-spacing: 3px;
+}
+#tic-tac-toe-board {
+    background-color: black;
 }
 #connect-four-board, #gomoku-board {
     display: none;
+    border-spacing: 3px;
 }
 .row {
     display: table-row;
@@ -229,10 +237,64 @@ select, button {
     vertical-align: middle;
 }
 #tic-tac-toe-board .cell {
-    width: 129px;
-    height: 129px;
+    width: 33%;
+    height: 33%;
     font-size: 80px;
-    background-color: lightgrey;
+    background-color: white;
+}
+#tic-tac-toe-1-1 {
+    border-left: 10px solid white;
+    border-top: 10px solid white;
+    border-right: 10px solid black;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-1-2 {
+    border-left: 10px solid black;
+    border-top: 10px solid white;
+    border-right: 10px solid black;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-1-3 {
+    border-left: 10px solid black;
+    border-top: 10px solid white;
+    border-right: 10px solid white;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-2-1 {
+    border-left: 10px solid white;
+    border-top: 10px solid black;
+    border-right: 10px solid black;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-2-2 {
+    border-left: 10px solid black;
+    border-top: 10px solid black;
+    border-right: 10px solid black;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-2-3 {
+    border-left: 10px solid black;
+    border-top: 10px solid black;
+    border-right: 10px solid white;
+    border-bottom: 10px solid black;
+}
+#tic-tac-toe-3-1 {
+    border-left: 10px solid white;
+    border-top: 10px solid black;
+    border-right: 10px solid black;
+    border-bottom: 10px solid white;
+}
+#tic-tac-toe-3-2 {
+    border-left: 10px solid black;
+    border-top: 10px solid black;
+    border-right: 10px solid black;
+    border-bottom: 10px solid white;
+}
+#tic-tac-toe-3-3 {
+    border-left: 10px solid black;
+    border-top: 10px solid black;
+    border-right: 10px solid white;
+    border-bottom: 10px solid white;
 }
 #connect-four-board {
     width: fit-content;
@@ -252,40 +314,51 @@ select, button {
     position: relative;
 }
 #gomoku-board {
-    background-color: #562509;
+    width: 400px;
+    background-color: transparent;
+    border-spacing: 0;
+    border-collapse: collapse;
+    transform: translate(12px, 12px);
 }
 #gomoku-board .cell {
-    width: 12px;
-    height: 12px;
+    width: 23px;
+    height: 23px;
     background-color: #e7ae75;
-    position: relative;
+    border: 3px solid #562509;
+}
+#gomoku-board .row:nth-child(15) .cell {
+    background-color: transparent;
+    border: 3px solid transparent;
+}
+#gomoku-board .cell:nth-child(15) {
+    background-color: transparent;
+    border: none;
 }
 .black-stone {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     background-color: black;
     border-radius: 50%;
     display: inline-block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: translate(-50%, -50%);
+    position: relative;
+    transform: translate(-85%,-85%);
+}
+.white-stone {
+    width: 15px;
+    height: 15px;
+    background-color: white;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    transform: translate(-85%,-85%);
 }
 #confirm-removal-button-container {
     text-align: center;
     margin-top: 10px;
     padding: 5px;
 }
-.large-button {
-    width: 250px;
-    height: 50px;
-    font-size: 30px;
-    margin-top: 10px;
-    margin-left: 10px;
-}
 
-/*Syling for prompt list pop up*/
-
+/*Styling for prompt list pop up*/
 .modal {
     display: none;
     position: fixed;
@@ -339,16 +412,14 @@ select, button {
     padding: 12px 8px;  /* Vertical and horizontal padding */
 }
 
-
 th {
     background-color: #f2f2f2;
 }
 
 /* Styling for prompt list, LLM list, and game details buttons */
-.promptList-btn, .LLMList-btn, .gameDetails-btn {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
+#button-container {
+    display: flex;
+    justify-content: center;
 }
 
 /* Adjust width for game type column */

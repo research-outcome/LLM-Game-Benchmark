@@ -1,5 +1,5 @@
 import {uuidv7} from "./uuidv7.js";
-import {Model} from "./classes.js";
+import {Model, Move} from "./classes.js";
 import {TicTacToe} from "./tic-tac-toe.js";
 import {ConnectFour} from "./connect-four.js";
 import {Gomoku} from "./gomoku.js";
@@ -16,8 +16,6 @@ let OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 let GOOGLE_API_KEY = "AIzaSyC-xij8Mk7bdlh0HDQUbNaSseqkqY4nTBE";
 let BEDROCK_SECRET = "LLM-GameOn";
 let BEDROCK_URL = "https://v5fb43ch74.execute-api.us-east-1.amazonaws.com/devpost/bedrockllms";
-
-let MAX_ALLOWED_MOVES = 20;
 
 let gameStopped = false;
 let resetStats = true;
@@ -50,18 +48,18 @@ document.getElementById("second-player").addEventListener("change", (event) => {
     resetProgressDisplays();
 });
 
-document.getElementById("edit-llms-btn").addEventListener("click", () => {
-    document.getElementById("edit-llms-container").style.display = "inline-block";
-    document.getElementById("edit-llms").style.display = "inline-block";
+document.getElementById("manage-llms-btn").addEventListener("click", () => {
+    document.getElementById("manage-llms-container").style.display = "inline-block";
+    document.getElementById("manage-llms").style.display = "inline-block";
 });
 
 document.getElementById("llm-type").addEventListener("change", (event) => {
     updateAddModelFields(event);
 });
 
-document.getElementById("edit-llms-close-btn").addEventListener("click", () => {
-    document.getElementById("edit-llms-container").style.display = "none";
-    document.getElementById("edit-llms").style.display = "none";
+document.getElementById("manage-llms-close-btn").addEventListener("click", () => {
+    document.getElementById("manage-llms-container").style.display = "none";
+    document.getElementById("manage-llms").style.display = "none";
 });
 
 document.getElementById("reset-btn").addEventListener("click", () => {
@@ -174,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.appendChild(promptTypeCell);
 
             const promptExampleCell = document.createElement("td");
-            promptExampleCell.textContent = item["Prompt Example"];
+            promptExampleCell.innerHTML = item["Prompt Example"];
             row.appendChild(promptExampleCell);
 
             tableBody.appendChild(row);
@@ -320,7 +318,7 @@ async function playGame() {
     else if (gameType === "connect-four") {
         promptVersion = ConnectFour.promptVersion();
     }
-    else if (gameType === "gomokou") {
+    else if (gameType === "gomoku") {
         promptVersion = Gomoku.promptVersion();
     }
 
@@ -490,7 +488,7 @@ async function playGame() {
             currentMoveCount++;
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
-            if (currentMoveCount >= MAX_ALLOWED_MOVES) {
+            if (currentMoveCount >= getMaxMoves(gameType)) {
                 gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
@@ -527,7 +525,7 @@ function disableInputs(disableFlag) {
     document.getElementById("first-player").disabled = disableFlag;
     document.getElementById("second-player").disabled = disableFlag;
     document.getElementById("prompt-type").disabled = disableFlag;
-    document.getElementById("edit-llms-btn").disabled = disableFlag;
+    document.getElementById("manage-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
 }
 
@@ -607,6 +605,18 @@ function resetBoard(gameType) {
     }
 }
 
+function getMaxMoves(gameType) {
+    if (gameType === "tic-tac-toe") {
+        return TicTacToe.getMaxMoves();
+    }
+    else if (gameType === "connect-four") {
+        ConnectFour.getMaxMoves();
+    }
+    else if (gameType === "gomoku") {
+        Gomoku.getMaxMoves();
+    }
+}
+
 // Return a visualized board state to be appended to the game log, which is used in .txt log files.
 function visualizeBoardState(gameType) {
     if (gameType === "tic-tac-toe") {
@@ -622,6 +632,7 @@ function visualizeBoardState(gameType) {
 function showBoardWithId(boardId) {
     // Hide all boards.
     for (let boardDiv of document.getElementById("board-container").children) {
+        console.log(boardDiv);
         document.getElementById(boardDiv.id).style.display = "none";
     }
 
@@ -636,22 +647,19 @@ function resetProgressDisplays() {
 
 document.addEventListener("DOMContentLoaded", async function() {
     // Add initial models to model list.
+    // gpt-3.5-turbo for TESTING ONLY, remove later.
     addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
     addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
     addModel(new Model("Google", "gemini-pro", "", GOOGLE_API_KEY, true, false));
+    addModel(new Model("Google", "gemini-1.5-pro", "", GOOGLE_API_KEY, true, false));
     addModel(new Model("Google", "gemini-pro-vision", "", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama2-13b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "meta.llama2-70b-chat-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-v2", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-v2:1", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "ai21.j2-ultra-v1", BEDROCK_URL, BEDROCK_SECRET, true, false));
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;
