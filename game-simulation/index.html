@@ -48,7 +48,7 @@
                         <!-- Pre-implemented models and models added by the user will appear here. -->
                     </select>
                 </div>
-                <div class="option">
+                <div class="option" id="game-count-container">
                     <label for="game-count">Number of Games: </label>
                     <input type="text" id="game-count" name="game-count" value=3>
                 </div>
@@ -452,6 +452,8 @@
             <button class="large-button" id="promptListButton">View Prompt List</button>
             <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="gameDetailsButton">Game Details</button>
+            <button class="large-button" id="FAQsButton">FAQs</button>
+            <button class="large-button" id="userGuideButton">User Guide</button>
         </div>
 
         <!-- Manage LLMs menu allows users to add, modify, and remove LLM models. -->
@@ -466,6 +468,7 @@
                     <li>To add a new LLM to the lists, make your selection and then click 'Add'.</li>
                     <li>To change an LLM's URL or API Key, edit it in the corresponding textbox.</li>
                     <li>To remove an LLM, use the <button id="dummy-remove-llm-btn" style="display: inline">X</button>button.</li>
+                    <li><em>Some models, such as gemini-pro-vision, do not support text-only prompts. The "Supports Text?" field refers to supporting text-only prompts.</em></li>
                 </ul>
                 <div id="add-llm-options">
                     <label for="llm-type">Type: </label>
@@ -490,6 +493,11 @@
                     <input type="text" id="llm-url">
                     <label for="llm-api-key" id="llm-api-key-label">API Key: </label>
                     <input type="text" id="llm-api-key">
+                    <label id="llm-supports-text-label" for="llm-supports-text">Supports Text: </label>
+                    <select id="llm-supports-text">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
                     <label id="llm-supports-images-label" for="llm-supports-images">Supports Images: </label>
                     <select id="llm-supports-images">
                         <option value="false">No</option>
@@ -505,8 +513,9 @@
                             <div class="llm-table-cell">Name</div>
                             <div class="llm-table-cell">URL</div>
                             <div class="llm-table-cell">API Key</div>
+                            <div class="llm-table-cell">Supports Text?</div>
                             <div class="llm-table-cell">Supports Images?</div>
-                            <div class="llm-table-cell"></div>
+                            <div class="llm-table-cell"><!-- Placeholder column for 'X' buttons --></div>
                         </div>
                         <!-- Models in the model list will be added here. -->
                     </div>
@@ -524,7 +533,7 @@
             </div>
         </div>
 
-        <!-- Modal structure for prompt list popup -->
+        <!-- Modal structure for Prompt List popup -->
         <div class="modal" id="promptListPopup">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -545,47 +554,48 @@
             </div>
         </div>
 
-         <!-- LLM list button -->
-         <!-- Modal structure for LLm list popup -->
-         <div id="LLMListPopup" class="modal">
-             <div class="modal-content">
-                 <span class="close">&times;</span>
-                 <div class="table-container">
-                     <table id="LLMTable">
-                         <thead>
-                             <tr>
-                                 <th>Company</th>
-                                 <th>LLM Model</th>
-                                 <th>More Info</th>
+        <!-- Modal structure for LLM List popup -->
+        <div id="LLMListPopup" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="LLMTable">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>LLM Model</th>
+                                <th>More Info</th>
                              </tr>
                          </thead>
-                         <tbody>
-                         <!-- Rows will be dynamically added here -->
-                     </tbody>
-                     </table>
-                 </div>
-             </div>
-         </div>
-                 <!-- LLM list button -->
-                 <!-- Modal structure for LLm list popup -->
-                 <div id="gameDetailsPopup" class="modal">
-                     <div class="modal-content">
-                         <span class="close">&times;</span>
-                         <div class="table-container">
-                             <table id="gameDetailsTable">
-                                 <thead>
-                                     <tr>
-                                        <th class = "game-type-column">Game Type</th>
-                                         <th>Details</th>
-                                     </tr>
-                                 </thead>
-                                 <tbody>
-                                 <!-- Rows will be dynamically added here -->
-                             </tbody>
-                             </table>
-                         </div>
-                     </div>
-                 </div>
+                        <tbody>
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal structure for Game Details popup -->
+        <div id="gameDetailsPopup" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="gameDetailsTable">
+                        <thead>
+                            <tr>
+                                <th class = "game-type-column">Game Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript scripts -->
         <script type="module" src="game-simulation.js"></script>
         <script type="text/javascript" src="jszip.js"></script>
         <script type="text/javascript" src="file-saver.js"></script>

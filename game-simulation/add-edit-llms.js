@@ -1,3 +1,5 @@
+import {Model} from "./classes.js";
+
 let models = [];
 
 function updateUrl(urlInputId) {
@@ -15,7 +17,74 @@ function updateApiKey(apiKeyInputId) {
 }
 
 // Add a model to the list of models available for gameplay and update the LLM dropdowns accordingly.
-export function addModel(model) {
+export function addModel(testModel) {
+    // FOR TESTING ONLY. THIS ALLOWS US TO PREDEFINE MODELS AND SHOULD BE REMOVED FOR RELEASE.
+    if (testModel) {
+        models.push(testModel);
+        updateModelLists();
+        return;
+    }
+
+    let modelType = document.getElementById("llm-type").value;
+    let modelName = document.getElementById("llm-name").value;
+    let modelApiKey = document.getElementById("llm-api-key").value;
+
+    let modelUrl;
+    // Google models do not require a URL field.
+    if (modelType === "Google") {
+        modelUrl = "URL is not needed since it is handled by the library.";
+    }
+    else {
+        modelUrl = document.getElementById("llm-url").value
+    }
+
+    // This should be updated to support additional models.
+    let supportsTextInput;
+    // If model is a predefined model, check if model supports images. If model is a user-defined model ("Other" type), get the value of the "supports text" input field.
+    if (modelType !== "Other") {
+        supportsTextInput = modelSupportsText(modelName);
+    } else {
+        supportsTextInput = document.getElementById("llm-supports-text").value;
+    }
+
+    let supportsImageInput;
+    // If model is a predefined model, check if model supports images. If model is a user-defined model ("Other" type), get the value of the "supports images" input field.
+    if (modelType !== "Other") {
+        supportsImageInput = modelSupportsImages(modelName);
+    } else {
+        supportsImageInput = document.getElementById("llm-supports-images").value;
+    }
+
+    let model = new Model(
+        modelType,
+        modelName,
+        modelUrl,
+        modelApiKey,
+        supportsTextInput,
+        supportsImageInput
+    );
+
+    // If this model already exists in the model list, do not add it; alert the user.
+    if (checkForDuplicateModel(model)) {
+        alert("Model already exists.");
+        return;
+    }
+    // If the model's name was left empty, do not add it; alert the user.
+    if (modelName === "") {
+        alert("Model name is empty.");
+        return;
+    }
+    // If the model's URL was left empty (and it is not a Google model which does not require a URL) do not add it; alert the user.
+    if (modelUrl === "" && modelType !== "Google") {
+        alert("Model URL is empty.");
+        return;
+    }
+    // If the model's API key was left empty, do not add it; alert the user.
+    if (modelApiKey === "") {
+        alert("Model API key is empty.");
+        return;
+    }
+
     models.push(model);
     updateModelLists();
 }
@@ -40,10 +109,17 @@ function removeModel(index) {
     updateModelLists();
 }
 
+// If the current model name supports text, return true.
+function modelSupportsText(modelName) {
+    // "gemini-pro-vision" is the only predefined model that does NOT support text input without an image component.
+    return modelName !== "gemini-pro-vision";
+}
+
 // If the current model name supports images, return true.
-export function modelSupportsImages(modelName) {
+function modelSupportsImages(modelName) {
     return modelName === "gpt-4-turbo" ||
         modelName === "gpt-4o" ||
+        modelName === "gemini-1.5-pro" ||
         modelName === "gemini-pro-vision" ||
         modelName === "anthropic.claude-3-sonnet-20240229-v1:0" ||
         modelName === "anthropic.claude-3-haiku-20240307-v1:0";
@@ -61,8 +137,10 @@ export function updateAddModelFields(event) {
 
         document.getElementById("llm-url-label").style.display = "none";
         document.getElementById("llm-url").style.display = "none";
-        document.getElementById("llm-supports-images").style.display = "none";
+        document.getElementById("llm-supports-text-label").style.display = "none";
+        document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
+        document.getElementById("llm-supports-images").style.display = "none";
     }
     else if (event.target.value === "Google") {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
@@ -73,13 +151,13 @@ export function updateAddModelFields(event) {
 
         document.getElementById("llm-url-label").style.display = "none";
         document.getElementById("llm-url").style.display = "none";
-        document.getElementById("llm-supports-images").style.display = "none";
+        document.getElementById("llm-supports-text-label").style.display = "none";
+        document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
+        document.getElementById("llm-supports-images").style.display = "none";
     }
     else if (event.target.value === "AWS Bedrock") {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
-            "<option value=\"meta.llama2-13b-chat-v1\">meta.llama2-13b-chat-v1</option>" +
-            "<option value=\"meta.llama2-70b-chat-v1\">meta.llama2-70b-chat-v1</option>" +
             "<option value=\"meta.llama3-70b-instruct-v1:0\">meta.llama3-70b-instruct-v1:0</option>" +
             "<option value=\"meta.llama3-8b-instruct-v1:0\">meta.llama3-8b-instruct-v1:0</option>" +
             "<option value=\"anthropic.claude-v2\">anthropic.claude-v2</option>" +
@@ -87,21 +165,24 @@ export function updateAddModelFields(event) {
             "<option value=\"anthropic.claude-3-sonnet-20240229-v1:0\">anthropic.claude-3-sonnet-20240229-v1:0</option>" +
             "<option value=\"anthropic.claude-3-haiku-20240307-v1:0\">anthropic.claude-3-haiku-20240307-v1:0</option>" +
             "<option value=\"mistral.mistral-large-2402-v1:0\">mistral.mistral-large-2402-v1:0</option>" +
-            "<option value=\"ai21.j2-ultra-v1\">ai21.j2-ultra-v1</option>" +
             "</select>";
 
         document.getElementById("llm-url-label").style.display = "inline";
         document.getElementById("llm-url").style.display = "inline";
-        document.getElementById("llm-supports-images").style.display = "none";
+        document.getElementById("llm-supports-text-label").style.display = "none";
+        document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
+        document.getElementById("llm-supports-images").style.display = "none";
 
     }
     else if (event.target.value === "Other") {
         document.getElementById("llm-name-container").innerHTML = "<input type=\"text\" id=\"llm-name\" name=\"llm-name\">";
         document.getElementById("llm-url-label").style.display = "inline";
         document.getElementById("llm-url").style.display = "inline";
-        document.getElementById("llm-supports-images").style.display = "inline";
+        document.getElementById("llm-supports-text-label").style.display = "inline";
+        document.getElementById("llm-supports-text").style.display = "inline";
         document.getElementById("llm-supports-images-label").style.display = "inline";
+        document.getElementById("llm-supports-images").style.display = "inline";
     }
 }
 
@@ -113,8 +194,9 @@ export function updateModelLists() {
         "<div class=\"llm-table-cell\">Name</div>" +
         "<div class=\"llm-table-cell\">URL</div>" +
         "<div class=\"llm-table-cell\">API Key</div>" +
+        "<div class=\"llm-table-cell\">Supports Text?</div>" +
         "<div class=\"llm-table-cell\">Supports Images?</div>" +
-        "<div class=\"llm-table-cell\"></div>" +
+        "<div class=\"llm-table-cell\"><!-- Placeholder column for 'X' buttons --></div>" +
         "</div>";
 
     // Append a table row with every LLM in the model list, and update dropdowns.
@@ -127,6 +209,7 @@ export function updateModelLists() {
             "<div class=\"llm-table-cell\">" + model.getName() + "</div>" +
             "<div class=\"llm-table-cell\"><input class=\"llm-url\" type=\"text\" value=\"" + model.getUrl() + "\" id=\"llm-url-" + index + "\"></div>" +
             "<div class=\"llm-table-cell\"><input class=\"llm-api-key\" type=\"text\" value=\"" + model.getApiKey() + "\" id=\"llm-api-key-" + index + "\"></div>" +
+            "<div class=\"llm-table-cell\">" + model.getSupportsTextInput() + "</div>" +
             "<div class=\"llm-table-cell\">" + model.getSupportsImageInput() + "</div>" +
             "<button class=\"remove-llm-btn\" id=\"remove-llm-btn-" + index + "\">X</button>" +
             "</div>";
@@ -199,7 +282,7 @@ export function updatePlayerDropdowns() {
 }
 
 // Check if a model with the given type and name already exists in the model list.
-export function checkForDuplicateModel(model) {
+function checkForDuplicateModel(model) {
     for (let existingModel of models) {
         if (model.getType() === existingModel.getType() && model.getName() === existingModel.getName()) {
             return true;

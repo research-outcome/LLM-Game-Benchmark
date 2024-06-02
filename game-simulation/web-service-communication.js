@@ -241,7 +241,6 @@ export function cleanResponse(content) {
             content = content.substring(0, content.lastIndexOf("}") + 1);
         }
     }
-    console.log("Final content before parsing: " + content);
     try {
         return JSON.parse(content);
     }
@@ -253,7 +252,6 @@ export function cleanResponse(content) {
 
 // Determine if the LLM's move was valid. Return a "Move" object which contains the model name and move outcome ("Y" for valid moves, explanations for invalid moves)
 export async function processMove(gameType, initialContent, currentPlayer, model, currentMoveCount) {
-    console.log("INITIAL CONTENT: " + initialContent);
     let jsonResponse = cleanResponse(initialContent);
 
     try {
