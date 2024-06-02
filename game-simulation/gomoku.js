@@ -72,7 +72,7 @@ export class Gomoku {
                 //saveAs(blob, "Gomoku Game Board.png");
                 //});
 
-                // Return base64-encoded board screeenshot.
+                // Return base64-encoded board screenshot.
                 return canvas.toDataURL("image/png;base64");
             }).then(data => {
                 resolve(data);
@@ -89,7 +89,6 @@ export class Gomoku {
 
         if (jsonResponse.row !== undefined && typeof jsonResponse.row === "number") {
             row = jsonResponse.row;
-            console.log("ROW: " + row);
 
         } else {
             throw new Error();
@@ -97,14 +96,12 @@ export class Gomoku {
 
         if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
             col = jsonResponse.column;
-            console.log("COL: " + col);
         } else {
             throw new Error();
         }
 
         // Validate row and column
         if (row >= 1 && row <= 15 && col >= 1 && col <= 15) {
-            console.log(document.getElementById("gomoku-" + row + "-" + col).innerHTML);
             if (document.getElementById("gomoku-" + row + "-" + col).innerHTML === "") {
                 // Display move on board.
                 document.getElementById("gomoku-" + row + "-" + col).innerHTML = "<div class=\"" + color + "-stone\"></div>";
@@ -121,7 +118,7 @@ export class Gomoku {
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
+            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is out of bounds");
             return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
         }
     }
@@ -146,15 +143,15 @@ export class Gomoku {
             }
             boardState += "\n";
         }
-        return boardState += "\n";
+        return boardState + "\n";
     }
 
     static checkForWin() {
         let rows = 15;
         let cols = 15;
-        let field = [rows];
+        let field = new Array(rows);
         for (let i = 0; i < rows; i++) {
-            field[i] = [cols];
+            field[i] = new Array(cols);
         }
 
         // Populate the field array with the colors of the stones placed on the board.
@@ -170,6 +167,14 @@ export class Gomoku {
                     field[row][col] = "";
                 }
             }
+        }
+
+        for (let i = 0; i < rows; i++) {
+            let concatenatedString = "";
+            for (let j = 0; j < cols; j++) {
+                concatenatedString += " " + field[i][j];
+            }
+            console.log(concatenatedString);
         }
 
         // Check horizontal lines

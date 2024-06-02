@@ -1,12 +1,12 @@
 // 'Move' class which contains the LLM name and move outcome ("Y" for valid moves, or explanations of invalid move types)
 export class Move {
-    #number;
-    #player;
+    #number; // Move number in current game.
+    #player; // Number of player who made the move.
     #row;
     #col;
-    #outcome;
-    #currentStatus;
-    #response;
+    #outcome; // Result of the game.
+    #currentStatus; // Current game status prompt provided to the LLM.
+    #response; // Response from the LLM.
 
     constructor(number, player, row, col, outcome, currentStatus, response) {
         this.#number = number;
@@ -18,6 +18,8 @@ export class Move {
         this.#response = response;
     }
 
+    // Getter methods which return values. These are needed because the value are private and thus cannot be directly
+    // accessed.
     getNumber() {
         return this.#number;
     }
@@ -43,12 +45,12 @@ export class Move {
 
 // 'Model' class which contains the model's type (company), name, API key, URL, and whether it supports images.
 export class Model {
-    #type;
-    #name;
-    #url;
-    #apiKey;
-    #supportsTextInput;
-    #supportsImageInput;
+    #type; // Model type, such as "OpenAI", "Google", or "AWS Bedrock".
+    #name; // Name of the model, such as "gpt-4-turbo".
+    #url; // URL for the model. NOTE: Google models do not require a URL.
+    #apiKey; // API Key for the model.
+    #supportsTextInput; // Flag indicating whether the model supports text-based input (prompts).
+    #supportsImageInput; // Flag indicating whether the model supports text-based input (prompts).
 
     constructor(type, name, url, apiKey, supportsTextInput, supportsImageInput) {
         this.#type = type;
@@ -78,6 +80,7 @@ export class Model {
         return this.#supportsImageInput;
     }
 
+    // Setter methods which set values which can not be set directly.
     setUrl(url) {
         this.#url = url;
     }

@@ -64,7 +64,7 @@ export class TicTacToe {
                 //saveAs(blob, "Tic Tac Toe Game Board.png");
                 //});
 
-                // Return base64-encoded board screeenshot.
+                // Return base64-encoded board screenshot.
                 return canvas.toDataURL("image/png;base64");
             }).then(data => {
                 resolve(data);
@@ -138,9 +138,9 @@ export class TicTacToe {
     }
 
     static checkForWin() {
-        let field = [3];
+        let field = new Array(3);
         for (let i = 0; i < 3; i++) {
-            field[i] = [];
+            field[i] = new Array(3);
         }
 
         for (let i = 0; i < 3; i++) {

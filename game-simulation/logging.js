@@ -89,7 +89,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
     // Generate the text file content.
     let textFileContent = "UUID: " + uuid + "\n" +
         "Game Type: " + gameType + "\n" +
-        "Game #: " + (currentGameCount + 1) + "\n" +
+        "Game #: " + currentGameCount + "\n" +
         "Prompt Type: " + promptType + "\n" +
         "Prompt Version: " + promptVersion + "\n" +
         "Player 1: " + sanitizedFirstPlayer + "\n" +

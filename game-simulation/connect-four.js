@@ -80,7 +80,7 @@ export class ConnectFour {
                 //saveAs(blob, "Connect Four Game Board.png");
                 //});
 
-                // Return base64-encoded board screeenshot.
+                // Return base64-encoded board screenshot.
                 return canvas.toDataURL("image/png;base64");
             }).then(data => {
                 resolve(data);
