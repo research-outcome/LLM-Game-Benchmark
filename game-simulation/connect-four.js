@@ -21,6 +21,8 @@ export class ConnectFour {
         return 13;
     }
 
+    static boardInitialized = false;
+
     static listPlayerMoves(player) {
         let movesList = [];
         let playerColor = (player === 1) ? 'red' : 'yellow'; 
@@ -52,7 +54,18 @@ export class ConnectFour {
         gameStatus += " The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 7; j++) {
-                gameStatus += (document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).innerText;
+                let cellColor = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space').style.backgroundColor;
+                switch (cellColor) {
+                    case "red":
+                        gameStatus += "R";
+                        break;
+                    case "yellow":
+                        gameStatus += "Y";
+                        break;
+                    default:
+                        gameStatus += ".";
+                        break;
+                }
             }
             gameStatus += "\n";
         }
@@ -82,6 +95,18 @@ export class ConnectFour {
         let color = (currentPlayer === 1) ? "red" : "yellow";
         console.log("RESPONSE: " + JSON.stringify(jsonResponse));
 
+
+        // Initialize the board if not already done
+        if (!ConnectFour.boardInitialized) {
+            for (let i = 0; i < 6; i++) {
+                for (let j = 0; j < 7; j++) {
+                    //document.getElementById(`connect-four-${i}-${j}`).querySelector('.connect-four-space').style.backgroundColor = "white";
+                    document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space').style.backgroundColor = "white";
+                }
+            }
+            ConnectFour.boardInitialized = true; // Set the flag to true after initialization
+        }
+
         if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
             col = jsonResponse.column;
         } else {
@@ -92,8 +117,8 @@ export class ConnectFour {
         if (col >= 1 && col <= 7) {
             // Check from the bottom of the column up to find the first empty space
             for (let row = 6; row > 0; row--) {
-                console.log("connect-four-" + row + "-" + col)
-                console.log(document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style);
+                //console.log("connect-four-" + row + "-" + col)
+                //console.log(document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style);
                 if (document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor === "white") {
                     // Update the background color to red or yellow.
                     document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor = color;
