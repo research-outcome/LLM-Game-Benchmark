@@ -1,10 +1,11 @@
 $(document).ready(function() {
-    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/Leaderboard.json';
+    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/newLeaderboard.json';
 
     $.getJSON(jsonURL, function(data) {
         const formattedData = data.map(item => [
             item.GameType,
-            item.Prompt,
+            item.PromptType,
+            item.PromptVersion,
             item.LLM1stPlayer,
             item.LLM2ndPlayer,
             item["WinRatio-1st"],
@@ -27,7 +28,8 @@ $(document).ready(function() {
             data: formattedData,
             columns: [
                 { title: "Game Type"},
-                { title: "Prompt" },
+                { title: "Prompt Type" },
+                { title: "Prompt Version" },
                 { title: "LLM (1st)" },
                 { title: "LLM (2nd)" },
                 { title: "Win Ratio (1st)" },
@@ -50,7 +52,7 @@ $(document).ready(function() {
             columnDefs: [
                 { targets: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16], className: 'dt-body-right' },
                 { targets: [0, 1, 2, 3, 15], className: 'dt-body-center' },
-                {targets: [17], visible: false}
+                { targets: [18], visible: false}
             ]
         });
 
@@ -96,9 +98,10 @@ $(document).ready(function() {
         }
 
         populateDropdown(0, '#gametypeList');
-        populateDropdown(1, '#promptList');
-        populateDropdown(2, '#llm1stList');
-        populateDropdown(3, '#llm2ndList');
+        populateDropdown(1, '#prompttypeList');
+        populateDropdown(2, '#promptversionList');
+        populateDropdown(3, '#llm1stList');
+        populateDropdown(4, '#llm2ndList');
 
         // Function to close all dropdowns
         function closeAllDropdowns() {
