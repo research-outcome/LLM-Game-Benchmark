@@ -406,12 +406,12 @@ select, button, input {
     box-sizing: border-box;
 }
 
-#promptTable, #LLMTable, #gameDetailsTable {
+#promptTable, #LLMTable, #gameDetailsTable, #faqTable {
     width: 100%;
     border: 1px solid #ddd;
 }
 
-#promptTable tbody td, #LLMTable tbody td, #gameDetailsTable tbody td {
+#promptTable tbody td, #LLMTable tbody td, #gameDetailsTable tbody td, #faqTable tbody td  {
     padding: 12px 8px;  /* Vertical and horizontal padding */
 }
 
