@@ -89,7 +89,7 @@ export class Model {
     }
 }
 
-// 'GameLogFiles' class which contains a text file, JSON file, and CSV file with game information.
+// 'GameLogFiles' class which contains a text file, JSON file, a CSV file with game information, and another CSV file with move information.
 export class GameLogFiles {
     #textFileName;
     #textFileContent;
@@ -97,14 +97,18 @@ export class GameLogFiles {
     #jsonFileContent;
     #csvFileName;
     #csvFileContent;
+    #movesCsvFileName;
+    #movesCsvFileContent;
 
-    constructor(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent) {
+    constructor(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent, movesCsvFileName, movesCsvFileContent) {
         this.#textFileName = textFileName;
         this.#textFileContent = textFileContent;
         this.#jsonFileName = jsonFileName;
         this.#jsonFileContent = jsonFileContent;
         this.#csvFileName = csvFileName;
         this.#csvFileContent = csvFileContent;
+        this.#movesCsvFileName = movesCsvFileName;
+        this.#movesCsvFileContent = movesCsvFileContent;
     }
 
     getTextFileName() {
@@ -124,5 +128,11 @@ export class GameLogFiles {
     }
     getCsvFileContent() {
         return this.#csvFileContent;
+    }
+    getMovesCsvFileName() {
+        return this.#movesCsvFileName;
+    }
+    getMovesCsvFileContent() {
+        return this.#movesCsvFileContent;
     }
 }

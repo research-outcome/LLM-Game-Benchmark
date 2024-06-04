@@ -8,7 +8,7 @@ export class ConnectFour {
         return "Suggest your next move in the following JSON format: {'column': ColumnNumber}. Do not include any additional commentary in your response. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. \n";
     }
     static systemPrompt() {
-        return "";
+        return this.formatNextMove();
     }
     static invalidMoveWarning() {
         return "Please note that your move will be considered invalid if your response does not follow the specified format, if you provide a ColumnNumber that is out of the allowed range, or if the column is already full (i.e., all rows in the column are occupied). Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n";
@@ -140,7 +140,7 @@ export class ConnectFour {
     
             // Return unsuccessful move because the column is full
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Column Full", currentStatus, JSON.stringify(jsonResponse));
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
