@@ -4,7 +4,7 @@ import { TicTacToe } from "./tic-tac-toe.js";
 import { ConnectFour } from "./connect-four.js";
 import { Gomoku } from "./gomoku.js";
 import { getMove, processMove } from "./web-service-communication.js";
-import { generateGameLogFiles, generateSubmissionFiles, downloadZipFile } from "./logging.js";
+import { generateGameLogFiles, generateSubmissionFiles, downloadZipFile, downloadBulkZipFile } from "./logging.js";
 import { updateAddModelFields, updatePlayerDropdowns, addModel, checkForEmptyApiKeys, getCurrentModel } from "./add-edit-llms.js";
 import { fetchJSON, populatePromptTable, populateLLMTable, populateGameDetailsTable, populateFAQTable } from "./info.js";
 
@@ -27,11 +27,9 @@ const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM
 const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FAQs.json';
 
 // Gameplay flags
+let bulkEnabled = false;
 let gameStopped = false;
 let resetStats = true;
-
-// Array of CSV files
-let csvFiles = [];
 
 // Main gameplay loop
 async function playGame() {
@@ -150,7 +148,6 @@ async function playGame() {
             }
 
             // Get move object, which includes LLM and outcome ('Y' for valid move, or a description of how the move was invalid).
-            let promptVersion = "";
             let move = await processMove(gameType, initialContent, currentPlayer, model, currentMoveCount);
             moves.push(move);
 
@@ -220,13 +217,13 @@ async function playGame() {
                 }
 
                 // If a player's invalid move count is above the threshold, disqualify the player.
-                if (firstPlayerCurrentInvalidMoves >= game.getMaxInvalidMoves()) {
+                if (firstPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified1st";
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
-                else if (secondPlayerCurrentInvalidMoves >= game.getMaxInvalidMoves()) {
+                else if (secondPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified2nd";
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
@@ -266,26 +263,33 @@ async function playGame() {
         updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount, gameType, promptType, currentGameCount, currentMoveCount, gameLog);
     }
 
-    // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
-    // Only generate a ZIP file if gameLogFiles is not empty, or in other words, at least one game has been played.
-    if (gameLogFiles.length > 0) {
-        let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
-        downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
-    }
-
     disableInputs(false);
     document.getElementById("run-btn").style.display = "inline-block";  // Show run button
     document.getElementById("bulk-run-btn").style.display = "inline-block";  // Show bulk run button
     document.getElementById("stop-btn").style.display = "none";  // Hide stop button
+
+    // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
+    // Only generate a ZIP file if gameLogFiles is not empty, or in other words, at least one game has been played.
+    if (gameLogFiles.length > 0) {
+        let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
+        if (bulkEnabled) {
+            return [submissionFiles, gameLogFiles];
+        }
+        else {
+            downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
+        }
+    }
 }
 
 // Run games with all combinations of LLMs in the player dropdowns.
 async function bulkRun() {
+    bulkEnabled = true;
+    let allGameLogs = [] // Each index here contains [submissionFiles, gameLogFiles] for a given game.
     for(let firstModelIndex = 0; firstModelIndex < document.getElementById("first-player").length; firstModelIndex++) {
         document.getElementById("first-player").selectedIndex = firstModelIndex;
         for(let secondModelIndex = 0; secondModelIndex < document.getElementById("second-player").length; secondModelIndex++) {
             document.getElementById("second-player").selectedIndex = secondModelIndex;
-            await playGame();
+            allGameLogs.push(await playGame());
             resetStats = true; // Reset stats after each set of matches.
             // If gameplay was stopped, stop the bulk run.
             if (gameStopped) {
@@ -296,6 +300,14 @@ async function bulkRun() {
         if (gameStopped) {
             break;
         }
+    }
+    bulkEnabled = false;
+
+    // If allGameLogs isn't empty, download a bulk ZIP file.
+    if (allGameLogs[0] !== undefined) {
+        let gameType = document.getElementById("game-type").value;
+        let promptType = document.getElementById("prompt-type").value;
+        downloadBulkZipFile(allGameLogs, gameType, promptType);
     }
 }
 
@@ -501,8 +513,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
     addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
+    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
     //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));

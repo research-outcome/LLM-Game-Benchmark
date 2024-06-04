@@ -55,8 +55,6 @@ async function createPrompt(promptType, gameType, currentPlayer, firstPlayerCurr
 
     prompt += "You currently have " + playerInvalidMoves + " invalid moves."
 
-    console.log(prompt);
-
     return escapeStringForJson(prompt);
 }
 
@@ -236,9 +234,7 @@ export async function processMove(gameType, initialContent, currentPlayer, model
         if (jsonResponse === "Invalid Response") {
             throw new Error();
         }
-
-        console.log(currentStatus);
-
+        
         if (gameType === "tic-tac-toe") {
             // If the move had a valid format, process it using the methods defined in the TicTacToe class.
             return TicTacToe.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
