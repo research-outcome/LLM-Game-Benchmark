@@ -2,16 +2,19 @@ import { Move } from "./classes.js";
 
 export class ConnectFour {
     static explainGame() {
-        return "Connect-Four, a classic two-player game, is played on a 6 by 7 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns dropping their discs into an empty column, where the disc occupies the lowest available space. You are a skilled strategic Connect-Four player, currently engaged in a game. ";
+        return "Connect-Four is a two-player game played on a 6 by 7 grid. The first player uses red (R) discs, and the second player uses yellow (Y) discs. Players take turns dropping their discs into a column from the top row where there is still at least one empty space. The dropped disc falls straight down, occupying the lowest available row within the column. The objective is to align four of your discs either horizontally, vertically, or diagonally. The player who first aligns four of their discs wins the game. Strategic placement is crucial; besides aiming to align their discs, players must also block their opponent's potential alignments to avoid defeat. \n";
     }
     static formatNextMove() {
-        return " Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response. "
+        return "Suggest your next move in the following JSON format: {'column': ColumnNumber}. Do not include any additional commentary in your response. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. \n";
     }
     static systemPrompt() {
-        return " Suggest your next move in the following JSON format: {'column': ColumnNumber}. Replace ColumnNumber with the appropriate number for your move. ColumnNumber starts at 1 (the leftmost column is {'column': 1}). The maximum value for ColumnNumber is 7, as the grid is 7 columns wide. Do not include any additional commentary in your response. "
+        return "";
+    }
+    static invalidMoveWarning() {
+        return "Please note that your move will be considered invalid if your response does not follow the specified format, if you provide a ColumnNumber that is out of the allowed range, or if the column is already full (i.e., all rows in the column are occupied). Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n";
     }
     static promptVersion() {
-        return "2024-05-29";
+        return "2024-06-04";
     }
     static getMaxMoves() {
         return 80;
@@ -41,17 +44,19 @@ export class ConnectFour {
 
     static listBoard(firstPlayerMoves, secondPlayerMoves) {
         let gameStatus = "";
-        gameStatus += " The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:\n";
-        gameStatus += "The locations occupied by the first player (marked by R for red discs): ";
-        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + "\n";
-        gameStatus += "The locations occupied by the second player (marked by Y for yellow discs): ";
-        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + "\n";
+        gameStatus += "The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. \n";
+        gameStatus += "The current state of the game is as follows: \n";
+        gameStatus += "The locations occupied by the first player: ";
+        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + " \n";
+        gameStatus += "The locations occupied by the second player: ";
+        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + " \n";
         return gameStatus;
     }
 
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
+        gameStatus += "The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += "The current state of the game is as follows: \n";
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 7; j++) {
                 let cellColor = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space').style.backgroundColor;
@@ -70,6 +75,10 @@ export class ConnectFour {
             gameStatus += "\n";
         }
         return gameStatus;
+    }
+
+    static imagePrompt() {
+        return "The current state of the game is depicted in an image showing a 6 by 7 grid, where red discs represent positions taken by the first player and yellow discs represent positions taken by the second player. \n";
     }
 
     static async screenshotBoard() {

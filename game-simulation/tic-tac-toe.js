@@ -2,16 +2,19 @@ import { Move } from "./classes.js";
 
 export class TicTacToe {
     static explainGame() {
-        return "Tic-Tac-Toe, a classic two-player game, is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. You are an adept strategic Tic-Tac-Toe player, currently playing the game. ";
+        return "Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat. \n";
     }
     static formatNextMove() {
-        return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
+        return "Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. \n";
     }
     static systemPrompt() {
-        return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. ";
+        return "";
+    }
+    static invalidMoveWarning() {
+        return "Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n";
     }
     static promptVersion() {
-        return "2024-05-29";
+        return "2024-06-04";
     }
     static getMaxMoves() {
         return 20;
@@ -36,17 +39,19 @@ export class TicTacToe {
 
     static listBoard(firstPlayerMoves, secondPlayerMoves) {
         let gameStatus = "";
-        gameStatus += "The current status of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. The current state of the game is as follows:\n";
-        gameStatus += "The locations occupied by the first player (marked by X): ";
-        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + "\n";
-        gameStatus += "The locations occupied by the second player (marked by O): ";
-        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + "\n";
+        gameStatus += "The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. \n";
+        gameStatus += "The current state of the game is as follows: \n";
+        gameStatus += "The locations occupied by the first player: ";
+        gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + " \n";
+        gameStatus += "The locations occupied by the second player: ";
+        gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + " \n";
         return gameStatus;
     }
     
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is displayed on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. The current layout is as follows:\n";
+        gameStatus += "The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += "The current state of the game is as follows: \n";
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 gameStatus += (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
@@ -54,6 +59,10 @@ export class TicTacToe {
             gameStatus += "\n";
         }
         return gameStatus;
+    }
+
+    static imagePrompt() {
+        return "The current state of the game is depicted in an image showing a 3 by 3 grid, where 'X' represents positions taken by the first player and 'O' represents positions taken by the second player. \n";
     }
     
     static async screenshotBoard() {

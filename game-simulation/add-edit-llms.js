@@ -120,6 +120,7 @@ function modelSupportsImages(modelName) {
     return modelName === "gpt-4-turbo" ||
         modelName === "gpt-4o" ||
         modelName === "gemini-1.5-pro" ||
+        modelName === "gemini-1.5-flash" ||
         modelName === "gemini-pro-vision" ||
         modelName === "anthropic.claude-3-sonnet-20240229-v1:0" ||
         modelName === "anthropic.claude-3-haiku-20240307-v1:0";
@@ -146,6 +147,7 @@ export function updateAddModelFields(event) {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
             "<option value=\"gemini-pro\">gemini-pro</option>" +
             "<option value=\"gemini-1.5-pro\">gemini-1.5-pro</option>" +
+            "<option value=\"gemini-1.5-flash\">gemini-1.5-flash</option>" +
             "<option value=\"gemini-pro-vision\">gemini-pro-vision</option>" +
             "</select>";
 
