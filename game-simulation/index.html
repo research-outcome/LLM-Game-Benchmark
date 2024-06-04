@@ -98,10 +98,13 @@
             <button id="reset-btn">Reset Stats</button>
         </div>
 
-        <!-- Start button starts gameplay, while stop button stops gameplay. -->
+        <!-- Run buttons start gameplay, while stop button stops gameplay. -->
         <!-- Stop button is only shown during gameplay. -->
-        <button class="large-button" id="start-btn">Start</button>
-        <button class="large-button" id="stop-btn">Stop</button>
+        <div class="button-container">
+            <button class="large-button" id="run-btn">Run</button>
+            <button class="large-button" id="bulk-run-btn">Bulk Run</button>
+            <button class="large-button" id="stop-btn">Stop</button>
+        </div>
 
         <!-- Gameplay Area container holds game boards as well as game progress displays for each player. -->
         <div id="gameplay-area">
@@ -447,8 +450,8 @@
             </div>
         </div>
 
-        <!-- This container holds the Prompt List, LLM List, and Game Details buttons. -->
-        <div id="button-container">
+        <!-- This container holds the Prompt List, LLM List, Game Details, FAQs, and User Guide buttons. -->
+        <div class="button-container">
             <button class="large-button" id="promptListButton">View Prompt List</button>
             <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="gameDetailsButton">Game Details</button>
@@ -534,14 +537,14 @@
         </div>
 
         <!-- Modal structure for Prompt List popup -->
-        <div class="modal" id="promptListPopup">
+        <div class="popup-container" id="promptListPopup">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <div class="table-container">
                     <table id="promptTable">
                         <thead>
                             <tr>
-                                <th class = "game-type-column">Game Type</th>
+                                <th class="game-type-column">Game Type</th>
                                 <th>Prompt Type</th>
                                 <th>Prompt Example</th>
                             </tr>
@@ -555,7 +558,7 @@
         </div>
 
         <!-- Modal structure for LLM List popup -->
-        <div id="LLMListPopup" class="modal">
+        <div class="popup-container" id="LLMListPopup">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <div class="table-container">
@@ -576,7 +579,7 @@
         </div>
 
         <!-- Modal structure for Game Details popup -->
-        <div id="gameDetailsPopup" class="modal">
+        <div class="popup-container" id="gameDetailsPopup">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <div class="table-container">
@@ -596,19 +599,19 @@
         </div>
 
         <!-- Modal structure for FAQ popup -->
-        <div id="faqPopup" class="modal">
+        <div class="popup-container" id="faqPopup">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <div class="table-container">
                     <table id="faqTable">
                         <thead>
-                            <tr>
-                                <th>Question</th>
-                                <th>Answer</th>
-                            </tr>
+                        <tr>
+                            <th>Question</th>
+                            <th>Answer</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <!-- Rows will be dynamically added here -->
+                        <!-- Rows will be dynamically added here -->
                         </tbody>
                     </table>
                 </div>

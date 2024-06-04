@@ -4,7 +4,7 @@ import { TicTacToe } from "./tic-tac-toe.js";
 import { ConnectFour } from "./connect-four.js";
 import { Gomoku } from "./gomoku.js";
 import { getMove, processMove } from "./web-service-communication.js";
-import { generateGameLogFiles, generateSubmissionJson, downloadZipFile } from "./logging.js";
+import { generateGameLogFiles, generateSubmissionFiles, downloadZipFile } from "./logging.js";
 import { updateAddModelFields, updatePlayerDropdowns, addModel, checkForEmptyApiKeys, getCurrentModel } from "./add-edit-llms.js";
 import { fetchJSON, populatePromptTable, populateLLMTable, populateGameDetailsTable, populateFAQTable } from "./info.js";
 
@@ -29,6 +29,9 @@ const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FA
 // Gameplay flags
 let gameStopped = false;
 let resetStats = true;
+
+// Array of CSV files
+let csvFiles = [];
 
 // Main gameplay loop
 async function playGame() {
@@ -59,17 +62,20 @@ async function playGame() {
     let firstPlayerTotalInvalidMoves = document.getElementById("first-player-invalid-moves").innerHTML;
     let secondPlayerTotalInvalidMoves = document.getElementById("second-player-invalid-moves").innerHTML;
 
-    // Get prompt version from game object.
-    let promptVersion = "";
+    // Get game class.
+    let game;
     if (gameType === "tic-tac-toe") {
-        promptVersion = TicTacToe.promptVersion();
+        game = TicTacToe;
     }
     else if (gameType === "connect-four") {
-        promptVersion = ConnectFour.promptVersion();
+        game = ConnectFour;
     }
     else if (gameType === "gomoku") {
-        promptVersion = Gomoku.promptVersion();
+        game = Gomoku;
     }
+
+    // Get prompt version from game object.
+    let promptVersion = game.promptVersion();
 
     // If the user has pressed the "reset stats" button, reset the stats.
     if (resetStats) {
@@ -89,7 +95,8 @@ async function playGame() {
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
     document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
 
-    document.getElementById("start-btn").style.display = "none";  // Hide start button
+    document.getElementById("run-btn").style.display = "none";  // Hide run button
+    document.getElementById("bulk-run-btn").style.display = "none"; // Hide bulk run button
     document.getElementById("stop-btn").style.display = "block";  // Show stop button
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount); // Initialize game information field.
     updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, 0, 0); // Update statistics field.
@@ -129,7 +136,7 @@ async function playGame() {
             let model = getCurrentModel(currentPlayer);
 
             // Get initial response from the corresponding API for the model.
-            let initialContent = await getMove(promptType, gameType, currentPlayer, model);
+            let initialContent = await getMove(promptType, gameType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
 
             if (initialContent === "Network Error Occurred") {
                 alert("A network error occurred when trying to fetch the move. Ending gameplay now.");
@@ -143,12 +150,13 @@ async function playGame() {
             }
 
             // Get move object, which includes LLM and outcome ('Y' for valid move, or a description of how the move was invalid).
+            let promptVersion = "";
             let move = await processMove(gameType, initialContent, currentPlayer, model, currentMoveCount);
             moves.push(move);
 
             // If a valid move was made, process it.
             if(move.getOutcome() === "Y") {
-                let boardState = visualizeBoardState(gameType);
+                let boardState = game.visualizeBoardState();
                 gameLog += boardState; // Append new move to visual game log.
 
                 // If player 1 is playing, append the board state to the first player's progress log. Otherwise, append it to the second player's log.
@@ -160,7 +168,7 @@ async function playGame() {
                 }
 
                 // If a player has won the game, process it accordingly.
-                if (checkForWin(gameType)) {
+                if (game.checkForWin()) {
                     if (currentPlayer === 1) {
                         result = "winner1st";
                         firstPlayerWins++;
@@ -177,7 +185,7 @@ async function playGame() {
                     isGameActive = false;
                 }
                 // If a draw has taken place, process it accordingly.
-                else if (checkForFullBoard(gameType)) {
+                else if (game.checkForFullBoard()) {
                     result = "draw";
                     draws++;
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
@@ -212,13 +220,13 @@ async function playGame() {
                 }
 
                 // If a player's invalid move count is above the threshold, disqualify the player.
-                if (firstPlayerCurrentInvalidMoves >= getMaxInvalidMoves(gameType)) {
+                if (firstPlayerCurrentInvalidMoves >= game.getMaxInvalidMoves()) {
                     result = "disqualified1st";
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
-                else if (secondPlayerCurrentInvalidMoves >= getMaxInvalidMoves(gameType)) {
+                else if (secondPlayerCurrentInvalidMoves >= game.getMaxInvalidMoves()) {
                     result = "disqualified2nd";
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
@@ -237,7 +245,7 @@ async function playGame() {
             currentMoveCount++;
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
-            if (currentMoveCount >= getMaxMoves(gameType)) {
+            if (currentMoveCount >= game.getMaxMoves()) {
                 gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
@@ -253,18 +261,42 @@ async function playGame() {
 
         // Pause game to allow user to view results. Then, reset the board and update game information.
         await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
-        resetBoard(gameType);
+        game.resetBoard();
         currentGameCount++;
         updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount, gameType, promptType, currentGameCount, currentMoveCount, gameLog);
     }
 
     // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
-    let submissionFile = generateSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
-    downloadZipFile(submissionFile, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
+    // Only generate a ZIP file if gameLogFiles is not empty, or in other words, at least one game has been played.
+    if (gameLogFiles.length > 0) {
+        let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
+        downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
+    }
 
     disableInputs(false);
-    document.getElementById("start-btn").style.display = "block";  // Show start button
+    document.getElementById("run-btn").style.display = "inline-block";  // Show run button
+    document.getElementById("bulk-run-btn").style.display = "inline-block";  // Show bulk run button
     document.getElementById("stop-btn").style.display = "none";  // Hide stop button
+}
+
+// Run games with all combinations of LLMs in the player dropdowns.
+async function bulkRun() {
+    for(let firstModelIndex = 0; firstModelIndex < document.getElementById("first-player").length; firstModelIndex++) {
+        document.getElementById("first-player").selectedIndex = firstModelIndex;
+        for(let secondModelIndex = 0; secondModelIndex < document.getElementById("second-player").length; secondModelIndex++) {
+            document.getElementById("second-player").selectedIndex = secondModelIndex;
+            await playGame();
+            resetStats = true; // Reset stats after each set of matches.
+            // If gameplay was stopped, stop the bulk run.
+            if (gameStopped) {
+                break;
+            }
+        }
+        // If gameplay was stopped, stop the bulk run.
+        if (gameStopped) {
+            break;
+        }
+    }
 }
 
 // Enable or disable option input fields.
@@ -311,80 +343,6 @@ function updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerD
     document.getElementById("second-player-moves-per-win").innerHTML = secondPlayerMovesPerWin;
 }
 
-// Check if a win has taken place in the given game type.
-function checkForWin(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.checkForWin();
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.checkForWin();
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.checkForWin();
-    }
-}
-
-// Check if the board is full for a given game.
-function checkForFullBoard(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.checkForFullBoard();
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.checkForFullBoard();
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.checkForFullBoard();
-    }
-}
-
-// Reset the board for a given game type.
-function resetBoard(gameType) {
-    if (gameType === "tic-tac-toe") {
-        TicTacToe.resetBoard();
-    }
-    else if (gameType === "connect-four") {
-        ConnectFour.resetBoard();
-    }
-    else if (gameType === "gomoku") {
-        Gomoku.resetBoard();
-    }
-}
-
-function getMaxMoves(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.getMaxMoves();
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.getMaxMoves();
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.getMaxMoves();
-    }
-}
-
-function getMaxInvalidMoves(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.getMaxInvalidMoves();
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.getMaxInvalidMoves();
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.getMaxInvalidMoves();
-    }
-}
-
-// Return a visualized board state to be appended to the game log, which is used in .txt log files.
-function visualizeBoardState(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.visualizeBoardState();
-    } else if (gameType === "connect-four") {
-        return ConnectFour.visualizeBoardState();
-    } else if (gameType === "gomoku") {
-        return Gomoku.visualizeBoardState();
-    }
-}
-
 // Show a game board with a specific HTML ID, hiding all other boards.
 function showBoardWithId(boardId) {
     // Hide all boards.
@@ -396,17 +354,20 @@ function showBoardWithId(boardId) {
     document.getElementById(boardId).style.display = "table";
 }
 
+// Clear the progress displays on either side of the game board.
 function resetProgressDisplays() {
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
     document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
 }
 
+// Once the webpage has been fully loaded, initialize values and event listeners.
 document.addEventListener("DOMContentLoaded", async function() {
-    // Event Handlers
+    // Reset stats and show board for selected game when the game type is changed.
     document.getElementById("game-type").addEventListener("change", (event) => {
-        resetStats = true;
-        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Update visual statistics immediately.
+        resetStats = true; // Internal statistics will be reset on next game run.
 
+        // Show board for selected game type and hide all others.
         if (event.target.value === "tic-tac-toe") {
             showBoardWithId("tic-tac-toe-board");
         }
@@ -418,64 +379,80 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     });
 
+    // When the prompt type is changed, update the available LLMs in the player dropdowns.
     document.getElementById("prompt-type").addEventListener("change", () => {
         updatePlayerDropdowns();
     });
 
+    // When the first player LLM is changed, update the progress displays with the new first player.
     document.getElementById("first-player").addEventListener("change", () => {
         resetProgressDisplays();
     });
 
+    // When the second player LLM is changed, update the progress displays with the new second player.
     document.getElementById("second-player").addEventListener("change", () => {
         resetProgressDisplays();
     });
 
+    // When game count is changed, ensure that entered game count is >= 1. If not, alert the user and set game count to 1.
     document.getElementById("game-count").addEventListener("change", (event) => {
-        // Ensure that entered game count is a number >= 1. If not, alert the user and set game count to 1.
-        if (typeof event.target.value !== "number" || event.target.value < 1) {
+        if (event.target.value < 1) {
             alert("Invalid game count.");
             document.getElementById("game-count").value = 1;
         }
     });
 
+    // Show "manage LLMs" window when the "Manage LLMs" button is clicked.
     document.getElementById("manage-llms-btn").addEventListener("click", () => {
         document.getElementById("manage-llms-container").style.display = "inline-block";
         document.getElementById("manage-llms").style.display = "inline-block";
     });
 
+    // When the LLM type is changed in the "manage LLMs" window, update the available options accordingly.
     document.getElementById("llm-type").addEventListener("change", (event) => {
         updateAddModelFields(event);
     });
 
+    // When the "manage LLMs" window's close button is clicked, close the window.
     document.getElementById("manage-llms-close-btn").addEventListener("click", () => {
         document.getElementById("manage-llms-container").style.display = "none";
         document.getElementById("manage-llms").style.display = "none";
     });
 
+    // When the "reset stats" button is clicked, reset the stats both visually and internally.
     document.getElementById("reset-btn").addEventListener("click", () => {
-        resetStats = true;
-        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        resetStats = true; // Reset stats internally when next game starts.
+        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Reset visual stats immediately.
     });
 
-    document.getElementById("start-btn").addEventListener("click", (event) => {
+    // When the "run" button is clicked, start gameplay.
+    document.getElementById("run-btn").addEventListener("click", () => {
         playGame();
     });
 
-    document.getElementById("stop-btn").addEventListener("click", (event) => {
+    // When the "bulk run" button is clicked, run games for all combinations of LLMs in the player dropdowns.
+    document.getElementById("bulk-run-btn").addEventListener("click", () => {
+        bulkRun();
+    });
+
+    // Stop gameplay when the "stop" button is clicked.
+    document.getElementById("stop-btn").addEventListener("click", () => {
         console.log("Stopping gameplay...");
         gameStopped = true;
     });
 
+    // Add an LLM to the LLM list when the "add" button is clicked.
     document.getElementById("add-llm-btn").addEventListener("click", () => {
         addModel();
     });
 
+    // Hide the "confirm model removal" popup when the "cancel model removal" button is clicked.
     document.getElementById("cancel-removal-btn").addEventListener("click", () => {
         document.getElementById("confirm-removal-popup-container").style.display = "none";
         document.getElementById("confirm-removal-popup").style.display = "none";
     });
 
-    // Event listener for the prompt list button
+    // Populate prompt list table and show prompt list when prompt list button is clicked.
     document.getElementById("promptListButton").addEventListener("click", () => {
         fetchJSON(promptListURL).then(data => {
             populatePromptTable(data);
@@ -483,7 +460,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     });
 
-    // Event listener for the LLM list button
+    // Populate LLM list table and show LLM list when LLM list button is clicked.
     document.getElementById("LLMListButton").addEventListener("click", () => {
         fetchJSON(LLMListURL).then(data => {
             populateLLMTable(data);
@@ -491,7 +468,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     });
 
-    // Event listener for the Game Details button
+    // Populate game details table and show game details popup when game details button is clicked.
     document.getElementById("gameDetailsButton").addEventListener("click", () => {
         fetchJSON(gameDetailsURL).then(data => {
             populateGameDetailsTable(data);
@@ -507,34 +484,35 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     });
 
-    // Event listener for the close buttons in the modals
-    document.querySelectorAll(".modal .close").forEach(closeButton => {
+    // Hide popups when a popup's close button has been clicked.
+    document.querySelectorAll(".popup-container .close").forEach(closeButton => {
         closeButton.addEventListener("click", () => {
-            closeButton.closest(".modal").style.display = "none";
+            closeButton.closest(".popup-container").style.display = "none";
         });
     });
 
-    // Event listener to close the modal when clicking outside of it
+    // Close popups when clicking outside of them.
     window.addEventListener("click", (event) => {
-        if (event.target.classList.contains('modal')) {
+        if (event.target.classList.contains('popup-container')) {
             event.target.style.display = "none";
         }
     });
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
-    // gpt-3.5-turbo for TESTING ONLY, remove later.
+    // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
     addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
     addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
-    addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
-    addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
+    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;
@@ -544,7 +522,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     let secondPlayer = document.getElementById("second-player").value;
     let promptType = document.getElementById("prompt-type").value;
 
-    resetProgressDisplays();
+    // Initialize the game information, statistics, and progress displays.
     updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount);
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    resetProgressDisplays();
 });

@@ -8,42 +8,59 @@ import {Gomoku} from "./gomoku.js";
 
 let currentStatus = "";
 
-async function createPrompt(promptType, gameType, currentPlayer) {
+async function createPrompt(promptType, gameType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
     let prompt = "";
+    let game;
+    let playerInvalidMoves;
+
     if (gameType === "tic-tac-toe") {
-        prompt += TicTacToe.explainGame();
-        prompt += TicTacToe.formatNextMove();
+        game = TicTacToe;
     }
     else if (gameType === "connect-four") {
-        prompt += ConnectFour.explainGame();
-        prompt += ConnectFour.formatNextMove();
+        game = ConnectFour;
     }
     else if (gameType === "gomoku") {
-        prompt += Gomoku.explainGame();
-        prompt += Gomoku.formatNextMove();
+        game = Gomoku;
     }
+
+    prompt += game.explainGame();
 
     if (promptType === "list") {
-        currentStatus = listBoard(gameType);
-        prompt += currentStatus;
+        let firstPlayerMoves = game.listPlayerMoves(1);
+        let secondPlayerMoves = game.listPlayerMoves(2);
+        prompt += game.listBoard(firstPlayerMoves, secondPlayerMoves);
     }
     else if (promptType === "illustration") {
-        currentStatus = drawBoard(gameType);
-        prompt += currentStatus;
+        prompt += game.drawBoard()
     }
     else if (promptType === "image") {
-        prompt += " The current state of the game is given in the attached image. ";
+        prompt += game.imagePrompt();
+        prompt += "The current state of the game is given in the attached image. \n";
     }
 
+    currentStatus = prompt.substring(prompt.lastIndexOf("The current state"));
+
     if (currentPlayer === 1) {
-        prompt += "You are the first player. What would be your next move?";
+        prompt += "You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the first player. What would be your next move? \n";
+        playerInvalidMoves = firstPlayerCurrentInvalidMoves;
     }
     else {
-        prompt += "You are the second player. What would be your next move?";
+        prompt += "You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the second player. What would be your next move? \n";
+        playerInvalidMoves = secondPlayerCurrentInvalidMoves;
     }
+
+    prompt += game.formatNextMove();
+
+    prompt += game.invalidMoveWarning();
+
+    prompt += "You currently have " + playerInvalidMoves + " invalid moves."
+
+    console.log(prompt);
 
     return escapeStringForJson(prompt);
 }
+
+
 
 // Create a system prompt given a model.
 function createSystemPrompt(currentModel) {
@@ -55,48 +72,6 @@ function createSystemPrompt(currentModel) {
 function escapeStringForJson(input) {
     input = input.replace("\n", "\\n");
     return input.replace("\"", "\\\"");
-}
-
-// Return a list of moves in (row, column) format for a given game type and player.
-function listPlayerMoves(gameType, player) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.listPlayerMoves(player);
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.listPlayerMoves(player);
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.listPlayerMoves(player);
-    }
-}
-
-// List the board state for a given game type.
-function listBoard(gameType) {
-    let firstPlayerMoves = listPlayerMoves(gameType, 1);
-    let secondPlayerMoves = listPlayerMoves(gameType, 2);
-
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.listBoard(firstPlayerMoves, secondPlayerMoves);
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.listBoard(firstPlayerMoves, secondPlayerMoves);
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.listBoard(firstPlayerMoves, secondPlayerMoves);
-    }
-}
-
-// Draw the board for a given game type.
-function drawBoard(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return TicTacToe.drawBoard();
-    }
-    else if (gameType === "connect-four") {
-        return ConnectFour.drawBoard();
-    }
-    else if (gameType === "gomoku") {
-        return Gomoku.drawBoard();
-    }
 }
 
 async function screenshotBoard(gameType) {
@@ -122,8 +97,8 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             let genAI = new GoogleGenerativeAI(apiKey);
             let result;
             model = genAI.getGenerativeModel({ model: modelName });
-            // If model is gemini-pro-vision, and we have image data, call the model with the image.
-            if (modelName === "gemini-pro-vision" && imageData !== "") {
+            // If we have image data, call the model with the image.
+            if (imageData !== "") {
                 let image = {
                     inlineData: {
                         data: imageData.split(',')[1],
@@ -152,7 +127,10 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
 
         // Generate a request for an OpenAI model.
         if (modelType === "OpenAI") {
-            if (model.getSupportsImageInput() === true) {
+            // If there is image data, we have a model that supports images and we are using the image prompt.
+            // Therefore, we should call the model with the image data if there is image data available.
+            // Otherwise, just call the model with a text-based prompt.
+            if (imageData !== "") {
                 requestBody = JSON.stringify({
                     "model": modelName,
                     "messages": [{
@@ -203,7 +181,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
                 return response.json();
             }
             else {
-                return Promise.reject();
+                return Promise.reject("Network Error Occurred");
             }
         }).then(data => {
             if (modelType === "OpenAI") {
@@ -259,6 +237,8 @@ export async function processMove(gameType, initialContent, currentPlayer, model
             throw new Error();
         }
 
+        console.log(currentStatus);
+
         if (gameType === "tic-tac-toe") {
             // If the move had a valid format, process it using the methods defined in the TicTacToe class.
             return TicTacToe.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
@@ -275,13 +255,16 @@ export async function processMove(gameType, initialContent, currentPlayer, model
 }
 
 // Generate a prompt, call the LLM, and return its response.
-export async function getMove(promptType, gameType, currentPlayer, model) {
-    let prompt = await createPrompt(promptType, gameType, currentPlayer);
+export async function getMove(promptType, gameType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
+    // Generate prompts. If we are using the image prompt, generate a screenshot of the board and store the
+    // base64-encoded image in the "imageData" parameter.
+    let prompt = await createPrompt(promptType, gameType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
     let imageData = (promptType === "image") ? await screenshotBoard(gameType) : "";
+    // Append image data to currentStatus so that the generated image can be logged.
     if (promptType === "image") {
-        currentStatus = "The current state of the game is given in the attached image.\n";
         currentStatus += imageData;
     }
     let systemPrompt = createSystemPrompt();
+
     return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, model);
 }

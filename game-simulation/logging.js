@@ -135,18 +135,20 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
     return new GameLogFiles(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent);
 }
 
-// Generate a JSON file containing aggregated information about a number of games to be submitted to the leaderboard.
-export function generateSubmissionJson(gameType, promptType, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid) {
+// Generate JSON and CSV files containing aggregated information about a number of games to be submitted to the leaderboard.
+export function generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid) {
     let sanitizedFirstPlayer = firstPlayer.replace("/", "_");
     let sanitizedSecondPlayer = secondPlayer.replace("/", "_");
 
     // Name the submission file.
     let timestamp = formatTimestamp(new Date());
-    let submissionFileName = "submission_" + gameType + "_" + promptType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + timestamp + ".json";
+    let submissionJsonName = "submission_" + gameType + "_" + promptType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + timestamp + ".json";
+    let submissionCsvName = "submission_" + gameType + "_" + promptType + "_" + sanitizedFirstPlayer + "_" + sanitizedSecondPlayer + "_" + timestamp + ".csv";
 
     // Generate the submission file content.
-    let submissionFileContent = "{\"GameType\": \"" + gameType +
-        "\", \"Prompt\": \"" + promptType +
+    let submissionJsonContent = "[{\"GameType\": \"" + gameType +
+        "\", \"PromptType\": \"" + promptType +
+        "\", \"PromptVersion\": \"" + promptVersion +
         "\", \"LLM1stPlayer\": \"" + firstPlayer +
         "\", \"LLM2ndPlayer\": \"" + secondPlayer +
         "\", \"WinRatio-1st\": \"" + firstPlayerWins/gameCount +
@@ -163,14 +165,17 @@ export function generateSubmissionJson(gameType, promptType, firstPlayer, second
         "\", \"ProviderEmail\": \"" + providerEmail +
         "\", \"SubmissionDate\": \"" + timestamp +
         "\", \"UUID\": \"" + uuid +
-        "\"}";
+        "\"}]";
 
-    // Download the generated submission file.
-    return [submissionFileName, submissionFileContent];
+    let submissionCsvContent = "GameType,PromptType,PromptVersion,LLM1stPlayer,LLM2ndPlayer,WinRatio-1st,WinRatio-2nd,Wins-1st,Wins-2nd,Disqualifications-1st,Disqualifications-2nd,Draws,InvalidMovesRatio-1st,InvalidMovesRatio-2nd,TotalMoves-1st,TotalMoves-2nd,ProviderEmail,SubmissionDate,UUID\n" +
+        gameType + "," + promptType + "," + promptVersion + "," + firstPlayer + "," + secondPlayer + "," + firstPlayerWins/gameCount + "," + secondPlayerWins/gameCount + "," + firstPlayerWins + "," + secondPlayerWins + "," + firstPlayerDisqualifications + "," + secondPlayerDisqualifications + "," + draws + "," + firstPlayerTotalInvalidMoves/firstPlayerTotalMoveCount + "," + secondPlayerTotalInvalidMoves/secondPlayerTotalMoveCount + "," + firstPlayerTotalMoveCount + "," + secondPlayerTotalMoveCount + "," + providerEmail + "," + timestamp + "," + uuid;
+
+    // Download the generated submission files to be compiled into the session's ZIP file.
+    return [submissionJsonName, submissionJsonContent, submissionCsvName, submissionCsvContent];
 }
 
 // Download a file given its content, file extension, and filename.
-export function downloadZipFile(submissionFile, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer) {
+export function downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer) {
     let logZipFile = new JSZip();
     let timestamp = formatTimestamp(new Date());
 
@@ -184,8 +189,10 @@ export function downloadZipFile(submissionFile, gameLogFiles, gameType, promptTy
         logZipFile.file(gameLogs.getCsvFileName(), gameLogs.getCsvFileContent());
     }
 
-    // Add final submission JSON to Zip file. submissionFile[0] = file name, submissionFile[1] = file content.
-    logZipFile.file(submissionFile[0], submissionFile[1]);
+    // Add final submission JSON and CSV to ZIP file.
+    // submissionFiles[0] = JSON name, submissionFiles[1] = JSON content, submissionFiles[2] = CSV name, and submissionFiles[3] = CSV content.
+    logZipFile.file(submissionFiles[0], submissionFiles[1]);
+    logZipFile.file(submissionFiles[2], submissionFiles[3]);
 
     logZipFile.generateAsync({type:"blob"}).then(function (blob) {
         saveAs(blob, zipFileName);
