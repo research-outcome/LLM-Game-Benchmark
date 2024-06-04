@@ -11,7 +11,7 @@ let receivedSubmissionsJSON = [];
 
 function validateData(jsonData) {
     const requiredFields = [
-        'GameType', 'Prompt', 'LLM1stPlayer', 'LLM2ndPlayer', 'WinRatio-1st',
+        'GameType', 'PromptType','PromptVersion', 'LLM1stPlayer', 'LLM2ndPlayer', 'WinRatio-1st',
         'WinRatio-2nd', 'Wins-1st', 'Wins-2nd', 'Disqualifications-1st',
         'Disqualifications-2nd', 'Draws', 'InvalidMovesRatio-1st',
         'InvalidMovesRatio-2nd', 'TotalMoves-1st', 'TotalMoves-2nd',
@@ -59,7 +59,8 @@ document.getElementById('receivedSubmissionsFileInput').addEventListener('change
 function mergeAndRecalculate(allData, newSubmission) {
     const existingIndex = allData.findIndex(item =>
         item.GameType === newSubmission.GameType &&
-        item.Prompt === newSubmission.Prompt &&
+        item.PromptType === newSubmission.PromptType &&
+        item.PromptVersion === newSubmission.PromptVersion &&
         item.LLM1stPlayer === newSubmission.LLM1stPlayer &&
         item.LLM2ndPlayer === newSubmission.LLM2ndPlayer
     );

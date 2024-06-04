@@ -6,7 +6,7 @@ import { Gomoku } from "./gomoku.js";
 import { getMove, processMove } from "./web-service-communication.js";
 import { generateGameLogFiles, generateSubmissionJson, downloadZipFile } from "./logging.js";
 import { updateAddModelFields, updatePlayerDropdowns, addModel, checkForEmptyApiKeys, getCurrentModel } from "./add-edit-llms.js";
-import { fetchJSON, populatePromptTable, populateLLMTable, populateGameDetailsTable } from "./info.js";
+import { fetchJSON, populatePromptTable, populateLLMTable, populateGameDetailsTable, populateFAQTable } from "./info.js";
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -24,6 +24,7 @@ const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
 const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
 const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/gameDetails.json';
+const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FAQs.json';
 
 // Gameplay flags
 let gameStopped = false;
@@ -495,6 +496,14 @@ document.addEventListener("DOMContentLoaded", async function() {
         fetchJSON(gameDetailsURL).then(data => {
             populateGameDetailsTable(data);
             document.getElementById("gameDetailsPopup").style.display = "block";
+        });
+    });
+
+    // Event listener for the FAQs button
+    document.getElementById("FAQsButton").addEventListener("click", () => {
+        fetchJSON(faqURL).then(data => {
+            populateFAQTable(data);
+            document.getElementById("faqPopup").style.display = "block";
         });
     });
 

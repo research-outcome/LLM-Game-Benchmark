@@ -93,3 +93,23 @@ export function populateGameDetailsTable(data) {
         tableBody.appendChild(row);
     });
 }
+
+// Function to populate the FAQ table
+export function populateFAQTable(data) {
+    const tableBody = document.querySelector("#faqTable tbody");
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    data.forEach(item => {
+        const row = document.createElement("tr");
+
+        const questionCell = document.createElement("td");
+        questionCell.textContent = item["Question"];
+        row.appendChild(questionCell);
+
+        const answerCell = document.createElement("td");
+        answerCell.textContent = item["Answer"];
+        row.appendChild(answerCell);
+
+        tableBody.appendChild(row);
+    });
+}
