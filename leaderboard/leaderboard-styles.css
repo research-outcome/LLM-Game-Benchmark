@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 body {
-    font-family: 'Kanit', serif, sans-serif;
+    font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
     font-size: small;
@@ -14,7 +14,6 @@ body {
 {
     margin-left: 10px;
 }
-
 
 /* container for drop downs */
 .container {
@@ -50,7 +49,7 @@ body {
     color: #fff;
     font-size: 14px;
     border-radius: 50%;
-    background: #6e93d7;
+    background: transparent;
     align-items: center;
     justify-content: center;
 }
@@ -97,8 +96,13 @@ body {
     border: 1.5px solid #c0c0c0;
     transition: all 0.3s ease-in-out;
 }
+
+.fa-chevron-down{
+    color:black
+}
+
 .checkbox.checked {
-    background-color: #6e93d7;
+    background-color: #357ec7;
 }
 .checkbox .check-icon {
     font-size: 11px;
@@ -108,7 +112,7 @@ body {
     transform: scale(1);
 }
 h1 {
-    color: purple;
+    color: black;
     margin-left: 10px;
 }
 /* Move search bar to the left */
@@ -117,11 +121,12 @@ h1 {
  }
 
  .table-container {
-    width: 100%; /* Adjust the width */
-    padding: 0 5%; /* Add padding on both sides */
-    margin: 0 auto; /* Center the container */
+    width: fit-content; /* Adjust the width */
+    margin: 0; /* Center the container */
     box-sizing: border-box;
     overflow-x: auto; /* Enable horizontal scrolling */
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #mytable {
@@ -132,22 +137,16 @@ h1 {
 
 /* Style the submit button */
 .submit-btn {
-    display: block;
     padding: 10px 20px;
     font-size: 16px;
-    color: white;
-    background-color: purple;
-    border: none;
-    border-radius: 5px;
+    display: flex;
     cursor: pointer;  
     position: relative; 
     top: 10px; /* Position it at the bottom */
     left: 10px; /* Position it at the left */
 }
 
-.submit-btn:hover {
-    background-color: darkviolet;
-}
+.submit-btn:hover,
 
 
 /* Modal styles */
