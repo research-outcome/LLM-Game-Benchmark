@@ -28,6 +28,7 @@ const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FA
 
 // Gameplay flags
 let bulkEnabled = false;
+let playersCanBeTheSame = false;
 let gameStopped = false;
 let resetStats = true;
 
@@ -136,7 +137,7 @@ async function playGame() {
             // Get initial response from the corresponding API for the model.
             let initialContent = await getMove(promptType, gameType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
 
-            if (initialContent === "Network Error Occurred") {
+            if (initialContent === "Network Error Occurred" || initialContent === undefined) {
                 alert("A network error occurred when trying to fetch the move. Ending gameplay now.");
                 gameStopped = true;
             }
@@ -289,11 +290,21 @@ async function bulkRun() {
         document.getElementById("first-player").selectedIndex = firstModelIndex;
         for(let secondModelIndex = 0; secondModelIndex < document.getElementById("second-player").length; secondModelIndex++) {
             document.getElementById("second-player").selectedIndex = secondModelIndex;
-            allGameLogs.push(await playGame());
+
+            // Skip games with the same first/second player LLM if the "playersCanBeTheSame" flag is set to false.
+            if (playersCanBeTheSame === false && firstModelIndex === secondModelIndex) {
+                continue;
+            }
+            let currentGameLogs = await playGame();
+
             resetStats = true; // Reset stats after each set of matches.
-            // If gameplay was stopped, stop the bulk run.
+
+            // If gameplay was stopped, stop the bulk run. Otherwise, write the current game logs.
             if (gameStopped) {
                 break;
+            } else {
+                allGameLogs.push(currentGameLogs);
+                console.log("Pushed game to allGameLogs: " + currentGameLogs);
             }
         }
         // If gameplay was stopped, stop the bulk run.
@@ -512,17 +523,17 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
-    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
     //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
-    //addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 

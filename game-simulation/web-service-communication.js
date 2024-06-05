@@ -111,6 +111,10 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             }
 
             let response = await result.response;
+            if (modelName === "gemini-1.5-flash") {
+                await new Promise(resolve => setTimeout(resolve, 4500)); // 4.5-second delay to meet free quota.
+
+            }
             return response.candidates[0].content.parts[0].text;
         }
     }
@@ -159,13 +163,25 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
         }
 
         if (modelType === "AWS Bedrock") {
-            requestBody = JSON.stringify({
-                "prompt": prompt,
-                "modelId": modelName,
-                "apiKey": model.getApiKey(),
-                "type": modelName.split('.')[0],
-            })
+            if (imageData !== "") {
+                requestBody = JSON.stringify({
+                    "prompt": prompt,
+                    "modelId": modelName,
+                    "apiKey": model.getApiKey(),
+                    "type": modelName.split('.')[0],
+                    "image": imageData.split(',')[1],
+                });
+            } else {
+                requestBody = JSON.stringify({
+                    "prompt": prompt,
+                    "modelId": modelName,
+                    "apiKey": model.getApiKey(),
+                    "type": modelName.split('.')[0],
+                });
+            }
         }
+
+        console.log(requestBody);
 
         fetch(url, {
             method: "POST",
@@ -186,6 +202,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
                 resolve(data.choices[0].message.content);
             }
             else if (modelType === "AWS Bedrock") {
+                console.log(data.body);
                 resolve(data.body);
             }
             else {
