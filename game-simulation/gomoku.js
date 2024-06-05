@@ -181,9 +181,14 @@ export class Gomoku {
         for (let i = 0; i < rows; i++) {
             let concatenatedString = "";
             for (let j = 0; j < cols; j++) {
-                concatenatedString += " " + field[i][j];
+                if (field[i][j] !== "") {
+                    concatenatedString += " " + field[i][j];
+                }
+                else {
+                    concatenatedString += " .";
+                }
             }
-            console.log(concatenatedString);
+            console.log(concatenatedString)
         }
 
         // Check horizontal lines
