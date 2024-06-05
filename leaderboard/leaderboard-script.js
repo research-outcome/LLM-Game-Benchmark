@@ -50,8 +50,8 @@ $(document).ready(function() {
             // Adjust positioning of dom to move search bar and 
             dom: 'frtlpi',
             columnDefs: [
-                { targets: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16], className: 'dt-body-right' },
-                { targets: [0, 1, 2, 3, 15], className: 'dt-body-center' },
+                { targets: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,17], className: 'dt-body-right' },
+                { targets: [0, 1, 2, 3, 4, 16], className: 'dt-body-center' },
                 { targets: [18], visible: false}
             ]
         });
