@@ -34,7 +34,7 @@ const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FA
 
 // Gameplay flags
 let bulkEnabled = false; // This flag determines whether the game will generate a "bulk" ZIP file.
-const playersCanBeTheSame = false; // This flag determines whether LLMs will go against themselves during a bulk run.
+let playersCanBeTheSame = document.getElementById("checkbox-bulk-run-same-players").checked; // This flag determines whether LLMs will go against themselves during a bulk run.
 let gameStopped = false; // This flag is used to halt gameplay when the user presses the "stop" button.
 
 // Main gameplay loop
@@ -376,6 +376,8 @@ function disableInputs(disableFlag) {
     for (let i = 0; i < radioButtons.length; i++) {
         radioButtons[i].disabled = disableFlag;
     }
+
+    document.getElementById("checkbox-bulk-run-same-players").disabled = disableFlag;
 }
 
 // Display selected gameplay options, as well as current game count, to the user.
@@ -462,6 +464,11 @@ function resetProgressDisplays() {
 
 // Once the webpage has been fully loaded, initialize values and event listeners.
 document.addEventListener("DOMContentLoaded", async function() {
+    if (window.location.protocol === "file:") {
+        alert("This file cannot run directly from the HTML file. You must run it through a local server, or an IDE that creates a local server for you, such as JetBrains' WebStorm.");
+        document.body.innerHTML = "";
+    }
+
     // Reset stats and show board for selected game when the game type is changed.
     document.getElementById("game-type").addEventListener("change", (event) => {
         updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Update visual statistics immediately.
@@ -616,6 +623,11 @@ document.addEventListener("DOMContentLoaded", async function() {
         console.log("Stopping gameplay...");
         resetProgressDisplays();
         gameStopped = true;
+    });
+
+    // Enable/disable the "playersCanBeTheSame" flag when the corresponding checkbox is clicked.
+    document.getElementById("checkbox-bulk-run-same-players").addEventListener("change", (event) => {
+        playersCanBeTheSame = document.getElementById("checkbox-bulk-run-same-players").checked;
     });
 
     // Add an LLM to the LLM list when the "add" button is clicked.
