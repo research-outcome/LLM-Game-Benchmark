@@ -120,6 +120,21 @@ h1 {
     float: left !important;
  }
 
+ h2 {
+    margin-left: 10px;
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+}
+
+h3 {
+    margin-left: 10px;
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: small;
+}
+
  .table-container {
     width: fit-content; /* Adjust the width */
     margin: 0; /* Center the container */
@@ -145,9 +160,6 @@ h1 {
     top: 10px; /* Position it at the bottom */
     left: 10px; /* Position it at the left */
 }
-
-.submit-btn:hover,
-
 
 /* Modal styles */
 .modal {
