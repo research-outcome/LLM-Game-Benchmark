@@ -225,17 +225,23 @@ button {
     justify-content: center;
     align-items: center;
 }
-#progress-display-type,
-#progress-auto-scroll { /* Styling for the "Progress Display Type" and "Progress Auto Scroll" options displays. */
-    display: flex;
+#progress-options-container,
+#bulk-run-options-container {
+    text-align: center;
     justify-content: center;
-    align-items: center;
+    align-content: center;
     margin-top: 1vh;
     background-color: lightgrey;
     font-size: 2vh;
     width: 100%;
     height: 8vh;
     border: 0.5vh solid black;
+}
+#progress-display-type { /* Styling for the "Progress Display Type" and "Progress Auto Scroll" options displays. */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1vh;
 }
 #progress-display-type label { /* Styling for the radio button labels in the "Progress Display Type" display. */
     margin-right: 2vh;

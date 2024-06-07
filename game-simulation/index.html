@@ -9,6 +9,18 @@
         <link rel="stylesheet" href="game-simulation.css">
     </head>
     <body>
+        <script>
+            if (window.location.protocol === "file:") {
+                document.body.style.display = "flex";
+                document.body.style.justifyContent = "center";
+                document.body.style.alignItems = "center";
+                document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
+                        "This site cannot run directly from the HTML file. You must run it on a server, or an IDE that creates a server for you.<br>" +
+                        "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
+                    "</div>";
+                window.stop();
+            }
+        </script>
         <script type="importmap">
             {
               "imports": {
@@ -101,17 +113,25 @@
         <!-- Run buttons start gameplay, while stop button stops gameplay. -->
         <!-- Stop button is only shown during gameplay. -->
         <div id="buttons-and-progress-options-container">
-            <div id="progress-display-type">
-                <strong style="display: block">Progress Display Type:</strong>
-                <input type="radio" id="radio-list" name="progress-display-type" value="list" checked>
-                <label for="radio-list">List</label>
+            <div id="progress-options-container">
+                <div id="progress-display-type">
+                    <strong style="display: block">Progress Display Type:</strong>
+                    <input type="radio" id="radio-list" name="progress-display-type" value="list" checked>
+                    <label for="radio-list">List</label>
 
-                <input type="radio" id="radio-illustration" name="progress-display-type" value="illustration">
-                <label for="radio-list">Illustration</label>
+                    <input type="radio" id="radio-illustration" name="progress-display-type" value="illustration">
+                    <label for="radio-list">Illustration</label>
 
-                <input type="radio" id="radio-image" name="progress-display-type" value="image">
-                <label for="radio-list">Image</label>
+                    <input type="radio" id="radio-image" name="progress-display-type" value="image">
+                    <label for="radio-list">Image</label>
+                </div>
+
+                <div id="progress-auto-scroll">
+                    <input type="checkbox" id="checkbox-auto-scroll" name="auto-scroll" checked />
+                    <label for="checkbox-auto-scroll">Auto-Scroll Progress Displays</label>
+                </div>
             </div>
+
 
             <div class="button-container" id="gameplay-button-container">
                 <button class="large-button" id="run-btn">Run</button>
@@ -119,9 +139,11 @@
                 <button class="large-button" id="stop-btn">Stop</button>
             </div>
 
-            <div id="progress-auto-scroll">
-                <input type="checkbox" id="checkbox-auto-scroll" name="auto-scroll" checked />
-                <label for="checkbox-auto-scroll">Auto-Scroll Progress Displays</label>
+            <div id="bulk-run-options-container">
+                <div id="bulk-run-same-players">
+                    <input type="checkbox" id="checkbox-bulk-run-same-players" name="bulk-run-same-players" />
+                    <label for="checkbox-auto-scroll">Allow LLMs to Play Against Themselves in Bulk Runs</label>
+                </div>
             </div>
         </div>
 
