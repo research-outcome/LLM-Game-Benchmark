@@ -27,10 +27,10 @@ const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM
 const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FAQs.json';
 
 // Gameplay flags
-let bulkEnabled = false;
-let playersCanBeTheSame = false;
-let gameStopped = false;
-let resetStats = true;
+let bulkEnabled = false; // This flag determines whether the game will generate a "bulk" ZIP file.
+let playersCanBeTheSame = false; // This flag determines whether LLMs will go against themselves during a bulk run.
+let gameStopped = false; // This flag is used to halt gameplay when the user presses the "stop" button.
+let resetStats = true; // This flag is used to reset the statistics window.
 
 // Main gameplay loop
 async function playGame() {
@@ -40,15 +40,23 @@ async function playGame() {
         return;
     }
 
-    // Obtain existing user selections and initialize current game count to 0.
+    gameStopped = false;
+
+    // Obtain existing user selections and initialize current game count to 1.
     let gameType = document.getElementById("game-type").value;
     let promptType = document.getElementById("prompt-type").value;
     let gameCount = document.getElementById("game-count").value;
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
     let currentGameCount = 1;
-    let uuid = uuidv7();
-    let gameLogFiles = [];
+
+    let progressDisplayType;
+    let radioButtons = document.getElementsByName("progress-display-type");
+    for (let i = 0; i < radioButtons.length; i++) {
+        if (radioButtons[i].checked) {
+            progressDisplayType = radioButtons[i].value;
+        }
+    }
 
     // Obtain existing statistics from the "stats" box.
     let firstPlayerWins = document.getElementById("first-player-wins").innerHTML;
@@ -73,8 +81,10 @@ async function playGame() {
         game = Gomoku;
     }
 
-    // Get prompt version from game object.
+    // Initialize prompt version, UUID, and game log files array for logging purposes.
     let promptVersion = game.promptVersion();
+    let uuid = uuidv7();
+    let gameLogFiles = [];
 
     // If the user has pressed the "reset stats" button, reset the stats.
     if (resetStats) {
@@ -94,16 +104,21 @@ async function playGame() {
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
     document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
 
+    // Hide/show appropriate buttons.
     document.getElementById("run-btn").style.display = "none";  // Hide run button
     document.getElementById("bulk-run-btn").style.display = "none"; // Hide bulk run button
     document.getElementById("stop-btn").style.display = "block";  // Show stop button
-    updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount); // Initialize game information field.
-    updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, 0, 0); // Update statistics field.
-    disableInputs(true); // Disable selection input fields.
 
+    // Update gameplay displays.
+    updateInfo(gameType, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount); // Initialize game information field.
+    updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, 0, 0); // Update statistics field.
+
+    disableInputs(true); // Disable input fields.
+
+    // Main gameplay loop
     while(currentGameCount <= gameCount) {
+        // Initialize values.
         let isGameActive = true;
-        gameStopped = false;
         let currentMoveCount = 1;
         let firstPlayerCurrentMoveCount = 0;
         let secondPlayerCurrentMoveCount = 0;
@@ -123,6 +138,14 @@ async function playGame() {
         document.getElementById("second-player-game-progress").innerHTML += "<strong>Game " + currentGameCount + "</strong><br>" +
             "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-second-player\"><em>Match in progress...</em></span><br>";
 
+        // Scroll the progress displays if "Auto-Scroll Progress Displays" is enabled.
+        let autoScrollDisplays = document.getElementById("checkbox-auto-scroll").checked;
+        let firstPlayerProgressDisplay = document.getElementById("first-player-game-progress");
+        let secondPlayerProgressDisplay = document.getElementById("second-player-game-progress");
+        if (autoScrollDisplays) {
+            firstPlayerProgressDisplay.scrollTop = firstPlayerProgressDisplay.scrollHeight;
+            secondPlayerProgressDisplay.scrollTop = secondPlayerProgressDisplay.scrollHeight;
+        }
 
         while(isGameActive) {
             // If gameplay was stopped, exit before attempting to fetch move.
@@ -135,11 +158,14 @@ async function playGame() {
             let model = getCurrentModel(currentPlayer);
 
             // Get initial response from the corresponding API for the model.
-            let initialContent = await getMove(promptType, gameType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
+            let initialContent = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
 
-            if (initialContent === "Network Error Occurred" || initialContent === undefined) {
-                alert("A network error occurred when trying to fetch the move. Ending gameplay now.");
-                gameStopped = true;
+            if (initialContent === "Network Error Occurred") {
+                result = "networkerror";
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                console.log("Game was canceled because a network error occurred.");
+                isGameActive = false;
+                continue;
             }
 
             // If gameplay was stopped, exit before attempting to process move.
@@ -149,7 +175,7 @@ async function playGame() {
             }
 
             // Get move object, which includes LLM and outcome ('Y' for valid move, or a description of how the move was invalid).
-            let move = await processMove(gameType, initialContent, currentPlayer, model, currentMoveCount);
+            let move = await processMove(game, initialContent, currentPlayer, model, currentMoveCount);
             moves.push(move);
 
             // If a valid move was made, process it.
@@ -157,13 +183,8 @@ async function playGame() {
                 let boardState = game.visualizeBoardState();
                 gameLog += boardState; // Append new move to visual game log.
 
-                // If player 1 is playing, append the board state to the first player's progress log. Otherwise, append it to the second player's log.
-                if (currentPlayer === 1) {
-                    document.getElementById("first-player-game-progress").innerHTML += boardState.replace(new RegExp("\n", "g"), "<br>");
-                }
-                else {
-                    document.getElementById("second-player-game-progress").innerHTML += boardState.replace(new RegExp("\n", "g"), "<br>");
-                }
+                // Update the progress displays with the new board state.
+                await updateProgressDisplays(game, currentPlayer, progressDisplayType);
 
                 // If a player has won the game, process it accordingly.
                 if (game.checkForWin()) {
@@ -191,28 +212,16 @@ async function playGame() {
                     isGameActive = false;
                 }
 
-                if (currentPlayer === 1) {
-                    firstPlayerCurrentMoveCount++
-                    firstPlayerTotalMoveCount++;
-                }
-                else {
-                    secondPlayerCurrentMoveCount++;
-                    secondPlayerTotalMoveCount++;
-                }
-
                 currentPlayer = (currentPlayer === 1) ? 2 : 1;  // Swap players since the move was valid.
             }
             // An invalid move was made, process it accordingly.
             else {
+                // Increment invalid move counts, since an invalid move was made.
                 if (currentPlayer === 1) {
-                    firstPlayerCurrentMoveCount++
-                    firstPlayerTotalMoveCount++;
                     firstPlayerCurrentInvalidMoves++;
                     firstPlayerTotalInvalidMoves++;
                 }
                 else {
-                    secondPlayerCurrentMoveCount++;
-                    secondPlayerTotalMoveCount++;
                     secondPlayerCurrentInvalidMoves++;
                     secondPlayerTotalInvalidMoves++;
                 }
@@ -220,16 +229,28 @@ async function playGame() {
                 // If a player's invalid move count is above the threshold, disqualify the player.
                 if (firstPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified1st";
+                    firstPlayerDisqualifications++;
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified2nd";
+                    secondPlayerDisqualifications++;
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
+            }
+
+            // Increment move counts, since a move was made.
+            if (currentPlayer === 1) {
+                firstPlayerCurrentMoveCount++
+                firstPlayerTotalMoveCount++;
+            }
+            else {
+                secondPlayerCurrentMoveCount++;
+                secondPlayerTotalMoveCount++;
             }
 
             // If gameplay was stopped, exit prior to updating game statistics.
@@ -250,27 +271,31 @@ async function playGame() {
             }
         }
 
-        // Update game results for progress windows. Do not update progress if stop button was clicked.
-        if (!gameStopped) {
-            document.getElementById("game-" + currentGameCount + "-result-first-player").textContent = result;
-            document.getElementById("game-" + currentGameCount + "-result-second-player").textContent = result;
+        // If the "Stop" button was clicked, just reset the board; do not update any fields or perform a post-game pause.
+        if (gameStopped) {
+            game.resetBoard();
+            break;
         }
 
+        // Update game results for progress windows.
+        document.getElementById("game-" + currentGameCount + "-result-first-player").textContent = result;
+        document.getElementById("game-" + currentGameCount + "-result-second-player").textContent = result;
 
         // Pause game to allow user to view results. Then, reset the board and update game information.
         await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
         game.resetBoard();
         currentGameCount++;
-        updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount, gameType, promptType, currentGameCount, currentMoveCount, gameLog);
+        updateInfo(gameType, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount);
     }
 
-    disableInputs(false);
     document.getElementById("run-btn").style.display = "inline-block";  // Show run button
     document.getElementById("bulk-run-btn").style.display = "inline-block";  // Show bulk run button
     document.getElementById("stop-btn").style.display = "none";  // Hide stop button
 
+    disableInputs(false); // Re-enable input fields.
+
     // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
-    // Only generate a ZIP file if gameLogFiles is not empty, or in other words, at least one game has been played.
+    // Only generate a ZIP file if gameLogFiles is not empty; in other words, if at least one game has been played.
     if (gameLogFiles.length > 0) {
         let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
         if (bulkEnabled) {
@@ -284,27 +309,30 @@ async function playGame() {
 
 // Run games with all combinations of LLMs in the player dropdowns.
 async function bulkRun() {
-    bulkEnabled = true;
-    let allGameLogs = [] // Each index here contains [submissionFiles, gameLogFiles] for a given game.
+    bulkEnabled = true; // Set bulkEnabled flag to true, since we are performing a bulk run.
+    let allGameLogs = [] // Each index here contains [submissionFiles, gameLogFiles] for a given set of games.
+
+    // Iterate through every combination of models in the model list, and play "gameCount" games per combination.
     for(let firstModelIndex = 0; firstModelIndex < document.getElementById("first-player").length; firstModelIndex++) {
-        document.getElementById("first-player").selectedIndex = firstModelIndex;
+        document.getElementById("first-player").selectedIndex = firstModelIndex; // Adjust selected first player model.
         for(let secondModelIndex = 0; secondModelIndex < document.getElementById("second-player").length; secondModelIndex++) {
-            document.getElementById("second-player").selectedIndex = secondModelIndex;
+            document.getElementById("second-player").selectedIndex = secondModelIndex; // Adjust selected second player model.
 
             // Skip games with the same first/second player LLM if the "playersCanBeTheSame" flag is set to false.
             if (playersCanBeTheSame === false && firstModelIndex === secondModelIndex) {
                 continue;
             }
+
+            // Get game logs in the form [submissionFiles, gameLogFiles] for this set of games.
             let currentGameLogs = await playGame();
 
-            resetStats = true; // Reset stats after each set of matches.
+            resetStats = true; // Reset stats after each set of games.
 
             // If gameplay was stopped, stop the bulk run. Otherwise, write the current game logs.
             if (gameStopped) {
                 break;
             } else {
                 allGameLogs.push(currentGameLogs);
-                console.log("Pushed game to allGameLogs: " + currentGameLogs);
             }
         }
         // If gameplay was stopped, stop the bulk run.
@@ -312,9 +340,10 @@ async function bulkRun() {
             break;
         }
     }
-    bulkEnabled = false;
 
-    // If allGameLogs isn't empty, download a bulk ZIP file.
+    bulkEnabled = false; // Disable the bulkEnabled flag, since we are now done with the bulk run.
+
+    // If allGameLogs isn't empty (at least one game was played), download a bulk ZIP file.
     if (allGameLogs[0] !== undefined) {
         let gameType = document.getElementById("game-type").value;
         let promptType = document.getElementById("prompt-type").value;
@@ -331,16 +360,21 @@ function disableInputs(disableFlag) {
     document.getElementById("prompt-type").disabled = disableFlag;
     document.getElementById("manage-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
+
+    let radioButtons = document.getElementsByName("progress-display-type");
+    for (let i = 0; i < radioButtons.length; i++) {
+        radioButtons[i].disabled = disableFlag;
+    }
 }
 
 // Display selected gameplay options, as well as current game count, to the user.
-function updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount) {
-    // If the game was stopped, it internally sets the current game count to be (game count + 1). If we didn't decrement
-    // it here, it would show "Number of Games: 3" "Current Game: 4", for example.
-    if (gameStopped) {
-        currentGameCount = gameCount;
+function updateInfo(gameType, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount) {
+    // If all games have concluded, gameCount will internally be gameCount + 1, but we don't want to display that.
+    if (currentGameCount > gameCount) {
+        currentGameCount = gameCount
     }
 
+    // Update the Game Info display with the current values.
     document.getElementById("game-info").innerHTML =
         "<div><strong><em>Current Selections:</em></strong></div>" +
         "<div class=\"info\"><strong>Game Type: </strong>" + gameType + "</div>" +
@@ -351,7 +385,7 @@ function updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, 
         "<div class=\"info\"><strong>Current Game: </strong>" + currentGameCount + "</div>";
 }
 
-// Display game statistics to the user.
+// Update the Statistics display with the current game statistics.
 function updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin) {
     document.getElementById("first-player-wins").innerHTML = firstPlayerWins;
     document.getElementById("second-player-wins").innerHTML = secondPlayerWins;
@@ -377,6 +411,38 @@ function showBoardWithId(boardId) {
     document.getElementById(boardId).style.display = "table";
 }
 
+async function updateProgressDisplays(game, currentPlayer, progressDisplayType) {
+    let newContent = "";
+    let autoScrollDisplays = document.getElementById("checkbox-auto-scroll").checked; // We check this every time because the user may have disabled this option during gameplay.
+    let firstPlayerProgressDisplay = document.getElementById("first-player-game-progress");
+    let secondPlayerProgressDisplay = document.getElementById("second-player-game-progress");
+
+    if (progressDisplayType === "list") {
+        newContent = game.listBoard().replaceAll("\n", "<br>");
+        newContent = newContent.substring(newContent.lastIndexOf("The current state of the game is as follows: <br>") + 49) + "<br>";
+    }
+    if (progressDisplayType === "illustration") {
+        newContent = game.drawBoard().replaceAll("\n", "<br>");
+        newContent = newContent.substring(newContent.lastIndexOf("The current state of the game is as follows: <br>") + 49) + "<br>";
+    }
+    if (progressDisplayType === "image") {
+        let imageData = await game.screenshotBoard();
+        newContent = "<img class=\"progress-image\" src=\"" + imageData + "\"><br><br>";
+    }
+
+    if (currentPlayer === 1) {
+        document.getElementById("first-player-game-progress").innerHTML += newContent;
+    }
+    else {
+        document.getElementById("second-player-game-progress").innerHTML += newContent;
+    }
+
+    if (autoScrollDisplays) {
+        firstPlayerProgressDisplay.scrollTop = firstPlayerProgressDisplay.scrollHeight;
+        secondPlayerProgressDisplay.scrollTop = secondPlayerProgressDisplay.scrollHeight;
+    }
+}
+
 // Clear the progress displays on either side of the game board.
 function resetProgressDisplays() {
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
@@ -400,21 +466,56 @@ document.addEventListener("DOMContentLoaded", async function() {
         else if (event.target.value === "gomoku") {
             showBoardWithId("gomoku-board");
         }
+        else if (event.target.value === "") {
+            // Additional game types here.
+        }
+
+        // Update "info" display with current selections.
+        let firstPlayer = document.getElementById("first-player").value;
+        let secondPlayer = document.getElementById("second-player").value;
+        let promptType = document.getElementById("prompt-type").value;
+        let gameCount = document.getElementById("game-count").value;
+        let currentGameCount = 1;
+        updateInfo(event.target.value, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount);
     });
 
     // When the prompt type is changed, update the available LLMs in the player dropdowns.
-    document.getElementById("prompt-type").addEventListener("change", () => {
+    document.getElementById("prompt-type").addEventListener("change", (event) => {
         updatePlayerDropdowns();
+
+        // Update "info" display with current selections.
+        let gameType = document.getElementById("game-type").value;
+        let firstPlayer = document.getElementById("first-player").value;
+        let secondPlayer = document.getElementById("second-player").value;
+        let gameCount = document.getElementById("game-count").value;
+        let currentGameCount = 1;
+        updateInfo(gameType, event.target.value, firstPlayer, secondPlayer, gameCount, currentGameCount);
     });
 
     // When the first player LLM is changed, update the progress displays with the new first player.
-    document.getElementById("first-player").addEventListener("change", () => {
+    document.getElementById("first-player").addEventListener("change", (event) => {
         resetProgressDisplays();
+
+        // Update "info" display with current selections.
+        let gameType = document.getElementById("game-type").value;
+        let secondPlayer = document.getElementById("second-player").value;
+        let promptType = document.getElementById("prompt-type").value;
+        let gameCount = document.getElementById("game-count").value;
+        let currentGameCount = 1;
+        updateInfo(gameType, promptType, event.target.value, secondPlayer, gameCount, currentGameCount);
     });
 
     // When the second player LLM is changed, update the progress displays with the new second player.
-    document.getElementById("second-player").addEventListener("change", () => {
+    document.getElementById("second-player").addEventListener("change", (event) => {
         resetProgressDisplays();
+
+        // Update "info" display with current selections.
+        let gameType = document.getElementById("game-type").value;
+        let firstPlayer = document.getElementById("first-player").value;
+        let promptType = document.getElementById("prompt-type").value;
+        let gameCount = document.getElementById("game-count").value;
+        let currentGameCount = 1;
+        updateInfo(gameType, promptType, firstPlayer, event.target.value, gameCount, currentGameCount);
     });
 
     // When game count is changed, ensure that entered game count is >= 1. If not, alert the user and set game count to 1.
@@ -423,6 +524,14 @@ document.addEventListener("DOMContentLoaded", async function() {
             alert("Invalid game count.");
             document.getElementById("game-count").value = 1;
         }
+
+        // Update "info" display with current selections.
+        let gameType = document.getElementById("game-type").value;
+        let firstPlayer = document.getElementById("first-player").value;
+        let secondPlayer = document.getElementById("second-player").value;
+        let promptType = document.getElementById("prompt-type").value;
+        let currentGameCount = 1;
+        updateInfo(gameType, promptType, firstPlayer, secondPlayer, event.target.value, currentGameCount);
     });
 
     // Show "manage LLMs" window when the "Manage LLMs" button is clicked.
@@ -471,6 +580,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Hide the "confirm model removal" popup when the "cancel model removal" button is clicked.
     document.getElementById("cancel-removal-btn").addEventListener("click", () => {
+        document.getElementById("confirm-removal-button-container").innerHTML = "<button id=\"confirm-removal-btn\">Yes</button>" +
+            "<button id=\"cancel-removal-btn\">Cancel</button>";
         document.getElementById("confirm-removal-popup-container").style.display = "none";
         document.getElementById("confirm-removal-popup").style.display = "none";
     });
@@ -499,7 +610,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     });
 
-    // Event listener for the FAQs button
+    // Populate FAQ table and show FAW popup when FAW button is clicked.
     document.getElementById("FAQsButton").addEventListener("click", () => {
         fetchJSON(faqURL).then(data => {
             populateFAQTable(data);
@@ -523,30 +634,33 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
     //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 
     // Initialize user selections and game statistics information windows.
     let gameType = document.getElementById("game-type").value;
-    let gameCount = document.getElementById("game-count").value;
-    let currentGameCount = 1;
+    let promptType = document.getElementById("prompt-type").value;
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
-    let promptType = document.getElementById("prompt-type").value;
+    let gameCount = document.getElementById("game-count").value;
+    let currentGameCount = 1;
 
     // Initialize the game information, statistics, and progress displays.
-    updateInfo(gameType, firstPlayer, secondPlayer, promptType, gameCount, currentGameCount);
+    updateInfo(gameType, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount);
     updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     resetProgressDisplays();
+
+    // Show the game board based on the default gameType selection.
+    showBoardWithId(gameType + "-board");
 });

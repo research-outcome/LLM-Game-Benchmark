@@ -1,49 +1,78 @@
-/* Disable scrolling on main page. */
-html, body {
+html,
+body {
     height: 99%; /* Setting this to 100% adds a constant scroll bar. */
 }
 
+/* Set default font style for page and input fields. */
 body {
     font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
-    font-size: small;
+    font-size: 1.5vh;
 }
+select,
+button,
+input {
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 1.5vh;
+}
+
+/* Ensure that the 'pointer' mouse cursor type is used for all buttons. */
 button {
     cursor: pointer;
 }
-#options-and-info {
+
+/* Styling for button containers. */
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Styling for large buttons such as the "Run", "Bulk Run", "Stop", "View Prompt List", and "LLM List" buttons. */
+.large-button {
+    width: fit-content;
+    height: fit-content;
+    padding: 1vh;
+    font-size: 3vh;
+    margin-top: 1vh;
+    margin-left: 1vh;
+    margin-right: 1vh;
+}
+
+/* Styling for game options and info displays. */
+#options-and-info { /* Styling for container that holds the options and info displays. */
     background-color: #f1f1f1;
     justify-content: center;
     border: 0.5vh solid black;
     margin-bottom: 1vh;
     font-size: 1.5vh;
 }
-#options-and-info-divider {
+#options-and-info-divider { /* Styling for dividing line between options and info displays. */
     background-color: black;
     height: 1px;
 }
-#options, #game-info {
+#options,
+#game-info { /* Styling for options and info containers. */
     display: flex;
     padding: 0.5vh;
 }
-.option, .info {
+.option,
+.info { /* Styling for individual options and info items. */
     margin-left: auto;
     margin-right: auto;
 }
-select, button, input {
-    font-family: 'Tahoma', sans-serif;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 1.5vh;
-}
-#game-count-container {
+#game-count-container { /* Styling for "game count" item in options display. */
     width: 10%;
 }
-#game-count {
+#game-count { /* Styling for "game count" text input field in options display. */
     width: 15%;
 }
-#game-stats {
+
+/* Statistics display styling */
+#game-stats { /* Styling for game statistics display container. */
     display: flex;
     align-items: center;
     background-color: #f1f1f1;
@@ -51,32 +80,32 @@ select, button, input {
     border: 0.5vh solid black;
     font-size: 1.5vh;
 }
-#stats-table {
+#stats-table { /* Styling for the table displayed in the statistics display. */
     width: 90%;
     display: table;
     margin-left: auto;
     margin-right: auto;
     font-size: 1.5vh;
 }
-.stats-row {
+.stats-row { /* Styling for each row of the statistics table. */
     display: table-row;
 }
-.stats-header, .stats-cell {
+.stats-cell { /* Styling for each cell of the statistics table. */
     display: table-cell;
     text-align: center;
     padding: 0.5vh;
+    border: 0.1vh solid black;
 }
-.stats-header {
+.stats-header { /* Styling for the header cells of the statistics table. */
     background-color: black;
     color: white;
 }
-.stats-cell {
-    border: 0.1vh solid black;
-}
-.popup-container {
+
+/* Styling for page popups. */
+.popup-container { /* Styling for popup containers, which allows us to display a dark background over all other page content. */
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1; /* This ensures popups will be displayed in front of all other page content. */
     padding: 0;
     margin: 0;
     top: 0;
@@ -86,7 +115,7 @@ select, button, input {
     overflow: auto;
     background: rgba(0,0,0,0.75);
 }
-.popup {
+.popup { /* Styling for popups. */
     display: none;
     position: fixed;
     top: 0;
@@ -97,156 +126,184 @@ select, button, input {
     align-items: center;
     background-color: #f1f1f1;
     font-size: 2vh;
-    padding: 0.5vh;
+    padding: 1vh;
     border: 0.5vh solid black;
 }
-.popup-close-btn-container {
-    text-align: right;
-}
-.popup-close-btn {
-    width: 5vh;
-    height: 5vh;
+.close { /* Popup close button styling. */
+    color: #aaa;
+    float: right;
     font-size: 4vh;
-    color: red;
+    font-weight: bold;
+    position: relative;
 }
-#prompt-info {
-    display: none;
+.close:hover { /* Styling when hovering over a popup close button. */
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
-#manage-llms {
+
+/* Styling for "Manage LLMs" popup menu. */
+#manage-llms { /* Styling for "Manage LLMs" popup. */
     width: 90vw;
-    height: 90vh;
+    height: fit-content;
 }
-#llm-name-container {
+#llm-name-container { /* Container for "Name" input. This will contain a dropdown for predefined models, or a text input for "Other" type models. */
     display: inline;
 }
-#llm-url-label, #llm-url {
-    display: none;
+#llm-url-label,
+#llm-url { /* Styling for "URL" input and label. */
+    display: none; /* This is only displayed when adding an "AWS Bedrock" or "Other" type model. URL is predefined for OpenAI and Google models. */
 }
 #llm-supports-text-label,
 #llm-supports-text,
 #llm-supports-images-label,
-#llm-supports-images {
-    display: none;
+#llm-supports-images { /* Styling for "Supports Text?" and "Supports Images?" labels and inputs. */
+    display: none; /* These are only displayed when adding an "Other" type model. These values are predefined for OpenAI, Google, and AWS Bedrock models. */
 }
-#add-llm-btn {
+#add-llm-btn { /* "Add" button styling for Manage LLMs popup. */
     font-size: 2vh;
     padding: 0.5vh;
 }
-#llm-table {
+#llm-table { /* Styling for table displayed on "Manage LLMs" popup. */
     display: block;
-    height: 58vh;
+    height: 65vh;
     margin-top: 1vh;
     overflow: auto;
     border: 0.5vh solid black;
 }
-#llm-table-body {
+#llm-table-body { /* Styling for body of the LLM table. */
     width: 100%;
     display: table-row-group;
 }
-.llm-table-row {
+.llm-table-row { /* Styling for each row of the LLM table. */
     width: 100%;
     display: table-row;
 }
-.llm-table-cell {
+.llm-table-cell { /* Styling for each cell of the LLM table. */
     display: table-cell;
     padding: 1vh;
 }
 .llm-table-cell:nth-child(1),
-.llm-table-cell:nth-child(2),
-.llm-table-cell:nth-child(5) {
-    width: 15%;
+.llm-table-cell:nth-child(5),
+.llm-table-cell:nth-child(6) { /* Styling for the 1st (Type), 5th (Supports Text), and 6th (Supports Images) columns of the LLM table. */
+    width: 10%;
+}
+.llm-table-cell:nth-child(2) { /* Styling for 2nd (Name) column of the LLM table. */
+    width: 20%;
 }
 .llm-table-cell:nth-child(3),
-.llm-table-cell:nth-child(4) {
-    width: 30%;
+.llm-table-cell:nth-child(4) { /* Styling for the 3rd and 4th columns of the LLM table. */
+    width: 25%;
 }
-.llm-table-cell:nth-child(6) {
-    width: 5%;
-}
-#llm-table-header .llm-table-cell {
+.llm-table-header { /* Styling for the LLM table header row. */
     color: white;
     background-color: black;
 }
-.llm-url, .llm-api-key {
+.llm-url,
+.llm-api-key { /* Styling for the URL and API key text input fields in the table rows. */
     width: 100%;
 }
-.remove-llm-btn, #dummy-remove-llm-btn {
+.remove-llm-btn,
+#dummy-remove-llm-btn { /* Styling for the 'X' buttons in each row of the LLM table, along with the "dummy" 'X' button shown in the instructions. */
     margin-right: 1vh;
 }
-#confirm-removal-popup {
+#confirm-removal-popup { /* Styling for the popup that asks the user if they are sure they want to remove an LLM from the list. */
     width: fit-content;
     height: fit-content;
 }
-.large-button {
-    width: fit-content;
-    height: fit-content;
-    padding: 1vh;
-    font-size: 3vh;
-    margin-top: 1vh;
-    margin-left: 1vh;
-    margin-right: 1vh;
+#confirm-removal-button-container { /* Container for the "confirm model removal" buttons the "confirm model removal" popup. */
+    text-align: center;
 }
-#run-btn, #bulk-run-btn {
-    color: green;
-    width: 14vw;
-    font-size: 5vh;
+#confirm-removal-btn,
+#cancel-removal-btn { /* Styling for the buttons in the "confirm model removal" popup. */
+    margin: 0.5vh;
 }
-#stop-btn {
-    /* Stop button is hidden until play starts */
-    display: none;
-    color: red;
-    width: 30vw;
-    font-size: 5vh;
-    margin-left: auto;
-    margin-right: auto;
-}
-#gameplay-area {
+
+/* Styling for game buttons and progress display options. */
+#buttons-and-progress-options-container { /* Styling for the container that holds the progress options (progress display type, auto-scroll) as well as the Run/Stop buttons. */
     display: flex;
     justify-content: center;
-    margin-top: 1%;
+    align-items: center;
+}
+#progress-display-type,
+#progress-auto-scroll { /* Styling for the "Progress Display Type" and "Progress Auto Scroll" options displays. */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1vh;
+    background-color: lightgrey;
+    font-size: 2vh;
+    width: 100%;
+    height: 8vh;
+    border: 0.5vh solid black;
+}
+#progress-display-type label { /* Styling for the radio button labels in the "Progress Display Type" display. */
+    margin-right: 2vh;
+}
+.progress-image { /* Styling for the images shown for the "image" progress display type. */
+    width: 30vh;
+    height: 30vh;
+}
+#gameplay-button-container { /* Styling for the container that holds the buttons related to gameplay (Run, Bulk Run, and Stop) */
+    width: 65vh;
+}
+#run-btn,
+#bulk-run-btn { /* Styling for the "Run" and "Bulk Run" buttons. */
+    color: green;
+    width: 29vh;
+    font-size: 5vh;
+}
+#stop-btn { /* Styling for the "Stop" button, which is only shown while gameplay is active. */
+    display: none;
+    color: red;
+    width: 60vh;
+    font-size: 5vh;
+}
+
+/* Styling for game boards and progress displays. */
+#gameplay-area { /* Styling for area that contains game board and progress displays. */
+    display: flex;
+    justify-content: center;
+    margin-top: 1vh;
     height: 60vh;
 }
-#board-container {
-    height: 100%;
-}
-#first-player-game-progress, #second-player-game-progress {
+.progress-display {
     background-color: lightgrey;
-    width: 30vw;
+    width: 100%;
     font-size: 2vh;
-    margin-left: 1vw;
-    margin-right: 1vw;
     padding: 1vh;
     border: 0.5vh solid black;
     overflow-y: auto;
 }
-#tic-tac-toe-board, #connect-four-board, #gomoku-board {
+#tic-tac-toe-board,
+#connect-four-board,
+#gomoku-board { /* Tic-Tac-Toe, Connect-Four, and Gomoku board styling. */
     display: table;
     width: 60vh;
     height: 60vh;
-    margin-right: auto;
-    margin-left: auto;
+    margin-right: 1vh;
+    margin-left: 1vh;
 }
-#tic-tac-toe-board {
-    background-color: black;
-}
-#connect-four-board, #gomoku-board {
-    display: none;
-    border-spacing: 0.5vh;
-}
-.row {
+#tic-tac-toe-board .board-row,
+#connect-four-board .board-row,
+#gomoku-board .board-row { /* Styling for Tic-Tac-Toe, Connect-Four, and Gomoku game board rows. */
     display: table-row;
 }
-#tic-tac-toe-board .cell, #connect-four-board .cell, #gomoku-board .cell {
+#tic-tac-toe-board .board-cell,
+#connect-four-board .board-cell,
+#gomoku-board .board-cell { /* Styling for Tic-Tac-Toe, Connect-Four, and Gomoku game board cells. */
     display: table-cell;
     text-align: center;
     vertical-align: middle;
 }
-#tic-tac-toe-board .cell {
+/* Tic-Tac-Toe styling. */
+#tic-tac-toe-board .board-cell { /* Styling for all Tic-Tac-Toe board cells. */
     width: 33%;
     height: 33%;
     font-size: 13vh;
     background-color: white;
 }
+/* Styling for individual tic-tac-toe cells. Each cell requires a different set of borders. */
 #tic-tac-toe-1-1 {
     border-left: 1vh solid white;
     border-top: 1vh solid white;
@@ -301,15 +358,17 @@ select, button, input {
     border-right: 1vh solid white;
     border-bottom: 1vh solid white;
 }
-#connect-four-board {
+/* Connect-Four styling. */
+#connect-four-board { /* Styling for Connect-Four board. */
     background-color: #1965dd;
+    border-spacing: 0.5vh;
 }
-#connect-four-board .cell {
+#connect-four-board .board-cell { /* Styling for every rectangular cell of the Connect-Four board. */
     width: 9vh;
     height: 8vh;
     background-color: #1965dd;
 }
-.connect-four-space {
+.connect-four-space { /* Styling for the circles within the rectangular cells of the Connect-Four board. */
     width: 7vh;
     height: 7vh;
     background-color: white;
@@ -317,102 +376,80 @@ select, button, input {
     display: inline-block;
     position: relative;
 }
-#gomoku-board {
+/* Gomoku styling. */
+#gomoku-board { /* Gomoku board styling. */
     background-color: transparent;
     border-spacing: 0;
     border-collapse: collapse;
-    transform: translate(1.73vh, 1.73vh);
+    transform: translate(1.89vh, 1.89vh);
 }
-#gomoku-board .cell {
-    width: 3.46vh;
-    height: 3.46vh;
+#gomoku-board .board-cell { /* Styling for every cell in the Gomoku board. */
+    width: 3.78vh;
+    height: 3.78vh;
+    min-width: 3.78vh;
+    min-height: 3.78vh;
     background-color: #e7ae75;
-    border: 0.5vh solid #562509;
+    border: 0.2vh solid #562509;
 }
-#gomoku-board .row:nth-child(15) .cell {
+/* Internally we need to have a 15x15-square board, but we only want to display a 14x14-square board. */
+/* We hide the 15th row and columns' squares, but still show any stones placed in them. */
+#gomoku-board .board-row:nth-child(15) .board-cell { /* Hide every cell in the last row. */
     background-color: transparent;
-    border: 0.5vh solid transparent;
+    border: 0.2vh solid transparent;
 }
-#gomoku-board .cell:nth-child(15) {
+#gomoku-board .board-cell:nth-child(15) { /* Hide every cell in the last column. */
     background-color: transparent;
-    border: none;
+    border: 0.2vh solid transparent;
 }
-.black-stone {
-    width: 2vh;
-    height: 2vh;
+.black-stone,
+.white-stone { /* Styling for both black and white Gomoku stones. */
+    width: 2.5vh;
+    height: 2.5vh;
     background-color: black;
     border-radius: 50%;
     display: inline-block;
     position: relative;
     transform: translate(-2vh,-2vh);
 }
-.white-stone {
-    width: 2vh;
-    height: 2vh;
+.white-stone { /* Styling for white Gomoku stones. */
     background-color: white;
-    border-radius: 50%;
-    display: inline-block;
-    position: relative;
-    transform: translate(-2vh,-2vh);
-}
-#confirm-removal-button-container {
-    text-align: center;
-    margin-top: 1vh;
-    padding: 1vh;
 }
 
-/*Styling for prompt list pop up*/
-
+/* Styling for content of popups that display for the buttons on the bottom of the screen. */
 .modal-content {
     position: relative;
     background-color: white;
     margin: 5% auto;
-    padding: 20px;
+    padding: 1vh;
     border: 0.5vh solid black;
     width: 80%;
     max-width: 90%;
 }
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: relative;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-}
-
-.table-container {
+.table-container { /* Styling for the tables that display when clicking the buttons on the bottom of the screen. */
     margin: 0 auto; /* Center the container */
     box-sizing: border-box;
 }
-
-#promptTable, #LLMTable, #gameDetailsTable, #faqTable {
+#promptTable,
+#LLMTable,
+#gameDetailsTable,
+#faqTable { /* Styling for the individual popup tables. */
     width: 100%;
     border: 0.5vh solid black;
 }
-
-#promptTable tbody td, #LLMTable tbody td, #gameDetailsTable tbody td, #faqTable tbody td {
-    padding: 12px 8px;  /* Vertical and horizontal padding */
-}
-
-th {
+#promptTable th,
+#LLMTable th,
+#gameDetailsTable th,
+#faqTable th { /* Styling for popup table headers. */
     color: white;
     background-color: black;
 }
-
-/* Styling for prompt list, LLM list, and game details buttons */
-.button-container {
-    display: flex;
-    justify-content: center;
+#promptTable td,
+#LLMTable td,
+#gameDetailsTable td,
+#faqTable td { /* Styling for popup table cells. */
+    padding: 1vh;
 }
-
-/* Adjust width for game type column */
-.game-type-column {
-    width: 90px; /* Adjust this width as needed */
+/* Adjust width for "game type" column of the prompt table. */
+#game-type-column {
+    width: 10%;
 }
