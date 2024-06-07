@@ -101,8 +101,20 @@ function confirmRemoveModel(buttonId) {
     let index = buttonId.slice(15); // Remove "remove-btn-id-" from ID. We just want to retrieve the index of the model to remove.
     document.getElementById("confirm-removal-popup-container").style.display = "inline-block";
     document.getElementById("confirm-removal-popup").style.display = "inline-block";
+
+    // Replace confirm removal popup buttons to clear event listeners and prevent repeated deletion of models.
+    document.getElementById("confirm-removal-button-container").innerHTML = "<button class=\"small-button\" id=\"confirm-removal-btn\">Yes</button>" +
+        "<button class=\"small-button\" id=\"cancel-removal-btn\">Cancel</button>";
+
+    // If the "yes" button is clicked, add the current model.
     document.getElementById("confirm-removal-btn").addEventListener("click", function () {
         removeModel(index);
+    });
+
+    // If the "cancel" button is clicked, hide the confirm removal popup.
+    document.getElementById("cancel-removal-btn").addEventListener("click", function () {
+        document.getElementById("confirm-removal-popup-container").style.display = "none";
+        document.getElementById("confirm-removal-popup").style.display = "none";
     });
 }
 
@@ -110,16 +122,6 @@ function confirmRemoveModel(buttonId) {
 function removeModel(index) {
     document.getElementById("confirm-removal-popup-container").style.display = "none";
     document.getElementById("confirm-removal-popup").style.display = "none";
-
-    // Replace confirm removal popups to clear event listeners and prevent repeated deletion of models.
-    document.getElementById("confirm-removal-button-container").innerHTML = "<button id=\"confirm-removal-btn\">Yes</button>" +
-        "<button id=\"cancel-removal-btn\">Cancel</button>";
-    document.getElementById("cancel-removal-btn").addEventListener("click", function () {
-        document.getElementById("confirm-removal-button-container").innerHTML = "<button id=\"confirm-removal-btn\">Yes</button>" +
-            "<button id=\"cancel-removal-btn\">Cancel</button>";
-        document.getElementById("confirm-removal-popup-container").style.display = "none";
-        document.getElementById("confirm-removal-popup").style.display = "none";
-    })
 
     // Remove matching model from model list and update model lists (table and player dropdowns).
     models.splice(index, 1);

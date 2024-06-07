@@ -58,8 +58,6 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     prompt = prompt.replaceAll("\n", "\\n");
     prompt = prompt.replaceAll("\"", "\\\"");
 
-    console.log(prompt);
-
     // Return an array consisting of the text-based prompt and image data (if any).
     return [prompt, imageData];
 }

@@ -97,8 +97,8 @@ export class ConnectFour {
     // Take a screenshot of the board and encode it using base64.
     static async screenshotBoard() {
         return new Promise((resolve, reject) => {
-            // Screenshot size is standardized at 557px * 557px, regardless of user's window dimensions.
-            html2canvas(document.querySelector("#connect-four-board"), { width: 557, height: 557, windowWidth: 1910, windowHeight: 927, scale: 1, logging: false }).then((canvas) => {
+            // Screenshot size is standardized at 512px * 512px, regardless of user's window dimensions.
+            html2canvas(document.querySelector("#connect-four-board"), { width: 512, height: 512, windowWidth: 1677, windowHeight: 854, scale: 1, logging: false }).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
                     //saveAs(blob, "Connect Four Game Board.png");

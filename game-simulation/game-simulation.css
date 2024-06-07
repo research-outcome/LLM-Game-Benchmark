@@ -42,6 +42,11 @@ button {
     margin-right: 1vh;
 }
 
+/* Styling for small buttons such as the ones that appear in the "bulk run warning" and "confirm LLM removal" popups. */
+.small-button {
+    margin: 0.5vh;
+}
+
 /* Styling for game options and info displays. */
 #options-and-info { /* Styling for container that holds the options and info displays. */
     background-color: #f1f1f1;
@@ -127,6 +132,8 @@ button {
     background-color: #f1f1f1;
     font-size: 2vh;
     padding: 1vh;
+    width: fit-content;
+    height: fit-content;
     border: 0.5vh solid black;
 }
 .close { /* Popup close button styling. */
@@ -144,7 +151,7 @@ button {
 
 /* Styling for "Manage LLMs" popup menu. */
 #manage-llms { /* Styling for "Manage LLMs" popup. */
-    width: 90vw;
+    width: fit-content;
     height: fit-content;
 }
 #llm-name-container { /* Container for "Name" input. This will contain a dropdown for predefined models, or a text input for "Other" type models. */
@@ -210,13 +217,6 @@ button {
 #confirm-removal-popup { /* Styling for the popup that asks the user if they are sure they want to remove an LLM from the list. */
     width: fit-content;
     height: fit-content;
-}
-#confirm-removal-button-container { /* Container for the "confirm model removal" buttons the "confirm model removal" popup. */
-    text-align: center;
-}
-#confirm-removal-btn,
-#cancel-removal-btn { /* Styling for the buttons in the "confirm model removal" popup. */
-    margin: 0.5vh;
 }
 
 /* Styling for game buttons and progress display options. */
