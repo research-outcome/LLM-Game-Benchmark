@@ -101,8 +101,9 @@ async function playGame() {
         game = Gomoku;
     }
 
-    // Initialize prompt version, UUID, and game log files array for logging purposes.
+    // Initialize prompt version, provider email(s), UUID, and game log files array for logging purposes.
     let promptVersion = game.promptVersion();
+    let providerEmail = document.getElementById("provider-email").value;
     let uuid = uuidv7();
     let gameLogFiles = [];
 
@@ -276,9 +277,11 @@ async function playGame() {
             // Increment move count, because a move was just made.
             currentMoveCount++;
 
-            // If the number of moves has exceeded the maximum allowed, cancel the game.
-            if (currentMoveCount >= game.getMaxMoves()) {
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+            // If the number of moves has met the maximum allowed, cancel the game.
+            // Note that we add 1 to the maximum allowed moves during comparison because we initialize currentMoveCount to 1.
+            // Essentially, if getMaxMoves() = 20 and there have been 20 total moves made, we will cancel the game here.
+            if (currentMoveCount === game.getMaxMoves() + 1) {
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, game.getMaxMoves(), gameLog, moves, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
@@ -310,7 +313,7 @@ async function playGame() {
     // Once all games have finished, write a submission JSON file, re-enable inputs, and show the start button again.
     // Only generate a ZIP file if gameLogFiles is not empty; in other words, if at least one game has been played.
     if (gameLogFiles.length > 0) {
-        let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, "cedell@floridapoly.edu", uuid);
+        let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid);
         if (bulkEnabled) {
             return [submissionFiles, gameLogFiles];
         }
@@ -464,11 +467,6 @@ function resetProgressDisplays() {
 
 // Once the webpage has been fully loaded, initialize values and event listeners.
 document.addEventListener("DOMContentLoaded", async function() {
-    if (window.location.protocol === "file:") {
-        alert("This file cannot run directly from the HTML file. You must run it through a local server, or an IDE that creates a local server for you, such as JetBrains' WebStorm.");
-        document.body.innerHTML = "";
-    }
-
     // Reset stats and show board for selected game when the game type is changed.
     document.getElementById("game-type").addEventListener("change", (event) => {
         updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Update visual statistics immediately.

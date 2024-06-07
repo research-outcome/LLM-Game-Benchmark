@@ -154,6 +154,10 @@ button {
     width: fit-content;
     height: fit-content;
 }
+#provider-email {
+    width: 30%;
+    margin-bottom: 1vh;
+}
 #llm-name-container { /* Container for "Name" input. This will contain a dropdown for predefined models, or a text input for "Other" type models. */
     display: inline;
 }
@@ -173,7 +177,7 @@ button {
 }
 #llm-table { /* Styling for table displayed on "Manage LLMs" popup. */
     display: block;
-    height: 65vh;
+    height: 50vh;
     margin-top: 1vh;
     overflow: auto;
     border: 0.5vh solid black;
@@ -219,14 +223,14 @@ button {
     height: fit-content;
 }
 
-/* Styling for game buttons and progress display options. */
-#buttons-and-progress-options-container { /* Styling for the container that holds the progress options (progress display type, auto-scroll) as well as the Run/Stop buttons. */
+/* Styling for game buttons and options windows on either side of the game buttons. */
+#buttons-and-progress-options-container { /* Styling for the container that holds the Run/Stop buttons as well as the options displays on either side of them. */
     display: flex;
     justify-content: center;
     align-items: center;
 }
-#progress-options-container,
-#bulk-run-options-container {
+#progress-display-type-container,
+#option-checkbox-container { /* Styling for the options displays on either side of the gameplay buttons. */
     text-align: center;
     justify-content: center;
     align-content: center;
@@ -241,7 +245,6 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 1vh;
 }
 #progress-display-type label { /* Styling for the radio button labels in the "Progress Display Type" display. */
     margin-right: 2vh;
@@ -264,6 +267,9 @@ button {
     color: red;
     width: 60vh;
     font-size: 5vh;
+}
+#progress-auto-scroll { /* Styling for the container that holds the "Auto-Scroll Progress Displays" and "Allow LLMs to Play Against Themselves in Bulk Runs" checkboxes. */
+    margin-bottom: 1vh;
 }
 
 /* Styling for game boards and progress displays. */

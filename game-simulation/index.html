@@ -10,16 +10,33 @@
     </head>
     <body>
         <script>
-            if (window.location.protocol === "file:") {
+            window.addEventListener('error', function (event) {
                 document.body.style.display = "flex";
                 document.body.style.justifyContent = "center";
                 document.body.style.alignItems = "center";
-                document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
-                        "This site cannot run directly from the HTML file. You must run it on a server, or an IDE that creates a server for you.<br>" +
-                        "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
-                    "</div>";
-                window.stop();
-            }
+                event.preventDefault(); // Prevent default browser error handling.
+                // If a CORS error occurs due to the user opening the HTML file directly, display an explanation and offer some fixes.
+                if (event.target.tagName === 'SCRIPT') {
+                    document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
+                            "Your browser is preventing you from running this site from directly from the HTML file.<br><br>" +
+                            "To fix this issue on Firefox, navigate to 'about:config' and set 'security.fileuri.strict_origin_policy' to 'false'.<br><br>" +
+                            "To fix this issue on Microsoft Edge, run Microsoft Edge with the following command, changing the directories as necessary:<br>" +
+                            "\"\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\".<br>" +
+                            "Then, you can drag-and-drop the HTML file onto your browser window; it should open and run as normal.<br><br>" +
+                            "To fix this issue on Google Chrome, run Google Chrome with the following command, changing the directories as necessary:<br>" +
+                            "\"\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\"<br>" +
+                            "Then, you can drag-and-drop the HTML file onto your browser window; it should open and run as normal.<br><br>" +
+                            "If these fixes did not work for your browser, you must either run the file on a server, or run the file with an IDE that creates a server for you.<br>" +
+                            "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
+                        "</div>";
+                    window.stop();
+                } else {
+                    document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
+                            "An unexpected error occurred." +
+                        "</div>";
+                    window.stop();
+                }
+            }, true);
         </script>
         <script type="importmap">
             {
@@ -113,7 +130,7 @@
         <!-- Run buttons start gameplay, while stop button stops gameplay. -->
         <!-- Stop button is only shown during gameplay. -->
         <div id="buttons-and-progress-options-container">
-            <div id="progress-options-container">
+            <div id="progress-display-type-container">
                 <div id="progress-display-type">
                     <strong style="display: block">Progress Display Type:</strong>
                     <input type="radio" id="radio-list" name="progress-display-type" value="list" checked>
@@ -125,11 +142,6 @@
                     <input type="radio" id="radio-image" name="progress-display-type" value="image">
                     <label for="radio-list">Image</label>
                 </div>
-
-                <div id="progress-auto-scroll">
-                    <input type="checkbox" id="checkbox-auto-scroll" name="auto-scroll" checked />
-                    <label for="checkbox-auto-scroll">Auto-Scroll Progress Displays</label>
-                </div>
             </div>
 
 
@@ -139,7 +151,12 @@
                 <button class="large-button" id="stop-btn">Stop</button>
             </div>
 
-            <div id="bulk-run-options-container">
+            <div id="option-checkbox-container">
+                <div id="progress-auto-scroll">
+                    <input type="checkbox" id="checkbox-auto-scroll" name="auto-scroll" checked />
+                    <label for="checkbox-auto-scroll">Auto-Scroll Progress Displays</label>
+                </div>
+
                 <div id="bulk-run-same-players">
                     <input type="checkbox" id="checkbox-bulk-run-same-players" name="bulk-run-same-players" />
                     <label for="checkbox-auto-scroll">Allow LLMs to Play Against Themselves in Bulk Runs</label>
@@ -524,8 +541,11 @@
                     <li>To add a new LLM to the lists, make your selection and then click 'Add'.</li>
                     <li>To change an LLM's URL or API Key, edit it in the corresponding textbox.</li>
                     <li>To remove an LLM, use the <button id="dummy-remove-llm-btn" style="display: inline">X</button>button.</li>
+                    <li>To include your email address(es) in your submission files, please enter them in the "Email Address(es)" text input box below. Please separate email addresses with commas.</li>
                     <li><em>Some models, such as gemini-pro-vision, do not support text-only prompts. The "Supports Text?" field refers to supporting text-only prompts.</em></li>
                 </ul>
+                <label for="provider-email">Submission File Email Address(es): </label>
+                <input type="text" id="provider-email">
                 <div id="add-llm-options">
                     <label for="llm-type">Type: </label>
                     <select id="llm-type">
