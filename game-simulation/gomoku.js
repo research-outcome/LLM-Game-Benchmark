@@ -89,9 +89,10 @@ export class Gomoku {
     // Take a screenshot of the board and encode it using base64.
     static async screenshotBoard() {
         return new Promise((resolve, reject) => {
-            // Screenshot size is standardized at 557px * 557px, regardless of user's window dimensions.
-            // Board is offset by 18 pixels to account for stones placed on the edge of the board.
-            html2canvas(document.querySelector("#gomoku-board"), { width: 557, height: 557, x: -18, y: -18, windowWidth: 1910, windowHeight: 927, scale: 1, logging: false }).then((canvas) => {
+            // Screenshot size is standardized at 512px * 512px, regardless of user's window dimensions.
+            // Board is offset down and right by 17 pixels to account for stones placed on the edge of the board.
+            // This is because we are internally using a 15x15 grid to store stones, but we hide the last row/column of spaces.
+            html2canvas(document.querySelector("#gomoku-board"), { width: 512, height: 512, x: -17, y: -17, windowWidth: 1677, windowHeight: 854, scale: 1, logging: false }).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
                     //saveAs(blob, "Gomoku Game Board.png");

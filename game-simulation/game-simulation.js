@@ -1,12 +1,18 @@
-import { uuidv7 } from "./uuidv7.js";
-import { Model } from "./classes.js";
-import { TicTacToe } from "./tic-tac-toe.js";
-import { ConnectFour } from "./connect-four.js";
-import { Gomoku } from "./gomoku.js";
-import { getMove, processMove } from "./web-service-communication.js";
-import { generateGameLogFiles, generateSubmissionFiles, downloadZipFile, downloadBulkZipFile } from "./logging.js";
-import { updateAddModelFields, updatePlayerDropdowns, addModel, checkForEmptyApiKeys, getCurrentModel } from "./add-edit-llms.js";
-import { fetchJSON, populatePromptTable, populateLLMTable, populateGameDetailsTable, populateFAQTable } from "./info.js";
+import {uuidv7} from "./uuidv7.js";
+import {Model} from "./classes.js";
+import {TicTacToe} from "./tic-tac-toe.js";
+import {ConnectFour} from "./connect-four.js";
+import {Gomoku} from "./gomoku.js";
+import {getMove, processMove} from "./web-service-communication.js";
+import {downloadBulkZipFile, downloadZipFile, generateGameLogFiles, generateSubmissionFiles} from "./logging.js";
+import {
+    addModel,
+    checkForEmptyApiKeys,
+    getCurrentModel,
+    updateAddModelFields,
+    updatePlayerDropdowns
+} from "./add-edit-llms.js";
+import {fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable} from "./info.js";
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -487,6 +493,15 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("prompt-type").addEventListener("change", (event) => {
         updatePlayerDropdowns();
 
+        // Match selected "progress visualization type" with newly-selected prompt type.
+        let radioButtons = document.getElementsByName("progress-display-type");
+        for (let i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].value === event.target.value) {
+                radioButtons[i].checked = true;
+                break;
+            }
+        }
+
         // Update "info" display with current selections.
         let gameType = document.getElementById("game-type").value;
         let firstPlayer = document.getElementById("first-player").value;
@@ -565,28 +580,47 @@ document.addEventListener("DOMContentLoaded", async function() {
         playGame();
     });
 
-    // When the "bulk run" button is clicked, run games for all combinations of LLMs in the player dropdowns.
+    // When the "bulk run" button is clicked, display the total number of games and ask the user if they are sure they want to continue.
     document.getElementById("bulk-run-btn").addEventListener("click", () => {
+        document.getElementById("bulk-run-warning-popup-container").style.display = "block";
+        document.getElementById("bulk-run-warning-popup").style.display = "block";
+
+        let firstPlayerModelCount = document.getElementById("first-player").length;
+        let secondPlayerModelCount = document.getElementById("second-player").length;
+        let gamesPerCombination = document.getElementById("game-count").value;
+
+        // If the "playersCanBeTheSame" flag is set to "false", decrement secondPlayerModelCount by 1.
+        // This is because models will not play against themselves with this flag set to false.
+        if (!playersCanBeTheSame) {
+            secondPlayerModelCount--;
+        }
+
+        document.getElementById("bulk-run-game-count").innerHTML = (firstPlayerModelCount * secondPlayerModelCount * gamesPerCombination).toString();
+    });
+
+    // When the "yes" button on the bulk run warning popup is clicked, hide the popup and start the bulk run.
+    document.getElementById("start-bulk-run-btn").addEventListener("click", () => {
+        document.getElementById("bulk-run-warning-popup-container").style.display = "none";
+        document.getElementById("bulk-run-warning-popup").style.display = "none";
         bulkRun();
     });
 
-    // Stop gameplay when the "stop" button is clicked.
+    // When the "no" button on the bulk run warning popup is clicked, hide the popup and do NOT start a bulk run.
+    document.getElementById("cancel-bulk-run-btn").addEventListener("click", () => {
+        document.getElementById("bulk-run-warning-popup-container").style.display = "none";
+        document.getElementById("bulk-run-warning-popup").style.display = "none";
+    });
+
+    // Stop gameplay and clear progress displays when the "stop" button is clicked.
     document.getElementById("stop-btn").addEventListener("click", () => {
         console.log("Stopping gameplay...");
+        resetProgressDisplays();
         gameStopped = true;
     });
 
     // Add an LLM to the LLM list when the "add" button is clicked.
     document.getElementById("add-llm-btn").addEventListener("click", () => {
         addModel();
-    });
-
-    // Hide the "confirm model removal" popup when the "cancel model removal" button is clicked.
-    document.getElementById("cancel-removal-btn").addEventListener("click", () => {
-        document.getElementById("confirm-removal-button-container").innerHTML = "<button id=\"confirm-removal-btn\">Yes</button>" +
-            "<button id=\"cancel-removal-btn\">Cancel</button>";
-        document.getElementById("confirm-removal-popup-container").style.display = "none";
-        document.getElementById("confirm-removal-popup").style.display = "none";
     });
 
     // Populate prompt list table and show prompt list when prompt list button is clicked.

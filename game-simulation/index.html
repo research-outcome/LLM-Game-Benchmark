@@ -125,6 +125,19 @@
             </div>
         </div>
 
+        <!-- Bulk run warning popup that appears before the user starts a bulk game. -->
+        <div class="popup-container" id="bulk-run-warning-popup-container">
+            <div class="popup" id="bulk-run-warning-popup">
+                Bulk run will run <strong id="bulk-run-game-count"></strong> games.
+                Do you want to continue?<br>
+                <div class="button-container">
+                    <button class="small-button" id="start-bulk-run-btn">Yes</button>
+                    <button class="small-button" id="cancel-bulk-run-btn">No</button>
+                </div>
+            </div>
+        </div>
+
+
 
         <!-- Gameplay Area container holds game boards as well as game progress displays for each player. -->
         <div id="gameplay-area">
@@ -472,9 +485,9 @@
 
         <!-- This container holds the Prompt List, LLM List, Game Details, FAQs, and User Guide buttons. -->
         <div class="button-container">
-            <button class="large-button" id="promptListButton">View Prompt List</button>
-            <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="gameDetailsButton">Game Details</button>
+            <button class="large-button" id="promptListButton">Prompt Details</button>
+            <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="FAQsButton">FAQs</button>
             <button class="large-button" id="userGuideButton">User Guide</button>
         </div>
@@ -547,9 +560,9 @@
         <div class="popup-container" id="confirm-removal-popup-container">
             <div class="popup" id="confirm-removal-popup">
                 Are you sure you want to remove this LLM?<br>
-                <div id="confirm-removal-button-container">
-                    <button id="confirm-removal-btn">Yes</button>
-                    <button id="cancel-removal-btn">Cancel</button>
+                <div class="button-container" id="confirm-removal-button-container">
+                    <button class="small-button" id="confirm-removal-btn">Yes</button>
+                    <button class="small-button" id="cancel-removal-btn">Cancel</button>
                 </div>
             </div>
         </div>
