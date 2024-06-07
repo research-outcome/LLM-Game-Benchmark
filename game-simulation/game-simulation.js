@@ -28,9 +28,8 @@ const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FA
 
 // Gameplay flags
 let bulkEnabled = false; // This flag determines whether the game will generate a "bulk" ZIP file.
-let playersCanBeTheSame = false; // This flag determines whether LLMs will go against themselves during a bulk run.
+const playersCanBeTheSame = false; // This flag determines whether LLMs will go against themselves during a bulk run.
 let gameStopped = false; // This flag is used to halt gameplay when the user presses the "stop" button.
-let resetStats = true; // This flag is used to reset the statistics window.
 
 // Main gameplay loop
 async function playGame() {
@@ -49,7 +48,6 @@ async function playGame() {
     let firstPlayer = document.getElementById("first-player").value;
     let secondPlayer = document.getElementById("second-player").value;
     let currentGameCount = 1;
-
     let progressDisplayType;
     let radioButtons = document.getElementsByName("progress-display-type");
     for (let i = 0; i < radioButtons.length; i++) {
@@ -58,16 +56,32 @@ async function playGame() {
         }
     }
 
-    // Obtain existing statistics from the "stats" box.
-    let firstPlayerWins = document.getElementById("first-player-wins").innerHTML;
-    let secondPlayerWins = document.getElementById("second-player-wins").innerHTML;
-    let draws = document.getElementById("draws").innerHTML;
-    let firstPlayerTotalMoveCount = document.getElementById("first-player-total-move-count").innerHTML;
-    let secondPlayerTotalMoveCount= document.getElementById("second-player-total-move-count").innerHTML;
-    let firstPlayerDisqualifications= document.getElementById("first-player-disqualifications").innerHTML;
-    let secondPlayerDisqualifications= document.getElementById("second-player-disqualifications").innerHTML;
-    let firstPlayerTotalInvalidMoves = document.getElementById("first-player-invalid-moves").innerHTML;
-    let secondPlayerTotalInvalidMoves = document.getElementById("second-player-invalid-moves").innerHTML;
+    // If bulk play is enabled, reset stats for every session. We should not keep stats from sessions from previous LLM combinations.
+    if (bulkEnabled) {
+        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    // Obtain existing statistics (from previous sessions) from the "stats" box.
+    let previousFirstPlayerWins = document.getElementById("first-player-wins").innerHTML;
+    let previousSecondPlayerWins = document.getElementById("second-player-wins").innerHTML;
+    let previousDraws = document.getElementById("draws").innerHTML;
+    let previousFirstPlayerTotalMoveCount = document.getElementById("first-player-total-move-count").innerHTML;
+    let previousSecondPlayerTotalMoveCount= document.getElementById("second-player-total-move-count").innerHTML;
+    let previousFirstPlayerDisqualifications= document.getElementById("first-player-disqualifications").innerHTML;
+    let previousSecondPlayerDisqualifications= document.getElementById("second-player-disqualifications").innerHTML;
+    let previousFirstPlayerTotalInvalidMoves = document.getElementById("first-player-invalid-moves").innerHTML;
+    let previousSecondPlayerTotalInvalidMoves = document.getElementById("second-player-invalid-moves").innerHTML;
+
+    // Initialize statistics for this gameplay session to 0.
+    let firstPlayerWins = 0;
+    let secondPlayerWins = 0;
+    let firstPlayerDisqualifications = 0;
+    let secondPlayerDisqualifications = 0;
+    let draws = 0;
+    let firstPlayerTotalMoveCount = 0;
+    let secondPlayerTotalMoveCount = 0;
+    let firstPlayerTotalInvalidMoves = 0;
+    let secondPlayerTotalInvalidMoves = 0;
 
     // Get game class.
     let game;
@@ -86,20 +100,6 @@ async function playGame() {
     let uuid = uuidv7();
     let gameLogFiles = [];
 
-    // If the user has pressed the "reset stats" button, reset the stats.
-    if (resetStats) {
-        firstPlayerWins = 0;
-        secondPlayerWins = 0;
-        firstPlayerDisqualifications = 0;
-        secondPlayerDisqualifications = 0;
-        draws = 0;
-        firstPlayerTotalMoveCount = 0;
-        secondPlayerTotalMoveCount = 0;
-        firstPlayerTotalInvalidMoves = 0;
-        secondPlayerTotalInvalidMoves = 0;
-        resetStats = false;
-    }
-
     // Initialize game progress displays.
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
     document.getElementById("second-player-game-progress").innerHTML = "<strong><u>Second Player:</u> " + document.getElementById("second-player").value + "</strong><br>";
@@ -108,10 +108,6 @@ async function playGame() {
     document.getElementById("run-btn").style.display = "none";  // Hide run button
     document.getElementById("bulk-run-btn").style.display = "none"; // Hide bulk run button
     document.getElementById("stop-btn").style.display = "block";  // Show stop button
-
-    // Update gameplay displays.
-    updateInfo(gameType, promptType, firstPlayer, secondPlayer, gameCount, currentGameCount); // Initialize game information field.
-    updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, 0, 0); // Update statistics field.
 
     disableInputs(true); // Disable input fields.
 
@@ -259,8 +255,19 @@ async function playGame() {
                 break;
             }
 
-            // Update statistics information and increment move count, because a move has taken place.
-            updateStatistics(firstPlayerWins, secondPlayerWins, draws, firstPlayerDisqualifications, secondPlayerDisqualifications, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin);
+            // Calculate new statistics information by adding current session's stats to previous stats from before this session started.
+            let newFirstPlayerWins = (parseInt(previousFirstPlayerWins) + firstPlayerWins).toString();
+            let newSecondPlayerWins = (parseInt(previousSecondPlayerWins) + secondPlayerWins).toString();
+            let newDraws = (parseInt(previousDraws) + draws).toString();
+            let newFirstPlayerDisqualifications = (parseInt(previousFirstPlayerDisqualifications) + firstPlayerDisqualifications).toString();
+            let newSecondPlayerDisqualifications = (parseInt(previousSecondPlayerDisqualifications) + secondPlayerDisqualifications).toString();
+            let newFirstPlayerTotalMoveCount = (parseInt(previousFirstPlayerTotalMoveCount) + firstPlayerTotalMoveCount).toString();
+            let newSecondPlayerTotalMoveCount = (parseInt(previousSecondPlayerTotalMoveCount) + secondPlayerTotalMoveCount).toString();
+            let newFirstPlayerTotalInvalidMoves = (parseInt(previousFirstPlayerTotalInvalidMoves) + firstPlayerTotalInvalidMoves).toString();
+            let newSecondPlayerTotalInvalidMoves = (parseInt(previousSecondPlayerTotalInvalidMoves) + secondPlayerTotalInvalidMoves).toString();
+            updateStatistics(newFirstPlayerWins, newSecondPlayerWins, newDraws, newFirstPlayerDisqualifications, newSecondPlayerDisqualifications, newFirstPlayerTotalMoveCount, newSecondPlayerTotalMoveCount, newFirstPlayerTotalInvalidMoves, newSecondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin);
+
+            // Increment move count, because a move was just made.
             currentMoveCount++;
 
             // If the number of moves has exceeded the maximum allowed, cancel the game.
@@ -325,8 +332,6 @@ async function bulkRun() {
 
             // Get game logs in the form [submissionFiles, gameLogFiles] for this set of games.
             let currentGameLogs = await playGame();
-
-            resetStats = true; // Reset stats after each set of games.
 
             // If gameplay was stopped, stop the bulk run. Otherwise, write the current game logs.
             if (gameStopped) {
@@ -454,7 +459,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Reset stats and show board for selected game when the game type is changed.
     document.getElementById("game-type").addEventListener("change", (event) => {
         updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Update visual statistics immediately.
-        resetStats = true; // Internal statistics will be reset on next game run.
 
         // Show board for selected game type and hide all others.
         if (event.target.value === "tic-tac-toe") {
@@ -553,7 +557,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // When the "reset stats" button is clicked, reset the stats both visually and internally.
     document.getElementById("reset-btn").addEventListener("click", () => {
-        resetStats = true; // Reset stats internally when next game starts.
         updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Reset visual stats immediately.
     });
 
@@ -634,17 +637,17 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
-    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 
