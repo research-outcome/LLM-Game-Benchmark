@@ -17,11 +17,11 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     // Note that for the "image" prompt, the image data is handled separately, and is not part of the text prompt.
     if (promptType === "list") {
         prompt += game.listBoard();
-        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 46);
     }
     else if (promptType === "illustration") {
         prompt += game.drawBoard();
-        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 46);
     }
     else if (promptType === "image") {
         // Generate the text-based portion of the image prompt and append it to the text-based prompt.
@@ -57,6 +57,8 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     // Clean the prompt for the web service call.
     prompt = prompt.replaceAll("\n", "\\n");
     prompt = prompt.replaceAll("\"", "\\\"");
+
+    console.log(prompt);
 
     // Return an array consisting of the text-based prompt and image data (if any).
     return [prompt, imageData];

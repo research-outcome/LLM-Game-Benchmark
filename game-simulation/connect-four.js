@@ -84,7 +84,7 @@ export class ConnectFour {
                         break;
                 }
             }
-            gameStatus += "\n";
+            gameStatus += " \n";
         }
         return gameStatus;
     }
@@ -161,7 +161,7 @@ export class ConnectFour {
         }
     }
 
-    // Visualize the board state in a text-based format to be displayed on the game progress windows.
+    // Visualize the board state in a text-based format to be used for the visual game logs in the text files.
     // Note that this format is different from the output given from the "drawBoard()" function, adding extra separators |.
     static visualizeBoardState() {
         let boardState = "";
