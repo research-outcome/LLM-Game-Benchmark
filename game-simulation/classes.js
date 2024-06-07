@@ -91,14 +91,14 @@ export class Model {
 
 // 'GameLogFiles' class which contains a text file, JSON file, a CSV file with game information, and another CSV file with move information.
 export class GameLogFiles {
-    #textFileName;
-    #textFileContent;
-    #jsonFileName;
-    #jsonFileContent;
-    #csvFileName;
-    #csvFileContent;
-    #movesCsvFileName;
-    #movesCsvFileContent;
+    #textFileName; // Name of text file for current game.
+    #textFileContent; // Content of text file for current game.
+    #jsonFileName; // Name of JSON file for current game.
+    #jsonFileContent; // Content of JSON file for current game.
+    #csvFileName; // Name of CSV summary file for current game. Does NOT include move information.
+    #csvFileContent; // Content of CSV summary file for current game.
+    #movesCsvFileName; // Name of CSV moves file for current game
+    #movesCsvFileContent; // Content of CSV moves file for current game, containing information about every move made.
 
     constructor(textFileName, textFileContent, jsonFileName, jsonFileContent, csvFileName, csvFileContent, movesCsvFileName, movesCsvFileContent) {
         this.#textFileName = textFileName;

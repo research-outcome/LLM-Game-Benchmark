@@ -1,105 +1,96 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Generate a prompt given the game type, prompt type, and player number.
 import {Move} from "./classes.js";
-import {TicTacToe} from "./tic-tac-toe.js";
-import {ConnectFour} from "./connect-four.js";
-import {Gomoku} from "./gomoku.js";
 
 let currentStatus = "";
 
-async function createPrompt(promptType, gameType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
-    let prompt = "";
-    let game;
-    let playerInvalidMoves;
+// Generate a prompt to call the LLM with based on the prompt type, game type, and model to be called..
+async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
+    let prompt = ""; // This string will contain the text-based prompt.
+    let imageData = ""; // This string will contain the base64-encoded image data for the "image" prompt type.
+    let playerInvalidMoves; // This variable will store the current player's invalid moves.
 
-    if (gameType === "tic-tac-toe") {
-        game = TicTacToe;
-    }
-    else if (gameType === "connect-four") {
-        game = ConnectFour;
-    }
-    else if (gameType === "gomoku") {
-        game = Gomoku;
-    }
-
+    // Append the game explanation to the prompt.
     prompt += game.explainGame();
 
+    // Dynamically generate a prompt based on the game/prompt type, and append it to the prompt.
+    // Note that for the "image" prompt, the image data is handled separately, and is not part of the text prompt.
     if (promptType === "list") {
-        let firstPlayerMoves = game.listPlayerMoves(1);
-        let secondPlayerMoves = game.listPlayerMoves(2);
-        prompt += game.listBoard(firstPlayerMoves, secondPlayerMoves);
+        prompt += game.listBoard();
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
     }
     else if (promptType === "illustration") {
-        prompt += game.drawBoard()
+        prompt += game.drawBoard();
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
     }
     else if (promptType === "image") {
-        prompt += game.imagePrompt();
-        prompt += "The current state of the game is given in the attached image. \n";
+        // Generate the text-based portion of the image prompt and append it to the text-based prompt.
+        prompt += game.imagePrompt(); // Describe what the screenshot will look like for the given game type.
+        prompt += " The current state of the game is given in the attached image. \n";
+
+        // Generate the base64-encoded board screenshot data and store it in the "imageData" variable.
+        // Note that the image data is NOT part of the text-based prompt.
+        imageData = await game.screenshotBoard();
+
+        currentStatus = imageData; // Store image data in current status so that generated images can be logged.
     }
 
-    currentStatus = prompt.substring(prompt.lastIndexOf("The current state"));
-
+    // Append the LLM role explanation and request for move to the text-based prompt.
     if (currentPlayer === 1) {
-        prompt += "You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the first player. What would be your next move? \n";
+        prompt += " You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the first player. What would be your next move? \n";
         playerInvalidMoves = firstPlayerCurrentInvalidMoves;
     }
     else {
-        prompt += "You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the second player. What would be your next move? \n";
+        prompt += " You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the second player. What would be your next move? \n";
         playerInvalidMoves = secondPlayerCurrentInvalidMoves;
     }
 
+    // Append the desired response formatting for the current game to the text-based prompt.
     prompt += game.formatNextMove();
 
+    // Append the warning about disqualification for invalid moves to the text-based prompt.
     prompt += game.invalidMoveWarning();
 
-    prompt += "You currently have " + playerInvalidMoves + " invalid moves."
+    // Append the player's current number of invalid moves to the text-based prompt.
+    prompt += " You currently have " + playerInvalidMoves + " invalid moves."
 
-    return escapeStringForJson(prompt);
+    // Clean the prompt for the web service call.
+    prompt = prompt.replaceAll("\n", "\\n");
+    prompt = prompt.replaceAll("\"", "\\\"");
+
+    // Return an array consisting of the text-based prompt and image data (if any).
+    return [prompt, imageData];
 }
-
-
 
 // Create a system prompt given a model.
-function createSystemPrompt(currentModel) {
+function createSystemPrompt(game) {
     let systemPrompt = "";
-    return escapeStringForJson(systemPrompt);
+
+    // Clean the prompt for the web service call.
+    systemPrompt = systemPrompt.replaceAll("\n", "\\n");
+    systemPrompt = systemPrompt.replaceAll("\"", "\\\"");
+
+    return systemPrompt;
 }
 
-// Reformat special characters for use in prompts.
-function escapeStringForJson(input) {
-    input = input.replace("\n", "\\n");
-    return input.replace("\"", "\\\"");
-}
-
-async function screenshotBoard(gameType) {
-    if (gameType === "tic-tac-toe") {
-        return await TicTacToe.screenshotBoard();
-    }
-    else if (gameType === "connect-four") {
-        return await ConnectFour.screenshotBoard();
-    }
-    else if (gameType === "gomoku") {
-        return await Gomoku.screenshotBoard();
-    }
-}
-
-// Call an LLM with a given prompt, and return its response.
+// Call an LLM with a given prompt and base64-encoded board screenshot (if any) and return its response.
 export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData, model) {
     let modelType = model.getType();
     let modelName = model.getName();
     let apiKey = model.getApiKey();
 
-    try {
-        if (modelType === "Google") {
+    // If we are attempting to call a Google model, call the model through the Google API.
+    if (modelType === "Google") {
+        try {
             let genAI = new GoogleGenerativeAI(apiKey);
             let result;
             model = genAI.getGenerativeModel({ model: modelName });
+
             // If we have image data, call the model with the image.
             if (imageData !== "") {
                 let image = {
                     inlineData: {
-                        data: imageData.split(',')[1],
+                        data: imageData.split(',')[1], // Discard the image metadata and only send the base64-encoded image.
                         mimeType: "image/png",
                     }
                 };
@@ -117,21 +108,19 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             }
             return response.candidates[0].content.parts[0].text;
         }
-    }
-    catch (e) {
-        return "Network Error Occurred";
+        catch (e) {
+            return "Network Error Occurred";
+        }
     }
 
-
-    return new Promise((resolve, reject) => {
+    // If we are attempting to call an OpenAI or Bedrock LLM, attempt to fetch the response through its web API.
+    return new Promise((resolve) => {
         let url = new URL(model.getUrl());
         let requestBody;
 
         // Generate a request for an OpenAI model.
         if (modelType === "OpenAI") {
-            // If there is image data, we have a model that supports images and we are using the image prompt.
-            // Therefore, we should call the model with the image data if there is image data available.
-            // Otherwise, just call the model with a text-based prompt.
+            // Call the model with the image data if there is image data available.
             if (imageData !== "") {
                 requestBody = JSON.stringify({
                     "model": modelName,
@@ -162,6 +151,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             }
         }
 
+        // Generate a request for a Bedrock model.
         if (modelType === "AWS Bedrock") {
             if (imageData !== "") {
                 requestBody = JSON.stringify({
@@ -169,7 +159,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
                     "modelId": modelName,
                     "apiKey": model.getApiKey(),
                     "type": modelName.split('.')[0],
-                    "image": imageData.split(',')[1],
+                    "image": imageData.split(',')[1], // Discard the image metadata and only send the base64-encoded image.
                 });
             } else {
                 requestBody = JSON.stringify({
@@ -181,8 +171,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             }
         }
 
-        console.log(requestBody);
-
+        // Attempt to fetch the URL's response using the generated prompt body.
         fetch(url, {
             method: "POST",
             headers: {
@@ -202,7 +191,6 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
                 resolve(data.choices[0].message.content);
             }
             else if (modelType === "AWS Bedrock") {
-                console.log(data.body);
                 resolve(data.body);
             }
             else {
@@ -214,20 +202,15 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
     });
 }
 
-// Replace all instances of a given string with another.
-export function replaceAll(originalString, searchString, replacementString) {
-    return originalString.replace(new RegExp(searchString, "g"), replacementString);
-}
-
 // Clean the LLM's response by reformatting certain characters and parsing it into a JSON object.
 export function cleanResponse(content) {
-    content = replaceAll(content, "\n", "");
-    content = replaceAll(content, "\\\\\"", "\"");
-    content = replaceAll(content, "'row'", "\"row\"");
-    content = replaceAll(content, "'column'", "\"column\"");
-    content = replaceAll(content, "\"{", "{");
-    content = replaceAll(content, "}\"", "}");
-    content = replaceAll(content, "'}", "}");
+    content = content.replaceAll("\n", "");
+    content = content.replaceAll("\\\\\"", "\"");
+    content = content.replaceAll("'row'", "\"row\"");
+    content = content.replaceAll("'column'", "\"column\"");
+    content = content.replaceAll("\"{", "{");
+    content = content.replaceAll("}\"", "}");
+    content = content.replaceAll("'}", "}");
     if (content.lastIndexOf("{") !== -1) {
         content = content.substring(content.lastIndexOf("{"));
         if (content.lastIndexOf("}") !== -1) {
@@ -244,22 +227,17 @@ export function cleanResponse(content) {
 }
 
 // Determine if the LLM's move was valid. Return a "Move" object which contains the model name and move outcome ("Y" for valid moves, explanations for invalid moves)
-export async function processMove(gameType, initialContent, currentPlayer, model, currentMoveCount) {
-    let jsonResponse = cleanResponse(initialContent);
+export async function processMove(game, initialContent, currentPlayer, model, currentMoveCount) {
+    let jsonResponse = cleanResponse(initialContent); // Preprocess the response string to remove any special characters.
 
+    // Attempt to process the move. If the move had an invalid format, return a move object with an "Invalid Format" outcome.
     try {
         if (jsonResponse === "Invalid Response") {
             throw new Error();
         }
-        
-        if (gameType === "tic-tac-toe") {
-            // If the move had a valid format, process it using the methods defined in the TicTacToe class.
-            return TicTacToe.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
-        } else if (gameType === "connect-four") {
-            return ConnectFour.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
-        } else if (gameType === "gomoku") {
-            return Gomoku.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
-        }
+
+        // Generate a Move object given the LLM response and display its move on the game board if it was valid.
+        return game.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
     }
     catch (e) {
         console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
@@ -267,17 +245,12 @@ export async function processMove(gameType, initialContent, currentPlayer, model
     }
 }
 
-// Generate a prompt, call the LLM, and return its response.
-export async function getMove(promptType, gameType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
-    // Generate prompts. If we are using the image prompt, generate a screenshot of the board and store the
-    // base64-encoded image in the "imageData" parameter.
-    let prompt = await createPrompt(promptType, gameType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
-    let imageData = (promptType === "image") ? await screenshotBoard(gameType) : "";
-    // Append image data to currentStatus so that the generated image can be logged.
-    if (promptType === "image") {
-        currentStatus += imageData;
-    }
+// Generate a prompt, call the LLM with the prompt, and return its response.
+export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
+    // Generate prompts and image data.
+    let [prompt, imageData] = await createPrompt(gameType, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
     let systemPrompt = createSystemPrompt();
 
+    // Call LLM with the prompt and return its response.
     return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, model);
 }

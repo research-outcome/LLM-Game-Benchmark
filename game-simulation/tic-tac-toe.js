@@ -1,29 +1,37 @@
 import { Move } from "./classes.js";
 
 export class TicTacToe {
+    // Return the game explanation prompt.
     static explainGame() {
         return "Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat. \n";
     }
+    // Return the prompt instructing the LLM on how to format its next move.
     static formatNextMove() {
-        return "Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. \n";
+        return " Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. \n";
     }
+    // Return the system prompt for the LLM.
     static systemPrompt() {
         return this.formatNextMove();
     }
+    // Return a prompt that warns the LLM about the disqualification policy.
     static invalidMoveWarning() {
-        return "Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n";
+        return " Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n";
     }
+    // Return the prompt version in YYYY-MM-DD format.
     static promptVersion() {
         return "2024-06-04";
     }
+    // Return the maximum total allowed moves for the game.
     static getMaxMoves() {
         return 20;
     }
+    // Return the maximum allowed invalid moves for a player. If a player exceeds this amount of invalid moves in a game, they will be disqualified in that match.
     static getMaxInvalidMoves() {
         // Invalid Moves formula: (rows + columns)
         return 6;
     }
-    
+
+    // Return a list of coordinates of moves for a given player.
     static listPlayerMoves(player) {
         let movesList = [];
         let playerSymbol = (player === 1) ? "X" : "O";
@@ -37,21 +45,25 @@ export class TicTacToe {
         return movesList;
     }
 
-    static listBoard(firstPlayerMoves, secondPlayerMoves) {
+    // Convey the board state using move coordinates.
+    static listBoard() {
         let gameStatus = "";
-        gameStatus += "The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. \n";
-        gameStatus += "The current state of the game is as follows: \n";
-        gameStatus += "The locations occupied by the first player: ";
+        let firstPlayerMoves = this.listPlayerMoves(1);
+        let secondPlayerMoves = this.listPlayerMoves(2);
+        gameStatus += " The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. \n";
+        gameStatus += " The current state of the game is as follows: \n";
+        gameStatus += " The locations occupied by the first player: ";
         gameStatus += (firstPlayerMoves.length ? firstPlayerMoves.join("; ") : "None") + " \n";
-        gameStatus += "The locations occupied by the second player: ";
+        gameStatus += " The locations occupied by the second player: ";
         gameStatus += (secondPlayerMoves.length ? secondPlayerMoves.join("; ") : "None") + " \n";
         return gameStatus;
     }
-    
+
+    // Draw the board in text format.
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += "The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. \n";
-        gameStatus += "The current state of the game is as follows: \n";
+        gameStatus += " The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += " The current state of the game is as follows: \n";
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 gameStatus += (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
@@ -61,16 +73,19 @@ export class TicTacToe {
         return gameStatus;
     }
 
+    // Return the prompt describing the board screenshot.
     static imagePrompt() {
-        return "The current state of the game is depicted in an image showing a 3 by 3 grid, where 'X' represents positions taken by the first player and 'O' represents positions taken by the second player. \n";
+        return " The current state of the game is depicted in an image showing a 3 by 3 grid, where 'X' represents positions taken by the first player and 'O' represents positions taken by the second player. \n";
     }
-    
+
+    // Take a screenshot of the board and encode it using base64.
     static async screenshotBoard() {
         return new Promise((resolve, reject) => {
-            html2canvas(document.querySelector("#tic-tac-toe-board")).then((canvas) => {
+            // Screenshot size is standardized at 557px * 557px, regardless of user's window dimensions.
+            html2canvas(document.querySelector("#tic-tac-toe-board"), { width: 557, height: 557, windowWidth: 1910, windowHeight: 927, scale: 1, logging: false }).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
-                //saveAs(blob, "Tic Tac Toe Game Board.png");
+                    //saveAs(blob, "Tic Tac Toe Game Board.png");
                 //});
 
                 // Return base64-encoded board screenshot.
@@ -82,7 +97,8 @@ export class TicTacToe {
             });
         });
     }
-    
+
+    // Construct a Move object given the model's response and display the move if it is valid.
     static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
         let row;
         let col;
@@ -103,34 +119,31 @@ export class TicTacToe {
         // Validate row and column
         if (row >= 1 && row <= 3 && col >= 1 && col <= 3) {
             if (document.getElementById("tic-tac-toe-" + row + "-" + col).innerText === "") {
-                // Use 'X' for player 1 and 'O' for player 2.
+                // Update board with current player's move.
                 document.getElementById("tic-tac-toe-" + row + "-" + col).innerText = symbol;
 
                 // Make X blue and O red.
-                if(document.getElementById("tic-tac-toe-" + row + "-" + col).innerText === 'X') {
-                    document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = "blue";
-                }
-                else {
-                    document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = "red";
-                }
+                document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = (symbol === "X") ? "blue" : "red";
 
                 // Return successful move.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
             }
             else {
-                // Return unsuccessful move because AI attempted to play in a space that was already taken.
+                // Return unsuccessful move because LLM attempted to play in a space that was already taken.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
             }
         }
         else {
-            // Return unsuccessful move because AI attempted to play in a space that was out of bounds.
+            // Return unsuccessful move because LLM attempted to play in a space that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
             return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
         }
     }
 
+    // Visualize the board state in a text-based format to be displayed on the game progress windows.
+    // Note that this format is different from the output given from the "drawBoard()" function, adding extra separators |.
     static visualizeBoardState() {
         let boardState = "";
         for (let i = 0; i < 3; i++) {
@@ -146,6 +159,7 @@ export class TicTacToe {
         return boardState + "\n";
     }
 
+    // Check to see if a player has won. If so, return true.
     static checkForWin() {
         let field = new Array(3);
         for (let i = 0; i < 3; i++) {
@@ -210,6 +224,7 @@ export class TicTacToe {
         return false;
     }
 
+    // Check to see if the board is full. If so, return true.
     static checkForFullBoard() {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -220,7 +235,8 @@ export class TicTacToe {
         }
         return true;
     }
-    
+
+    // Delete all moves from the board.
     static resetBoard() {
         for (let i = 0; i < 3; i++) {
             for(let j = 0; j < 3; j++) {
