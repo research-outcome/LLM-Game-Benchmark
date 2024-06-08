@@ -1,10 +1,10 @@
-import {uuidv7} from "./uuidv7.js";
-import {Model} from "./classes.js";
-import {TicTacToe} from "./tic-tac-toe.js";
-import {ConnectFour} from "./connect-four.js";
-import {Gomoku} from "./gomoku.js";
-import {getMove, processMove} from "./web-service-communication.js";
-import {downloadBulkZipFile, downloadZipFile, generateGameLogFiles, generateSubmissionFiles} from "./logging.js";
+import { uuidv7 } from "./uuidv7.js";
+import { Model } from "./classes.js";
+import { TicTacToe } from "./tic-tac-toe.js";
+import { ConnectFour } from "./connect-four.js";
+import { Gomoku } from "./gomoku.js";
+import { getMove, processMove } from "./web-service-communication.js";
+import { downloadBulkZipFile, downloadZipFile, generateGameLogFiles, generateSubmissionFiles } from "./logging.js";
 import {
     addModel,
     checkForEmptyApiKeys,
@@ -12,7 +12,7 @@ import {
     updateAddModelFields,
     updatePlayerDropdowns
 } from "./add-edit-llms.js";
-import {fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable} from "./info.js";
+import { fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable } from "./info.js";
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -134,6 +134,7 @@ async function playGame() {
         let gameLog = "";
         let gameStartTime = Date.now();
         let result = "";
+        let finalGameState = "";
 
         // Initialize current game's progress information for each player's progress window.
         document.getElementById("first-player-game-progress").innerHTML += "<strong>Game " + currentGameCount + "</strong><br>" +
@@ -161,11 +162,12 @@ async function playGame() {
             let model = getCurrentModel(currentPlayer);
 
             // Get initial response from the corresponding API for the model.
-            let initialContent = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
+            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
 
-            if (initialContent === "Network Error Occurred") {
+            if (response === "Network Error Occurred") {
                 result = "networkerror";
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                finalGameState = await getFinalGameState(game, promptType);
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
                 console.log("Game was canceled because a network error occurred.");
                 isGameActive = false;
                 continue;
@@ -178,16 +180,16 @@ async function playGame() {
             }
 
             // Get move object, which includes LLM and outcome ('Y' for valid move, or a description of how the move was invalid).
-            let move = await processMove(game, initialContent, currentPlayer, model, currentMoveCount);
+            let move = await processMove(game, response, currentPlayer, model, currentMoveCount);
             moves.push(move);
 
             // If a valid move was made, process it.
-            if(move.getOutcome() === "Y") {
+            if(move.getOutcome() === "Valid") {
                 let boardState = game.visualizeBoardState();
                 gameLog += boardState; // Append new move to visual game log.
 
                 // Update the progress displays with the new board state.
-                await updateProgressDisplays(game, currentPlayer, progressDisplayType);
+                await updateProgressDisplays(game, currentPlayer, progressDisplayType, currentMoveCount);
 
                 // If a player has won the game, process it accordingly.
                 if (game.checkForWin()) {
@@ -202,7 +204,8 @@ async function playGame() {
                     }
 
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, gameCount, currentGameCount, currentMoveCount, gameLog, moves, uuid));
+                    finalGameState = await getFinalGameState(game, promptType);
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, gameCount, currentGameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
                     console.log(result);
                     isGameActive = false;
                 }
@@ -210,7 +213,8 @@ async function playGame() {
                 else if (game.checkForFullBoard()) {
                     result = "draw";
                     draws++;
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    finalGameState = await getFinalGameState(game, promptType);
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
                     console.log("Draw");
                     isGameActive = false;
                 }
@@ -233,14 +237,16 @@ async function playGame() {
                 if (firstPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified1st";
                     firstPlayerDisqualifications++;
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    finalGameState = await getFinalGameState(game, promptType);
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
                     result = "disqualified2nd";
                     secondPlayerDisqualifications++;
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, uuid));
+                    finalGameState = await getFinalGameState(game, promptType);
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
@@ -281,7 +287,8 @@ async function playGame() {
             // Note that we add 1 to the maximum allowed moves during comparison because we initialize currentMoveCount to 1.
             // Essentially, if getMaxMoves() = 20 and there have been 20 total moves made, we will cancel the game here.
             if (currentMoveCount === game.getMaxMoves() + 1) {
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, game.getMaxMoves(), gameLog, moves, uuid));
+                finalGameState = await getFinalGameState(game, promptType);
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, game.getMaxMoves(), gameLog, moves, finalGameState, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
@@ -326,7 +333,7 @@ async function playGame() {
 // Run games with all combinations of LLMs in the player dropdowns.
 async function bulkRun() {
     bulkEnabled = true; // Set bulkEnabled flag to true, since we are performing a bulk run.
-    let allGameLogs = [] // Each index here contains [submissionFiles, gameLogFiles] for a given set of games.
+    let allLogFiles = [] // Each index here contains [submissionFiles, gameLogFiles] for a given set of games.
 
     // Iterate through every combination of models in the model list, and play "gameCount" games per combination.
     for(let firstModelIndex = 0; firstModelIndex < document.getElementById("first-player").length; firstModelIndex++) {
@@ -346,7 +353,7 @@ async function bulkRun() {
             if (gameStopped) {
                 break;
             } else {
-                allGameLogs.push(currentGameLogs);
+                allLogFiles.push(currentGameLogs);
             }
         }
         // If gameplay was stopped, stop the bulk run.
@@ -357,11 +364,25 @@ async function bulkRun() {
 
     bulkEnabled = false; // Disable the bulkEnabled flag, since we are now done with the bulk run.
 
-    // If allGameLogs isn't empty (at least one game was played), download a bulk ZIP file.
-    if (allGameLogs[0] !== undefined) {
-        let gameType = document.getElementById("game-type").value;
-        let promptType = document.getElementById("prompt-type").value;
-        downloadBulkZipFile(allGameLogs, gameType, promptType);
+    // If allLogFiles isn't empty (at least one game was played), download a bulk ZIP file.
+    if (allLogFiles[0] !== undefined) {
+        downloadBulkZipFile(allLogFiles);
+    }
+}
+
+// Obtain the final game state for logging purposes. This uses the same functionality as prompt generation.
+async function getFinalGameState(game, promptType) {
+    let finalGameState = "";
+    if (promptType === "list") {
+        finalGameState = game.listBoard();
+        return finalGameState.substring(finalGameState.lastIndexOf("The current state of the game is as follows: \n") + 47);
+    }
+    else if (promptType === "illustration") {
+        finalGameState = game.drawBoard();
+        return finalGameState.substring(finalGameState.lastIndexOf("The current state of the game is as follows: \n") + 47);
+    }
+    else if (promptType === "image") {
+        return await game.screenshotBoard();
     }
 }
 
@@ -427,7 +448,7 @@ function showBoardWithId(boardId) {
     document.getElementById(boardId).style.display = "table";
 }
 
-async function updateProgressDisplays(game, currentPlayer, progressDisplayType) {
+async function updateProgressDisplays(game, currentPlayer, progressDisplayType, currentMoveCount) {
     let newContent = "";
     let autoScrollDisplays = document.getElementById("checkbox-auto-scroll").checked; // We check this every time because the user may have disabled this option during gameplay.
     let firstPlayerProgressDisplay = document.getElementById("first-player-game-progress");
@@ -447,10 +468,12 @@ async function updateProgressDisplays(game, currentPlayer, progressDisplayType) 
     }
 
     if (currentPlayer === 1) {
-        document.getElementById("first-player-game-progress").innerHTML += newContent;
+        document.getElementById("first-player-game-progress").innerHTML += "Move " + currentMoveCount + ":<br>" +
+            newContent;
     }
     else {
-        document.getElementById("second-player-game-progress").innerHTML += newContent;
+        document.getElementById("second-player-game-progress").innerHTML += "Move " + currentMoveCount + ":<br>" +
+            newContent;
     }
 
     if (autoScrollDisplays) {
@@ -619,7 +642,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Stop gameplay and clear progress displays when the "stop" button is clicked.
     document.getElementById("stop-btn").addEventListener("click", () => {
         console.log("Stopping gameplay...");
-        resetProgressDisplays();
         gameStopped = true;
     });
 
@@ -683,8 +705,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
     //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
     addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));

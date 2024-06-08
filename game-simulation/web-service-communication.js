@@ -17,11 +17,11 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     // Note that for the "image" prompt, the image data is handled separately, and is not part of the text prompt.
     if (promptType === "list") {
         prompt += game.listBoard();
-        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 46);
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
     }
     else if (promptType === "illustration") {
         prompt += game.drawBoard();
-        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 46);
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
     }
     else if (promptType === "image") {
         // Generate the text-based portion of the image prompt and append it to the text-based prompt.
@@ -203,22 +203,22 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
 }
 
 // Clean the LLM's response by reformatting certain characters and parsing it into a JSON object.
-export function cleanResponse(content) {
-    content = content.replaceAll("\n", "");
-    content = content.replaceAll("\\\\\"", "\"");
-    content = content.replaceAll("'row'", "\"row\"");
-    content = content.replaceAll("'column'", "\"column\"");
-    content = content.replaceAll("\"{", "{");
-    content = content.replaceAll("}\"", "}");
-    content = content.replaceAll("'}", "}");
-    if (content.lastIndexOf("{") !== -1) {
-        content = content.substring(content.lastIndexOf("{"));
-        if (content.lastIndexOf("}") !== -1) {
-            content = content.substring(0, content.lastIndexOf("}") + 1);
+export function cleanResponse(response) {
+    response = response.replaceAll("\n", "");
+    response = response.replaceAll("\\\\\"", "\"");
+    response = response.replaceAll("'row'", "\"row\"");
+    response = response.replaceAll("'column'", "\"column\"");
+    response = response.replaceAll("\"{", "{");
+    response = response.replaceAll("}\"", "}");
+    response = response.replaceAll("'}", "}");
+    if (response.lastIndexOf("{") !== -1) {
+        response = response.substring(response.lastIndexOf("{"));
+        if (response.lastIndexOf("}") !== -1) {
+            response = response.substring(0, response.lastIndexOf("}") + 1);
         }
     }
     try {
-        return JSON.parse(content);
+        return JSON.parse(response);
     }
     catch(e) {
         // If there was an error parsing the JSON, return an empty string.
@@ -227,21 +227,21 @@ export function cleanResponse(content) {
 }
 
 // Determine if the LLM's move was valid. Return a "Move" object which contains the model name and move outcome ("Y" for valid moves, explanations for invalid moves)
-export async function processMove(game, initialContent, currentPlayer, model, currentMoveCount) {
-    let jsonResponse = cleanResponse(initialContent); // Preprocess the response string to remove any special characters.
+export async function processMove(game, response, currentPlayer, model, currentMoveCount) {
+    response = cleanResponse(response); // Preprocess the response string into a JSON-formatted move.
 
     // Attempt to process the move. If the move had an invalid format, return a move object with an "Invalid Format" outcome.
     try {
-        if (jsonResponse === "Invalid Response") {
+        if (response === "Invalid Response") {
             throw new Error();
         }
 
         // Generate a Move object given the LLM response and display its move on the game board if it was valid.
-        return game.processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus);
+        return game.processMove(response, currentPlayer, model, currentMoveCount, currentStatus);
     }
     catch (e) {
         console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
-        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(jsonResponse));
+        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(response));
     }
 }
 

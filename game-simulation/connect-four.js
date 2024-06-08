@@ -115,7 +115,7 @@ export class ConnectFour {
     }
 
     // Construct a Move object given the model's response and display the move if it is valid.
-    static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
+    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {
         let col;
         let color = (currentPlayer === 1) ? "red" : "yellow";
 
@@ -130,8 +130,8 @@ export class ConnectFour {
             ConnectFour.boardInitialized = true; // Set the flag to true after initialization
         }
 
-        if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
-            col = jsonResponse.column;
+        if (response.column !== undefined && typeof response.column === "number") {
+            col = response.column;
         } else {
             throw new Error();
         }
@@ -146,18 +146,18 @@ export class ConnectFour {
     
                     // Return successful move.
                     console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
-                    return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
+                    return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
                 }
             }
     
             // Return unsuccessful move because the column is full
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Already Taken", currentStatus, JSON.stringify(response));
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
+            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
 

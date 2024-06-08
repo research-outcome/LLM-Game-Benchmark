@@ -99,19 +99,19 @@ export class TicTacToe {
     }
 
     // Construct a Move object given the model's response and display the move if it is valid.
-    static processMove(currentMoveCount, currentPlayer, jsonResponse, model, currentStatus) {
+    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {
         let row;
         let col;
         let symbol = (currentPlayer === 1) ? "X" : "O";
 
-        if (jsonResponse.row !== undefined && typeof jsonResponse.row === "number") {
-            row = jsonResponse.row;
+        if (response.row !== undefined && typeof response.row === "number") {
+            row = response.row;
         } else {
             throw new Error();
         }
 
-        if (jsonResponse.column !== undefined && typeof jsonResponse.column === "number") {
-            col = jsonResponse.column;
+        if (response.column !== undefined && typeof response.column === "number") {
+            col = response.column;
         } else {
             throw new Error();
         }
@@ -127,18 +127,18 @@ export class TicTacToe {
 
                 // Return successful move.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Y", currentStatus, JSON.stringify(jsonResponse));
+                return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
             }
             else {
                 // Return unsuccessful move because LLM attempted to play in a space that was already taken.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(jsonResponse));
+                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(response));
             }
         }
         else {
             // Return unsuccessful move because LLM attempted to play in a space that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(jsonResponse));
+            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
 
