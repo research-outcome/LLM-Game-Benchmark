@@ -136,8 +136,8 @@ function modelSupportsText(modelName) {
 
 // If the current model name supports images, return true.
 function modelSupportsImages(modelName) {
-    return modelName === "gpt-4-turbo" ||
-        modelName === "gpt-4o" ||
+    return modelName === "gpt-4o" ||
+        modelName === "gpt-4-turbo" ||
         modelName === "gemini-1.5-pro" ||
         modelName === "gemini-1.5-flash" ||
         modelName === "gemini-pro-vision" ||
@@ -151,8 +151,8 @@ export function updateAddModelFields(event) {
         document.getElementById("llm-name-container").innerHTML = "<select id=\"llm-name\">" +
                 "<option value=\"gpt-3.5-turbo\">gpt-3.5-turbo</option>" +
                 "<option value=\"gpt-4\">gpt-4</option>" +
-                "<option value=\"gpt-4-turbo\">gpt-4-turbo</option>" +
                 "<option value=\"gpt-4o\">gpt-4o</option>" +
+                "<option value=\"gpt-4-turbo\">gpt-4-turbo</option>" +
             "</select>";
 
         document.getElementById("llm-url-label").style.display = "none";
@@ -209,20 +209,10 @@ export function updateAddModelFields(event) {
 
 // Update "Add/Edit LLMs" table and "Player" dropdowns with current model list.
 export function updateModelLists() {
-    // Write table header.
-    document.getElementById("llm-table-body").innerHTML = "<div class=\"llm-table-row\">" +
-            "<div class=\"llm-table-header llm-table-cell\">Type</div>" +
-            "<div class=\"llm-table-header llm-table-cell\">Name</div>" +
-            "<div class=\"llm-table-header llm-table-cell\">URL</div>" +
-            "<div class=\"llm-table-header llm-table-cell\">API Key</div>" +
-            "<div class=\"llm-table-header llm-table-cell\">Supports Text?</div>" +
-            "<div class=\"llm-table-header llm-table-cell\">Supports Images?</div>" +
-            "<div class=\"llm-table-header llm-table-cell\"><!-- Placeholder column for 'X' buttons --></div>" +
-        "</div>";
-
     // Append a table row with every LLM in the model list, and update dropdowns.
     document.getElementById("first-player").innerHTML = "";
     document.getElementById("second-player").innerHTML = "";
+    document.getElementById("llm-table-body").innerHTML = "";
     let index = 0;
     for (let model of models) {
         document.getElementById("llm-table-body").innerHTML += "<div class=\"llm-table-row\">\n" +
