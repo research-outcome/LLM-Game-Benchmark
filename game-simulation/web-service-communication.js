@@ -21,7 +21,7 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     }
     else if (promptType === "illustration") {
         prompt += game.drawBoard();
-        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 47);
+        currentStatus = prompt.substring(prompt.lastIndexOf("The current state of the game is as follows: \n") + 46);
     }
     else if (promptType === "image") {
         // Generate the text-based portion of the image prompt and append it to the text-based prompt.
@@ -241,7 +241,7 @@ export async function processMove(game, response, currentPlayer, model, currentM
     }
     catch (e) {
         console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
-        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(response));
+        return new Move(currentMoveCount, currentPlayer, "Invalid Format", currentStatus, JSON.stringify(response));
     }
 }
 
