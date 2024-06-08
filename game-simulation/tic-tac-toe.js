@@ -127,18 +127,18 @@ export class TicTacToe {
 
                 // Return successful move.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
+                return new Move(currentMoveCount, currentPlayer, "Valid", currentStatus, JSON.stringify(response));
             }
             else {
                 // Return unsuccessful move because LLM attempted to play in a space that was already taken.
                 console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
-                return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(response));
+                return new Move(currentMoveCount, currentPlayer, "Already Taken", currentStatus, JSON.stringify(response));
             }
         }
         else {
             // Return unsuccessful move because LLM attempted to play in a space that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(response));
+            return new Move(currentMoveCount, currentPlayer, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
 

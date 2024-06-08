@@ -14,7 +14,6 @@
                 document.body.style.display = "flex";
                 document.body.style.justifyContent = "center";
                 document.body.style.alignItems = "center";
-                event.preventDefault(); // Prevent default browser error handling.
                 // If a CORS error occurs due to the user opening the HTML file directly, display an explanation and offer some fixes.
                 if (event.target.tagName === 'SCRIPT') {
                     document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
@@ -30,11 +29,6 @@
                             "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
                         "</div>";
                     window.stop();
-                } else {
-                    document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
-                            "An unexpected error occurred." +
-                        "</div>";
-                    window.stop();
                 }
             }, true);
         </script>
@@ -45,6 +39,7 @@
               }
             }
         </script>
+        <h1><strong>LLM Game Benchmark - Simulation</strong></h1>
         <!-- Options and Info displays -->
         <div id="options-and-info">
             <!-- Options display allows users to select game options. -->
@@ -78,7 +73,7 @@
                     </select>
                 </div>
                 <div class="option" id="game-count-container">
-                    <label for="game-count">Number of Games: </label>
+                    <label for="game-count">Total # of Games: </label>
                     <input type="text" id="game-count" name="game-count" value=1>
                 </div>
                 <button id="manage-llms-btn"><strong>Manage LLMs</strong></button>
@@ -89,7 +84,13 @@
 
             <!-- Game Info display shows users their selected options, as well as the current game number. -->
             <div id="game-info">
-                <!-- User's selected game options will be displayed here. -->
+                <div><strong><em>Current Selections:</em></strong><span id="info-game-count"></span></div>
+                <div class="info"><strong>Game Type: </strong><span id="info-game-type"></span></div>
+                <div class="info"><strong>Prompt Type: </strong><span id="info-prompt-type"></span></div>
+                <div class="info"><strong>1st Player: </strong><span id="info-first-player"></span></div>
+                <div class="info"><strong>2nd Player: </strong><span id="info-second-player"></span></div>
+                <div class="info"><strong>Total # of Games: </strong><span id="info-total-game-count"></span></div>
+                <div class="info"><strong>Current Game #: </strong><span id="info-current-game-number"></span></div>
             </div>
         </div>
 
@@ -98,17 +99,17 @@
             <div><strong><em>Stats:</em></strong></div>
             <div id="stats-table">
                 <div class="stats-row">
-                    <div class="stats-cell stats-header"><strong>1st Player Wins</strong></div>
-                    <div class="stats-cell stats-header"><strong>2nd Player Wins</strong></div>
-                    <div class="stats-cell stats-header"><strong>Draws</strong></div>
-                    <div class="stats-cell stats-header"><strong>1st Player Total Move Count</strong></div>
-                    <div class="stats-cell stats-header"><strong>2nd Player Total Move Count</strong></div>
-                    <div class="stats-cell stats-header"><strong>1st Player Disqualifications</strong></div>
-                    <div class="stats-cell stats-header"><strong>2nd Player Disqualifications</strong></div>
-                    <div class="stats-cell stats-header"><strong>1st Player Invalid Moves</strong></div>
-                    <div class="stats-cell stats-header"><strong>2nd Player Invalid Moves</strong></div>
-                    <div class="stats-cell stats-header"><strong>1st Player Moves per Win</strong></div>
-                    <div class="stats-cell stats-header"><strong>2nd Player Moves per Win</strong></div>
+                    <div class="stats-cell stats-header">1st Player Wins</div>
+                    <div class="stats-cell stats-header">2nd Player Wins</div>
+                    <div class="stats-cell stats-header">Draws</div>
+                    <div class="stats-cell stats-header">1st Player Total Move Count</div>
+                    <div class="stats-cell stats-header">2nd Player Total Move Count</div>
+                    <div class="stats-cell stats-header">1st Player Disqualifications</div>
+                    <div class="stats-cell stats-header">2nd Player Disqualifications</div>
+                    <div class="stats-cell stats-header">1st Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">2nd Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">1st Player Moves per Win</div>
+                    <div class="stats-cell stats-header">2nd Player Moves per Win</div>
                 </div>
                 <div class="stats-row">
                     <div class="stats-cell" id="first-player-wins">0</div>
@@ -583,7 +584,7 @@
                 </div>
                 <!-- Table displaying current LLMs in the "models" list. -->
                 <div id="llm-table">
-                    <div class="llm-table-row" id="llm-table-header">
+                    <div class="llm-table-row" id="llm-table-header-row">
                         <div class="llm-table-header llm-table-cell"><strong>Type</strong></div>
                         <div class="llm-table-header llm-table-cell"><strong>Name</strong></div>
                         <div class="llm-table-header llm-table-cell"><strong>URL</strong></div>

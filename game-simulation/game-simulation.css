@@ -10,6 +10,13 @@ body {
     font-weight: 500;
     font-size: 1.5vh;
 }
+h1 {
+    text-align: center;
+    font-size: 2vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+
+}
 select,
 button,
 input {
@@ -91,6 +98,7 @@ button {
     margin-left: auto;
     margin-right: auto;
     font-size: 1.5vh;
+    border-collapse: collapse;
 }
 .stats-row { /* Styling for each row of the statistics table. */
     display: table-row;
@@ -99,7 +107,7 @@ button {
     display: table-cell;
     text-align: center;
     padding: 0.5vh;
-    border: 0.1vh solid black;
+    border: 0.25vh solid black;
 }
 
 /* Styling for page popups. */
@@ -178,10 +186,13 @@ button {
     overflow: auto;
     border: 0.25vh solid black;
 }
-#llm-table-header,
+#llm-table-header-row,
 #llm-table-body { /* Styling for body of the LLM table. */
     width: 100%;
     display: table-row-group;
+}
+.llm-table-header { /* Styling for the LLM table header row cells. */
+    border-bottom: 0.25vh solid black;
 }
 .llm-table-row { /* Styling for each row of the LLM table. */
     width: 100%;
@@ -202,9 +213,6 @@ button {
 .llm-table-cell:nth-child(3),
 .llm-table-cell:nth-child(4) { /* Styling for the 3rd and 4th columns of the LLM table. */
     width: 25%;
-}
-.llm-table-header { /* Styling for the LLM table header row. */
-    border-bottom: 0.25vh solid black;
 }
 .llm-url,
 .llm-api-key { /* Styling for the URL and API key text input fields in the table rows. */

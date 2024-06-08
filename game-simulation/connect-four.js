@@ -146,18 +146,18 @@ export class ConnectFour {
     
                     // Return successful move.
                     console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
-                    return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
+                    return new Move(currentMoveCount, currentPlayer, "Valid", currentStatus, JSON.stringify(response));
                 }
             }
     
             // Return unsuccessful move because the column is full
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Already Taken", currentStatus, JSON.stringify(response));
+            return new Move(currentMoveCount, currentPlayer, "Already Taken", currentStatus, JSON.stringify(response));
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
             console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
-            return new Move(currentMoveCount, currentPlayer, 0, col, "Out of Bounds", currentStatus, JSON.stringify(response));
+            return new Move(currentMoveCount, currentPlayer, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
 
