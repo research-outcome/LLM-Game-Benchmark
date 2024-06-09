@@ -241,7 +241,7 @@ export async function processMove(game, response, currentPlayer, model, currentM
     }
     catch (e) {
         console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
-        return new Move(currentMoveCount, currentPlayer, "Invalid Format", currentStatus, JSON.stringify(response));
+        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(response));
     }
 }
 

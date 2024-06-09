@@ -2,13 +2,17 @@
 export class Move {
     #number; // Move number in current game.
     #player; // Number of player who made the move.
+    #row;
+    #col;
     #outcome; // Result of the game.
     #currentStatus; // Current game status prompt provided to the LLM.
     #response; // Response from the LLM.
 
-    constructor(number, player, outcome, currentStatus, response) {
+    constructor(number, player, row, col, outcome, currentStatus, response) {
         this.#number = number;
         this.#player = player;
+        this.#row = row;
+        this.#col = col;
         this.#outcome = outcome;
         this.#currentStatus = currentStatus;
         this.#response = response;
@@ -21,6 +25,12 @@ export class Move {
     }
     getPlayer() {
         return this.#player;
+    }
+    getRow() {
+        return this.#row;
+    }
+    getCol() {
+        return this.#col;
     }
     getOutcome() {
         return this.#outcome;
