@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>LLM Game Simulation</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="game-simulation.css">
+    </head>
+    <body>
+        <script>
+            window.addEventListener('error', function (event) {
+                document.body.style.display = "flex";
+                document.body.style.justifyContent = "center";
+                document.body.style.alignItems = "center";
+                // If a CORS error occurs due to the user opening the HTML file directly, display an explanation and offer some fixes.
+                if (event.target.tagName === 'SCRIPT') {
+                    document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
+                            "Your browser is preventing you from running this site from directly from the HTML file.<br><br>" +
+                            "To fix this issue on Firefox, navigate to 'about:config' and set 'security.fileuri.strict_origin_policy' to 'false'.<br><br>" +
+                            "To fix this issue on Microsoft Edge, run Microsoft Edge with the following command, changing the directories as necessary:<br>" +
+                            "\"\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\".<br>" +
+                            "Then, you can drag-and-drop the HTML file onto your browser window; it should open and run as normal.<br><br>" +
+                            "To fix this issue on Google Chrome, run Google Chrome with the following command, changing the directories as necessary:<br>" +
+                            "\"\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\"<br>" +
+                            "Then, you can drag-and-drop the HTML file onto your browser window; it should open and run as normal.<br><br>" +
+                            "If these fixes did not work for your browser, you must either run the file on a server, or run the file with an IDE that creates a server for you.<br>" +
+                            "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
+                        "</div>";
+                    window.stop();
+                }
+            }, true);
+        </script>
+        <script type="importmap">
+            {
+              "imports": {
+                "@google/generative-ai": "https://esm.run/@google/generative-ai"
+              }
+            }
+        </script>
+        <h1><strong>LLM Game Benchmark - Simulation & Data Collection</strong></h1>
+        <!-- Options and Info displays -->
+        <div id="options-and-info">
+            <!-- Options display allows users to select game options. -->
+            <div id="options">
+                <div class="option">
+                    <label for="game-type">Game Type: </label>
+                    <select id="game-type" name="game-type">
+                        <option value="tic-tac-toe">Tic-Tac-Toe</option>
+                        <option value="connect-four">Connect Four</option>
+                        <option value="gomoku">Gomoku</option>
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="prompt-type">Prompt Type: </label>
+                    <select id="prompt-type" name="prompt-type">
+                        <option value="list">List</option>
+                        <option value="illustration">Illustration</option>
+                        <option value="image">Image</option>
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="first-player">1st Player LLM: </label>
+                    <select id="first-player" name="first-player">
+                        <!-- Pre-implemented models and models added by the user will appear here. -->
+                    </select>
+                </div>
+                <div class="option">
+                    <label for="second-player">2nd Player LLM: </label>
+                    <select id="second-player" name="second-player">
+                        <!-- Pre-implemented models and models added by the user will appear here. -->
+                    </select>
+                </div>
+                <div class="option" id="game-count-container">
+                    <label for="game-count">Total # of Games: </label>
+                    <input type="text" id="game-count" name="game-count" value=1>
+                </div>
+                <button id="manage-llms-btn"><strong>Manage LLMs</strong></button>
+            </div>
+
+            <!-- Dividing line between Options and Info displays. -->
+            <div id="options-and-info-divider"></div>
+
+            <!-- Game Info display shows users their selected options, as well as the current game number. -->
+            <div id="game-info">
+                <div><strong><em>Current Selections:</em></strong><span id="info-game-count"></span></div>
+                <div class="info"><strong>Game Type: </strong><span id="info-game-type"></span></div>
+                <div class="info"><strong>Prompt Type: </strong><span id="info-prompt-type"></span></div>
+                <div class="info"><strong>1st Player: </strong><span id="info-first-player"></span></div>
+                <div class="info"><strong>2nd Player: </strong><span id="info-second-player"></span></div>
+                <div class="info"><strong>Total # of Games: </strong><span id="info-total-game-count"></span></div>
+                <div class="info"><strong>Current Game #: </strong><span id="info-current-game-number"></span></div>
+            </div>
+        </div>
+
+        <!-- Game Stats display shows users the current game statistics. -->
+        <div id="game-stats">
+            <div><strong><em>Stats:</em></strong></div>
+            <div id="stats-table">
+                <div class="stats-row">
+                    <div class="stats-cell stats-header">1st Player Wins</div>
+                    <div class="stats-cell stats-header">2nd Player Wins</div>
+                    <div class="stats-cell stats-header">Draws</div>
+                    <div class="stats-cell stats-header">1st Player Total Move Count</div>
+                    <div class="stats-cell stats-header">2nd Player Total Move Count</div>
+                    <div class="stats-cell stats-header">1st Player Disqualifications</div>
+                    <div class="stats-cell stats-header">2nd Player Disqualifications</div>
+                    <div class="stats-cell stats-header">1st Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">2nd Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">1st Player Moves per Win</div>
+                    <div class="stats-cell stats-header">2nd Player Moves per Win</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell" id="first-player-wins">0</div>
+                    <div class="stats-cell" id="second-player-wins">0</div>
+                    <div class="stats-cell" id="draws">0</div>
+                    <div class="stats-cell" id="first-player-total-move-count">0</div>
+                    <div class="stats-cell" id="second-player-total-move-count">0</div>
+                    <div class="stats-cell" id="first-player-disqualifications">0</div>
+                    <div class="stats-cell" id="second-player-disqualifications">0</div>
+                    <div class="stats-cell" id="first-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="second-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="first-player-moves-per-win">0</div>
+                    <div class="stats-cell" id="second-player-moves-per-win">0</div>
+                </div>
+            </div>
+            <button id="reset-btn"><strong>Reset Stats</strong></button>
+        </div>
+
+        <!-- Run buttons start gameplay, while stop button stops gameplay. -->
+        <!-- Stop button is only shown during gameplay. -->
+        <div id="buttons-and-progress-options-container">
+            <div id="progress-display-type-container">
+                <div id="progress-display-type">
+                    <strong style="display: block">Progress Display Type:</strong>
+                    <input type="radio" id="radio-list" name="progress-display-type" value="list" checked>
+                    <label for="radio-list">List</label>
+
+                    <input type="radio" id="radio-illustration" name="progress-display-type" value="illustration">
+                    <label for="radio-list">Illustration</label>
+
+                    <input type="radio" id="radio-image" name="progress-display-type" value="image">
+                    <label for="radio-list">Image</label>
+                </div>
+            </div>
+
+
+            <div class="button-container" id="gameplay-button-container">
+                <button class="large-button" id="run-btn">Run</button>
+                <button class="large-button" id="bulk-run-btn">Bulk Run</button>
+                <button class="large-button" id="stop-btn">Stop</button>
+            </div>
+
+            <div id="option-checkbox-container">
+                <div id="progress-auto-scroll">
+                    <input type="checkbox" id="checkbox-auto-scroll" name="auto-scroll" checked />
+                    <label for="checkbox-auto-scroll">Auto-Scroll Progress Displays</label>
+                </div>
+
+                <div id="bulk-run-same-players">
+                    <input type="checkbox" id="checkbox-bulk-run-same-players" name="bulk-run-same-players" />
+                    <label for="checkbox-auto-scroll">Allow LLMs to Play Against Themselves in Bulk Runs</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk run warning popup that appears before the user starts a bulk game. -->
+        <div class="popup-container" id="bulk-run-warning-popup-container">
+            <div class="popup" id="bulk-run-warning-popup">
+                Bulk run will run <strong id="bulk-run-game-count"></strong> games.
+                Do you want to continue?<br>
+                <div class="button-container">
+                    <button class="small-button" id="start-bulk-run-btn">Yes</button>
+                    <button class="small-button" id="cancel-bulk-run-btn">No</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Gameplay Area container holds game boards as well as game progress displays for each player. -->
+        <div id="gameplay-area">
+            <div class="progress-display" id="first-player-game-progress">
+                <!-- First player's game progress will be displayed here. -->
+            </div>
+
+            <div id="board-container">
+                <div id="tic-tac-toe-board">
+                    <div class="board-row">
+                        <div class="board-cell" id="tic-tac-toe-1-1"></div>
+                        <div class="board-cell" id="tic-tac-toe-1-2"></div>
+                        <div class="board-cell" id="tic-tac-toe-1-3"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="tic-tac-toe-2-1"></div>
+                        <div class="board-cell" id="tic-tac-toe-2-2"></div>
+                        <div class="board-cell" id="tic-tac-toe-2-3"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="tic-tac-toe-3-1"></div>
+                        <div class="board-cell" id="tic-tac-toe-3-2"></div>
+                        <div class="board-cell" id="tic-tac-toe-3-3"></div>
+                    </div>
+                </div>
+                <div id="connect-four-board">
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-1-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-1-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-2-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-2-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-3-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-3-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-4-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-4-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-5-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-5-7"><div class="connect-four-space"></div></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="connect-four-6-1"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-2"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-3"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-4"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-5"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-6"><div class="connect-four-space"></div></div>
+                        <div class="board-cell" id="connect-four-6-7"><div class="connect-four-space"></div></div>
+                    </div>
+                </div>
+                <div id="gomoku-board">
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-1-1"></div>
+                        <div class="board-cell" id="gomoku-1-2"></div>
+                        <div class="board-cell" id="gomoku-1-3"></div>
+                        <div class="board-cell" id="gomoku-1-4"></div>
+                        <div class="board-cell" id="gomoku-1-5"></div>
+                        <div class="board-cell" id="gomoku-1-6"></div>
+                        <div class="board-cell" id="gomoku-1-7"></div>
+                        <div class="board-cell" id="gomoku-1-8"></div>
+                        <div class="board-cell" id="gomoku-1-9"></div>
+                        <div class="board-cell" id="gomoku-1-10"></div>
+                        <div class="board-cell" id="gomoku-1-11"></div>
+                        <div class="board-cell" id="gomoku-1-12"></div>
+                        <div class="board-cell" id="gomoku-1-13"></div>
+                        <div class="board-cell" id="gomoku-1-14"></div>
+                        <div class="board-cell" id="gomoku-1-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-2-1"></div>
+                        <div class="board-cell" id="gomoku-2-2"></div>
+                        <div class="board-cell" id="gomoku-2-3"></div>
+                        <div class="board-cell" id="gomoku-2-4"></div>
+                        <div class="board-cell" id="gomoku-2-5"></div>
+                        <div class="board-cell" id="gomoku-2-6"></div>
+                        <div class="board-cell" id="gomoku-2-7"></div>
+                        <div class="board-cell" id="gomoku-2-8"></div>
+                        <div class="board-cell" id="gomoku-2-9"></div>
+                        <div class="board-cell" id="gomoku-2-10"></div>
+                        <div class="board-cell" id="gomoku-2-11"></div>
+                        <div class="board-cell" id="gomoku-2-12"></div>
+                        <div class="board-cell" id="gomoku-2-13"></div>
+                        <div class="board-cell" id="gomoku-2-14"></div>
+                        <div class="board-cell" id="gomoku-2-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-3-1"></div>
+                        <div class="board-cell" id="gomoku-3-2"></div>
+                        <div class="board-cell" id="gomoku-3-3"></div>
+                        <div class="board-cell" id="gomoku-3-4"></div>
+                        <div class="board-cell" id="gomoku-3-5"></div>
+                        <div class="board-cell" id="gomoku-3-6"></div>
+                        <div class="board-cell" id="gomoku-3-7"></div>
+                        <div class="board-cell" id="gomoku-3-8"></div>
+                        <div class="board-cell" id="gomoku-3-9"></div>
+                        <div class="board-cell" id="gomoku-3-10"></div>
+                        <div class="board-cell" id="gomoku-3-11"></div>
+                        <div class="board-cell" id="gomoku-3-12"></div>
+                        <div class="board-cell" id="gomoku-3-13"></div>
+                        <div class="board-cell" id="gomoku-3-14"></div>
+                        <div class="board-cell" id="gomoku-3-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-4-1"></div>
+                        <div class="board-cell" id="gomoku-4-2"></div>
+                        <div class="board-cell" id="gomoku-4-3"></div>
+                        <div class="board-cell" id="gomoku-4-4"></div>
+                        <div class="board-cell" id="gomoku-4-5"></div>
+                        <div class="board-cell" id="gomoku-4-6"></div>
+                        <div class="board-cell" id="gomoku-4-7"></div>
+                        <div class="board-cell" id="gomoku-4-8"></div>
+                        <div class="board-cell" id="gomoku-4-9"></div>
+                        <div class="board-cell" id="gomoku-4-10"></div>
+                        <div class="board-cell" id="gomoku-4-11"></div>
+                        <div class="board-cell" id="gomoku-4-12"></div>
+                        <div class="board-cell" id="gomoku-4-13"></div>
+                        <div class="board-cell" id="gomoku-4-14"></div>
+                        <div class="board-cell" id="gomoku-4-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-5-1"></div>
+                        <div class="board-cell" id="gomoku-5-2"></div>
+                        <div class="board-cell" id="gomoku-5-3"></div>
+                        <div class="board-cell" id="gomoku-5-4"></div>
+                        <div class="board-cell" id="gomoku-5-5"></div>
+                        <div class="board-cell" id="gomoku-5-6"></div>
+                        <div class="board-cell" id="gomoku-5-7"></div>
+                        <div class="board-cell" id="gomoku-5-8"></div>
+                        <div class="board-cell" id="gomoku-5-9"></div>
+                        <div class="board-cell" id="gomoku-5-10"></div>
+                        <div class="board-cell" id="gomoku-5-11"></div>
+                        <div class="board-cell" id="gomoku-5-12"></div>
+                        <div class="board-cell" id="gomoku-5-13"></div>
+                        <div class="board-cell" id="gomoku-5-14"></div>
+                        <div class="board-cell" id="gomoku-5-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-6-1"></div>
+                        <div class="board-cell" id="gomoku-6-2"></div>
+                        <div class="board-cell" id="gomoku-6-3"></div>
+                        <div class="board-cell" id="gomoku-6-4"></div>
+                        <div class="board-cell" id="gomoku-6-5"></div>
+                        <div class="board-cell" id="gomoku-6-6"></div>
+                        <div class="board-cell" id="gomoku-6-7"></div>
+                        <div class="board-cell" id="gomoku-6-8"></div>
+                        <div class="board-cell" id="gomoku-6-9"></div>
+                        <div class="board-cell" id="gomoku-6-10"></div>
+                        <div class="board-cell" id="gomoku-6-11"></div>
+                        <div class="board-cell" id="gomoku-6-12"></div>
+                        <div class="board-cell" id="gomoku-6-13"></div>
+                        <div class="board-cell" id="gomoku-6-14"></div>
+                        <div class="board-cell" id="gomoku-6-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-7-1"></div>
+                        <div class="board-cell" id="gomoku-7-2"></div>
+                        <div class="board-cell" id="gomoku-7-3"></div>
+                        <div class="board-cell" id="gomoku-7-4"></div>
+                        <div class="board-cell" id="gomoku-7-5"></div>
+                        <div class="board-cell" id="gomoku-7-6"></div>
+                        <div class="board-cell" id="gomoku-7-7"></div>
+                        <div class="board-cell" id="gomoku-7-8"></div>
+                        <div class="board-cell" id="gomoku-7-9"></div>
+                        <div class="board-cell" id="gomoku-7-10"></div>
+                        <div class="board-cell" id="gomoku-7-11"></div>
+                        <div class="board-cell" id="gomoku-7-12"></div>
+                        <div class="board-cell" id="gomoku-7-13"></div>
+                        <div class="board-cell" id="gomoku-7-14"></div>
+                        <div class="board-cell" id="gomoku-7-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-8-1"></div>
+                        <div class="board-cell" id="gomoku-8-2"></div>
+                        <div class="board-cell" id="gomoku-8-3"></div>
+                        <div class="board-cell" id="gomoku-8-4"></div>
+                        <div class="board-cell" id="gomoku-8-5"></div>
+                        <div class="board-cell" id="gomoku-8-6"></div>
+                        <div class="board-cell" id="gomoku-8-7"></div>
+                        <div class="board-cell" id="gomoku-8-8"></div>
+                        <div class="board-cell" id="gomoku-8-9"></div>
+                        <div class="board-cell" id="gomoku-8-10"></div>
+                        <div class="board-cell" id="gomoku-8-11"></div>
+                        <div class="board-cell" id="gomoku-8-12"></div>
+                        <div class="board-cell" id="gomoku-8-13"></div>
+                        <div class="board-cell" id="gomoku-8-14"></div>
+                        <div class="board-cell" id="gomoku-8-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-9-1"></div>
+                        <div class="board-cell" id="gomoku-9-2"></div>
+                        <div class="board-cell" id="gomoku-9-3"></div>
+                        <div class="board-cell" id="gomoku-9-4"></div>
+                        <div class="board-cell" id="gomoku-9-5"></div>
+                        <div class="board-cell" id="gomoku-9-6"></div>
+                        <div class="board-cell" id="gomoku-9-7"></div>
+                        <div class="board-cell" id="gomoku-9-8"></div>
+                        <div class="board-cell" id="gomoku-9-9"></div>
+                        <div class="board-cell" id="gomoku-9-10"></div>
+                        <div class="board-cell" id="gomoku-9-11"></div>
+                        <div class="board-cell" id="gomoku-9-12"></div>
+                        <div class="board-cell" id="gomoku-9-13"></div>
+                        <div class="board-cell" id="gomoku-9-14"></div>
+                        <div class="board-cell" id="gomoku-9-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-10-1"></div>
+                        <div class="board-cell" id="gomoku-10-2"></div>
+                        <div class="board-cell" id="gomoku-10-3"></div>
+                        <div class="board-cell" id="gomoku-10-4"></div>
+                        <div class="board-cell" id="gomoku-10-5"></div>
+                        <div class="board-cell" id="gomoku-10-6"></div>
+                        <div class="board-cell" id="gomoku-10-7"></div>
+                        <div class="board-cell" id="gomoku-10-8"></div>
+                        <div class="board-cell" id="gomoku-10-9"></div>
+                        <div class="board-cell" id="gomoku-10-10"></div>
+                        <div class="board-cell" id="gomoku-10-11"></div>
+                        <div class="board-cell" id="gomoku-10-12"></div>
+                        <div class="board-cell" id="gomoku-10-13"></div>
+                        <div class="board-cell" id="gomoku-10-14"></div>
+                        <div class="board-cell" id="gomoku-10-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-11-1"></div>
+                        <div class="board-cell" id="gomoku-11-2"></div>
+                        <div class="board-cell" id="gomoku-11-3"></div>
+                        <div class="board-cell" id="gomoku-11-4"></div>
+                        <div class="board-cell" id="gomoku-11-5"></div>
+                        <div class="board-cell" id="gomoku-11-6"></div>
+                        <div class="board-cell" id="gomoku-11-7"></div>
+                        <div class="board-cell" id="gomoku-11-8"></div>
+                        <div class="board-cell" id="gomoku-11-9"></div>
+                        <div class="board-cell" id="gomoku-11-10"></div>
+                        <div class="board-cell" id="gomoku-11-11"></div>
+                        <div class="board-cell" id="gomoku-11-12"></div>
+                        <div class="board-cell" id="gomoku-11-13"></div>
+                        <div class="board-cell" id="gomoku-11-14"></div>
+                        <div class="board-cell" id="gomoku-11-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-12-1"></div>
+                        <div class="board-cell" id="gomoku-12-2"></div>
+                        <div class="board-cell" id="gomoku-12-3"></div>
+                        <div class="board-cell" id="gomoku-12-4"></div>
+                        <div class="board-cell" id="gomoku-12-5"></div>
+                        <div class="board-cell" id="gomoku-12-6"></div>
+                        <div class="board-cell" id="gomoku-12-7"></div>
+                        <div class="board-cell" id="gomoku-12-8"></div>
+                        <div class="board-cell" id="gomoku-12-9"></div>
+                        <div class="board-cell" id="gomoku-12-10"></div>
+                        <div class="board-cell" id="gomoku-12-11"></div>
+                        <div class="board-cell" id="gomoku-12-12"></div>
+                        <div class="board-cell" id="gomoku-12-13"></div>
+                        <div class="board-cell" id="gomoku-12-14"></div>
+                        <div class="board-cell" id="gomoku-12-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-13-1"></div>
+                        <div class="board-cell" id="gomoku-13-2"></div>
+                        <div class="board-cell" id="gomoku-13-3"></div>
+                        <div class="board-cell" id="gomoku-13-4"></div>
+                        <div class="board-cell" id="gomoku-13-5"></div>
+                        <div class="board-cell" id="gomoku-13-6"></div>
+                        <div class="board-cell" id="gomoku-13-7"></div>
+                        <div class="board-cell" id="gomoku-13-8"></div>
+                        <div class="board-cell" id="gomoku-13-9"></div>
+                        <div class="board-cell" id="gomoku-13-10"></div>
+                        <div class="board-cell" id="gomoku-13-11"></div>
+                        <div class="board-cell" id="gomoku-13-12"></div>
+                        <div class="board-cell" id="gomoku-13-13"></div>
+                        <div class="board-cell" id="gomoku-13-14"></div>
+                        <div class="board-cell" id="gomoku-13-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-14-1"></div>
+                        <div class="board-cell" id="gomoku-14-2"></div>
+                        <div class="board-cell" id="gomoku-14-3"></div>
+                        <div class="board-cell" id="gomoku-14-4"></div>
+                        <div class="board-cell" id="gomoku-14-5"></div>
+                        <div class="board-cell" id="gomoku-14-6"></div>
+                        <div class="board-cell" id="gomoku-14-7"></div>
+                        <div class="board-cell" id="gomoku-14-8"></div>
+                        <div class="board-cell" id="gomoku-14-9"></div>
+                        <div class="board-cell" id="gomoku-14-10"></div>
+                        <div class="board-cell" id="gomoku-14-11"></div>
+                        <div class="board-cell" id="gomoku-14-12"></div>
+                        <div class="board-cell" id="gomoku-14-13"></div>
+                        <div class="board-cell" id="gomoku-14-14"></div>
+                        <div class="board-cell" id="gomoku-14-15"></div>
+                    </div>
+                    <div class="board-row">
+                        <div class="board-cell" id="gomoku-15-1"></div>
+                        <div class="board-cell" id="gomoku-15-2"></div>
+                        <div class="board-cell" id="gomoku-15-3"></div>
+                        <div class="board-cell" id="gomoku-15-4"></div>
+                        <div class="board-cell" id="gomoku-15-5"></div>
+                        <div class="board-cell" id="gomoku-15-6"></div>
+                        <div class="board-cell" id="gomoku-15-7"></div>
+                        <div class="board-cell" id="gomoku-15-8"></div>
+                        <div class="board-cell" id="gomoku-15-9"></div>
+                        <div class="board-cell" id="gomoku-15-10"></div>
+                        <div class="board-cell" id="gomoku-15-11"></div>
+                        <div class="board-cell" id="gomoku-15-12"></div>
+                        <div class="board-cell" id="gomoku-15-13"></div>
+                        <div class="board-cell" id="gomoku-15-14"></div>
+                        <div class="board-cell" id="gomoku-15-15"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-display" id="second-player-game-progress">
+                <!-- Second player's game progress will be displayed here. -->
+            </div>
+        </div>
+
+        <!-- This container holds the Prompt List, LLM List, Game Details, FAQs, and User Guide buttons. -->
+        <div class="button-container">
+            <button class="large-button" id="gameDetailsButton">Game Details</button>
+            <button class="large-button" id="promptListButton">Prompt Details</button>
+            <button class="large-button" id="LLMListButton">LLM List</button>
+            <button class="large-button" id="FAQsButton">FAQs</button>
+            <button class="large-button" id="userGuideButton">User Guide</button>
+        </div>
+
+        <!-- Manage LLMs menu allows users to add, modify, and remove LLM models. -->
+        <div class="popup-container" id="manage-llms-container">
+            <div class="popup" id="manage-llms">
+                <span class="close" id="manage-llms-close-btn">&times;</span>
+                <strong><u>Manage LLMs</u></strong><br>
+                The LLMs that can be selected in the current ‘Player LLM’ dropdowns are listed below.
+                <ul>
+                    <li>To add a new LLM to the lists, make your selection and then click 'Add'.</li>
+                    <li>To change an LLM's URL or API Key, edit it in the corresponding textbox.</li>
+                    <li>To remove an LLM, use the <button id="dummy-remove-llm-btn" style="display: inline">X</button>button.</li>
+                    <li>To include your email address(es) in your submission files, please enter them in the "Email Address(es)" text input box below. Please separate email addresses with commas.</li>
+                    <li><em>Some models, such as gemini-pro-vision, do not support text-only prompts. The "Supports Text?" field refers to supporting text-only prompts.</em></li>
+                </ul>
+                <label for="provider-email">Submission File Email Address(es): </label>
+                <input type="text" id="provider-email">
+                <div id="add-llm-options">
+                    <label for="llm-type">Type: </label>
+                    <select id="llm-type">
+                        <option value="OpenAI">OpenAI</option>
+                        <option value="Google">Google</option>
+                        <option value="AWS Bedrock">AWS Bedrock</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <label for="llm-name">LLM: </label>
+                    <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
+                    <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
+                    <div id="llm-name-container">
+                        <select id="llm-name">
+                            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                            <option value="gpt-4">gpt-4</option>
+                            <option value="gpt-4-turbo">gpt-4-turbo</option>
+                            <option value="gpt-4o">gpt-4o</option>
+                        </select>
+                    </div>
+                    <label for="llm-url" id="llm-url-label">URL: </label>
+                    <input type="text" id="llm-url">
+                    <label for="llm-api-key" id="llm-api-key-label">API Key: </label>
+                    <input type="text" id="llm-api-key">
+                    <label id="llm-supports-text-label" for="llm-supports-text">Supports Text: </label>
+                    <select id="llm-supports-text">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                    <label id="llm-supports-images-label" for="llm-supports-images">Supports Images: </label>
+                    <select id="llm-supports-images">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                    <button id="add-llm-btn">Add</button>
+                </div>
+                <!-- Table displaying current LLMs in the "models" list. -->
+                <div id="llm-table">
+                    <div class="llm-table-row" id="llm-table-header-row">
+                        <div class="llm-table-header llm-table-cell"><strong>Type</strong></div>
+                        <div class="llm-table-header llm-table-cell"><strong>Name</strong></div>
+                        <div class="llm-table-header llm-table-cell"><strong>URL</strong></div>
+                        <div class="llm-table-header llm-table-cell"><strong>API Key</strong></div>
+                        <div class="llm-table-header llm-table-cell"><strong>Supports Text?</strong></div>
+                        <div class="llm-table-header llm-table-cell"><strong>Supports Images?</strong></div>
+                        <div class="llm-table-header llm-table-cell"><!-- Placeholder column for 'X' buttons --></div>
+                    </div>
+                    <div id="llm-table-body">
+                        <!-- Models in the model list will be added here. -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- This popup appears to ask the user whether they'd like to remove the LLM model they just attempted to remove. -->
+        <div class="popup-container" id="confirm-removal-popup-container">
+            <div class="popup" id="confirm-removal-popup">
+                Are you sure you want to remove this LLM?<br>
+                <div class="button-container" id="confirm-removal-button-container">
+                    <button class="small-button" id="confirm-removal-btn">Yes</button>
+                    <button class="small-button" id="cancel-removal-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal structure for Prompt List popup -->
+        <div class="popup-container" id="promptListPopup">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="promptTable">
+                        <thead>
+                            <tr>
+                                <th id="game-type-column">Game Type</th>
+                                <th>Prompt Type</th>
+                                <th>Prompt Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal structure for LLM List popup -->
+        <div class="popup-container" id="LLMListPopup">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="LLMTable">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>LLM Model</th>
+                                <th>More Info</th>
+                             </tr>
+                         </thead>
+                        <tbody>
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal structure for Game Details popup -->
+        <div class="popup-container" id="gameDetailsPopup">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="gameDetailsTable">
+                        <thead>
+                            <tr>
+                                <th class = "game-type-column">Game Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal structure for FAQ popup -->
+        <div class="popup-container" id="faqPopup">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="table-container">
+                    <table id="faqTable">
+                        <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Answer</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript scripts -->
+        <script type="module" src="game-simulation.js"></script>
+        <script type="text/javascript" src="jszip.js"></script>
+        <script type="text/javascript" src="file-saver.js"></script>
+        <script type="text/javascript" src="html2canvas.js"></script>
+    </body>
+</html>
