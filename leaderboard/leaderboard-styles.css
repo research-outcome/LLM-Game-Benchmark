@@ -4,7 +4,7 @@ body {
     font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
-    font-size: small;
+    font-size: medium;
     background-color: #ffffff;
     margin: 0; /* Remove default margin */
     padding-top: 0; /* Remove default padding */
@@ -38,7 +38,10 @@ body {
 
 .select-btn .btn-txt {
     font-size: 14px;
-    font-weight: 400;
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: medium;
     color: #333;
 }
 
@@ -82,7 +85,10 @@ body {
 
 .item .item-text {
     font-size: 14px;
-    font-weight: 400;
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: medium;
     color: #333;
 }
 .item .checkbox {
@@ -113,7 +119,7 @@ body {
 }
 h1 {
     color: black;
-    margin-left: 10px;
+    text-align: center
 }
 /* Move search bar to the left */
 .dataTables_filter {
@@ -132,7 +138,7 @@ h3 {
     font-family: 'Tahoma', sans-serif;
     font-style: normal;
     font-weight: 500;
-    font-size: small;
+    font-size:medium;
 }
 
  .table-container {
@@ -147,21 +153,24 @@ h3 {
 #mytable {
     width: 100%; /* Ensure the table takes full width of its container */
     margin-bottom: 5px;
-    font-size: 12px;
+    font-family: 'Tahoma', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: medium;
 }
 
-/* Style the submit button */
+/* Style the submit button 
 .submit-btn {
     padding: 10px 20px;
     font-size: 16px;
     display: flex;
     cursor: pointer;  
     position: relative; 
-    top: 10px; /* Position it at the bottom */
-    left: 10px; /* Position it at the left */
+    top: 10px; 
+    left: 10px; 
 }
 
-/* Modal styles */
+
 .modal {
     display: none;
     position: fixed;
@@ -198,3 +207,4 @@ h3 {
     text-decoration: none;
     cursor: pointer;
 }
+*/

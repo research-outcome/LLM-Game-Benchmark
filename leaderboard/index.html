@@ -100,19 +100,21 @@
             <h2>*DQ = Disqualification  </h2>
             <h3>Disqualification occurs when a player makes a certain number of invalid moves in a game. The threshold for disqualification is 6 invalid moves in Tic-Tac-Toe, 13 in Connect Four, and 30 in Gomoku. <br>
                 Invalid moves can result from the LLM's response not following the specified format, providing a row or column that is out of the allowed range, or choosing a position that is already occupied by a previous move.</h3>
+            <h3>To submit your results to the leaderboard, please send the zip file, which was downloaded after running the game simulation, to research.explorations@gmail.com.</h3>
         </div>
     </div>  
 
-    <!-- Submit button -->
-    <button id="submitButton" class="submit-btn">Submit</button>
-
     <!-- Modal Structure -->
+    <!--
+   <button id="submitButton" class="submit-btn">Submit</button> 
+
     <div id="instructionsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <p>To submit your results, send the zip file, which was downloaded after running the game simulation, to research.explorations@gmail.com.</p>
         </div>
     </div>
+    -->
 
     <!-- Include jQuery library -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -120,7 +122,8 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
     <!-- Initialize DataTables -->
     <script src="leaderboard-script.js"></script>
-    <!-- Modal Script -->
+
+    <!-- Modal Script 
     <script>
         // Get the modal
         var modal = document.getElementById("instructionsModal");
@@ -148,5 +151,7 @@
             }
         }
     </script>
+    -->
+
 </body>
 </html>
