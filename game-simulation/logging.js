@@ -14,7 +14,7 @@ function formatDateTime(dateTime) {
 }
 
 // Write information about the current game to .txt, .json, and .csv formats.
-export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid) {
+export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid) {
     let gameDuration = Math.round((Date.now() - gameStartTime) / 1000); // Calculate game duration in seconds.
     firstPlayer = firstPlayer.replaceAll("/", "_");
     secondPlayer = secondPlayer.replaceAll("/", "_");
@@ -103,6 +103,10 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "Result: " + result + "\n" +
         "Game Duration (seconds): " + gameDuration + "\n" +
         "Total Moves: " + currentMoveCount + "\n" +
+        "Player 1 Moves: " + firstPlayerCurrentMoveCount + "\n" +
+        "Player 2 Moves: " + secondPlayerCurrentMoveCount + "\n" +
+        "Player 1 Moves per Win: " + firstPlayerMovesPerWin + "\n" +
+        "Player 2 Moves per Win: " + secondPlayerMovesPerWin + "\n" +
         "Player 1 Already Taken Moves: " + invalidMovesFirstPlayerAlreadyTaken + "\n" +
         "Player 2 Already Taken Moves: " + invalidMovesSecondPlayerAlreadyTaken + "\n" +
         "Player 1 Invalid Format Moves: " + invalidMovesFirstPlayerInvalidFormat + "\n" +
@@ -125,6 +129,10 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
             "\t\"Result\": \"" + result + "\",\n" +
             "\t\"GameDuration\": " + gameDuration + ",\n" +
             "\t\"TotalMoves\": " + currentMoveCount + ",\n" +
+            "\t\"Player1Moves\": " + firstPlayerCurrentMoveCount + ",\n" +
+            "\t\"Player2Moves\": " + secondPlayerCurrentMoveCount + ",\n" +
+            "\t\"Player1MovesPerWin\": " + firstPlayerMovesPerWin + ",\n" +
+            "\t\"Player2MovesPerWin\": " + secondPlayerMovesPerWin + ",\n" +
             "\t\"Player1InvalidAlreadyTaken\": " + invalidMovesFirstPlayerAlreadyTaken + ",\n" +
             "\t\"Player2InvalidAlreadyTaken\": " + invalidMovesSecondPlayerAlreadyTaken + ",\n" +
             "\t\"Player1InvalidFormat\": " + invalidMovesFirstPlayerInvalidFormat + ",\n" +
@@ -136,13 +144,13 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         "}";
 
     // Generate the outcome CSV file content.
-    let csvFileContent = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds\n" +
-        "\"" + uuid + "\",\"" + dateTime + "\",\"" + gameType + "\",\"" + promptType + "\",\"" + promptVersion + "\"," + currentGameCount + ",\"" + firstPlayer + "\",\"" + secondPlayer + "\",\"" + result + "\"," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
+    let csvFileContent = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds\n" +
+        "\"" + uuid + "\",\"" + dateTime + "\",\"" + gameType + "\",\"" + promptType + "\",\"" + promptVersion + "\"," + currentGameCount + ",\"" + firstPlayer + "\",\"" + secondPlayer + "\",\"" + result + "\"," + gameDuration + "," + currentMoveCount + "," + firstPlayerCurrentMoveCount + "," + secondPlayerCurrentMoveCount + "," + firstPlayerMovesPerWin + "," + secondPlayerMovesPerWin + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds;
 
     // Generate the moves CSV file content.
-    let movesCsvFileContent = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds,MoveNumber,MovePlayer,MoveRow,MoveCol,MoveOutcome,CurrentStatus,Response,FinalGameState\n";
+    let movesCsvFileContent = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds,MoveNumber,MovePlayer,MoveRow,MoveCol,MoveOutcome,CurrentStatus,Response,FinalGameState\n";
     for (let csvMove of csvMoves) {
-        movesCsvFileContent += "\"" + uuid + "\",\"" + dateTime + "\",\"" + gameType + "\",\"" + promptType + "\",\"" + promptVersion + "\"," + currentGameCount + ",\"" + firstPlayer + "\",\"" + secondPlayer + "\",\"" + result + "\"," + gameDuration + "," + currentMoveCount + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds + "," + csvMove + ",\"" + finalGameState + "\"\n";
+        movesCsvFileContent += "\"" + uuid + "\",\"" + dateTime + "\",\"" + gameType + "\",\"" + promptType + "\",\"" + promptVersion + "\"," + currentGameCount + ",\"" + firstPlayer + "\",\"" + secondPlayer + "\",\"" + result + "\"," + gameDuration + "," + currentMoveCount + "," + firstPlayerCurrentMoveCount + "," + secondPlayerCurrentMoveCount + "," + firstPlayerMovesPerWin + "," + secondPlayerMovesPerWin + "," + invalidMovesFirstPlayerAlreadyTaken + "," + invalidMovesSecondPlayerAlreadyTaken + "," + invalidMovesFirstPlayerInvalidFormat + "," + invalidMovesSecondPlayerInvalidFormat + "," + invalidMovesFirstPlayerOutOfBounds + "," + invalidMovesSecondPlayerOutOfBounds + "," + csvMove + ",\"" + finalGameState + "\"\n";
     }
     movesCsvFileContent = movesCsvFileContent.substring(0, movesCsvFileContent.length - 1); // Remove last '\n' from moves string.
 
@@ -243,8 +251,8 @@ export function downloadBulkZipFile(allLogFiles) {
     let gameType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).GameType;
     let promptType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).PromptType;
 
-    let csvFileContentAll = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds\n";
-    let csvFileContentAllMoves = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds,MoveNumber,MovePlayer,MoveRow,MoveCol,MoveOutcome,CurrentStatus,Response,FinalGameState\n";
+    let csvFileContentAll = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds\n";
+    let csvFileContentAllMoves = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds,MoveNumber,MovePlayer,MoveRow,MoveCol,MoveOutcome,CurrentStatus,Response,FinalGameState\n";
     let csvFileContentAllSubmission = "GameType,PromptType,PromptVersion,LLM1stPlayer,LLM2ndPlayer,WinRatio-1st,WinRatio-2nd,Wins-1st,Wins-2nd,Disqualifications-1st,Disqualifications-2nd,Draws,InvalidMovesRatio-1st,InvalidMovesRatio-2nd,TotalMoves-1st,TotalMoves-2nd,ProviderEmail,DateTime,UUID\n";
 
     // Add all individual game log files from all games to bulk ZIP file.
