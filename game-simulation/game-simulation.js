@@ -171,7 +171,7 @@ async function playGame() {
             if (response === "Network Error Occurred") {
                 result = "networkerror";
                 finalGameState = await getFinalGameState(game, promptType);
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                 console.log("Game was canceled because a network error occurred.");
                 isGameActive = false;
                 continue;
@@ -190,6 +190,16 @@ async function playGame() {
 
             // If a valid move was made, process it.
             if(move.getOutcome() === "Valid") {
+                // Increment move counts, since a move was made.
+                if (currentPlayer === 1) {
+                    firstPlayerCurrentMoveCount++
+                    firstPlayerTotalMoveCount++;
+                }
+                else {
+                    secondPlayerCurrentMoveCount++;
+                    secondPlayerTotalMoveCount++;
+                }
+
                 let boardState = game.visualizeBoardState();
                 gameLog += boardState; // Append new move to visual game log.
 
@@ -207,7 +217,7 @@ async function playGame() {
 
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
                     finalGameState = await getFinalGameState(game, promptType);
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                     console.log(result);
                     isGameActive = false;
                 }
@@ -216,7 +226,7 @@ async function playGame() {
                     result = "draw";
                     draws++;
                     finalGameState = await getFinalGameState(game, promptType);
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                     console.log("Draw");
                     isGameActive = false;
                 }
@@ -227,12 +237,16 @@ async function playGame() {
             else {
                 gameLog += "Invalid Move (" + move.getOutcome() + ")\n\n"; // Append invalid move explanation to text file's game log.
 
-                // Increment invalid move counts, since an invalid move was made.
+                // Increment move counts and invalid move counts, since an invalid move was made.
                 if (currentPlayer === 1) {
+                    firstPlayerCurrentMoveCount++
+                    firstPlayerTotalMoveCount++;
                     firstPlayerCurrentInvalidMoves++;
                     firstPlayerTotalInvalidMoves++;
                 }
                 else {
+                    secondPlayerCurrentMoveCount++;
+                    secondPlayerTotalMoveCount++;
                     secondPlayerCurrentInvalidMoves++;
                     secondPlayerTotalInvalidMoves++;
                 }
@@ -242,7 +256,7 @@ async function playGame() {
                     result = "disqualified1st";
                     firstPlayerDisqualifications++;
                     finalGameState = await getFinalGameState(game, promptType);
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                     console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
@@ -250,20 +264,10 @@ async function playGame() {
                     result = "disqualified2nd";
                     secondPlayerDisqualifications++;
                     finalGameState = await getFinalGameState(game, promptType);
-                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, gameLog, moves, finalGameState, uuid));
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                     console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
-            }
-
-            // Increment move counts, since a move was made.
-            if (currentPlayer === 1) {
-                firstPlayerCurrentMoveCount++
-                firstPlayerTotalMoveCount++;
-            }
-            else {
-                secondPlayerCurrentMoveCount++;
-                secondPlayerTotalMoveCount++;
             }
 
             // If gameplay was stopped, exit prior to updating game statistics.
@@ -296,7 +300,7 @@ async function playGame() {
             // Essentially, if getMaxMoves() = 20 and there have been 20 total moves made, we will cancel the game here.
             if (currentMoveCount === game.getMaxMoves() + 1) {
                 finalGameState = await getFinalGameState(game, promptType);
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, game.getMaxMoves(), gameLog, moves, finalGameState, uuid));
+                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount - 1, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                 console.log("Game Cancelled");
                 isGameActive = false;
             }
@@ -354,10 +358,10 @@ async function bulkRun() {
     // Iterate through every combination of models in the model list, and play "gameCount" games per combination.
     for(let firstModelIndex = 0; firstModelIndex < document.getElementById("first-player").length; firstModelIndex++) {
         document.getElementById("first-player").selectedIndex = firstModelIndex; // Adjust selected first player model.
-        document.getElementById("first-player").change(); // Update info display, since changing selectedIndex doesn't trigger a change event.
+        document.getElementById("info-first-player").innerHTML = document.getElementById("first-player").options[firstModelIndex].value; // Update info display, since changing selectedIndex doesn't trigger a change event.
         for(let secondModelIndex = 0; secondModelIndex < document.getElementById("second-player").length; secondModelIndex++) {
             document.getElementById("second-player").selectedIndex = secondModelIndex; // Adjust selected second player model.
-            document.getElementById("second-player").change(); // Update info display, since changing selectedIndex doesn't trigger a change event.
+            document.getElementById("info-second-player").innerHTML = document.getElementById("second-player").options[secondModelIndex].value; // Update info display, since changing selectedIndex doesn't trigger a change event.
 
             // Skip games with the same first/second player LLM if the "playersCanBeTheSame" flag is set to false.
             if (playersCanBeTheSame === false && firstModelIndex === secondModelIndex) {
@@ -704,17 +708,17 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
-    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 

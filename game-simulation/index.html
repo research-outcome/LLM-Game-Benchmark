@@ -17,7 +17,14 @@
                 // If a CORS error occurs due to the user opening the HTML file directly, display an explanation and offer some fixes.
                 if (event.target.tagName === 'SCRIPT') {
                     document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
-                            "Your browser is preventing you from running this site from directly from the HTML file.<br><br>" +
+                            //"A Cross-Origin Resource Sharing (CORS) policy in your browser is preventing you from running this site from directly from the HTML file.<br><br>" +
+                            //"CORS is a security feature implemented in browsers to control how resources are accessed from different origins (domain, scheme, or port). <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS'>Learn More About CORS</a><br><br>" +
+                            //"Opening the HTML file directly uses the \"file://\" protocol, which means any requests made to an external server would violate the CORS same-origin policy, which is a security mechanism that restricts how resources from one origin (protocol, port, and host) can interact with resources from another origin. <a href='https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy'>Learn More About CORS Same-Origin Policy</a>"
+                            //"<span style=\"color: red;\">Do the following fixes at your own risk. Disabling web security on your browser may introduce security vulnerabilities along with other issues such as browser slowdowns. It is highly recommended to follow the suggestions about running the file on a server in the \"More Information\" link instead.</span>"
+                            "<strong><u>Important Notice: Proceed At Your Own Risk</u></strong><br><br>" +
+                            "Your browser is preventing you from running this site directly from the HTML file due to security settings designed to protect your system.<br>" +
+                            "These measures are in place to safeguard you from potential threats. However, if you choose to bypass these protections, we provide a list of actions you can take.<br>" +
+                            "<strong>Please note that you proceed at your own risk.</strong><br><br>" +
                             "To fix this issue on Firefox, navigate to 'about:config' and set 'security.fileuri.strict_origin_policy' to 'false'.<br><br>" +
                             "To fix this issue on Microsoft Edge, run Microsoft Edge with the following command, changing the directories as necessary:<br>" +
                             "\"\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\".<br>" +
