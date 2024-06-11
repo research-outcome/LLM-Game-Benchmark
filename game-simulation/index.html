@@ -3,9 +3,6 @@
     <head>
         <meta charset="UTF-8">
         <title>LLM Game Simulation</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="game-simulation.css">
     </head>
     <body>
@@ -57,6 +54,7 @@
                         <option value="tic-tac-toe">Tic-Tac-Toe</option>
                         <option value="connect-four">Connect Four</option>
                         <option value="gomoku">Gomoku</option>
+                        <!-- Add options for future games here. -->
                     </select>
                 </div>
                 <div class="option">
@@ -522,6 +520,7 @@
                         <div class="board-cell" id="gomoku-15-14"></div>
                         <div class="board-cell" id="gomoku-15-15"></div>
                     </div>
+                    <!-- Add HTML for future game boards here. -->
                 </div>
             </div>
 
@@ -537,6 +536,7 @@
             <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="FAQsButton">FAQs</button>
             <button class="large-button" id="userGuideButton">User Guide</button>
+            <a href="../add-games-guide/index.html"><button class="large-button">How to Add Your Own Game</button></a>
         </div>
 
         <!-- Manage LLMs menu allows users to add, modify, and remove LLM models. -->
@@ -704,7 +704,7 @@
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h2 id="userGuideTitle"></h2>
-                <div id="userGuideDescription"></div> 
+                <div id="userGuideDescription"></div>
             </div>
         </div>
 

@@ -3,6 +3,7 @@ import { Model } from "./classes.js";
 import { TicTacToe } from "./tic-tac-toe.js";
 import { ConnectFour } from "./connect-four.js";
 import { Gomoku } from "./gomoku.js";
+// Add imports for future game classes here.
 import { getMove, processMove } from "./web-service-communication.js";
 import { downloadBulkZipFile, downloadZipFile, generateGameLogFiles, generateSubmissionFiles } from "./logging.js";
 import {
@@ -12,7 +13,7 @@ import {
     updateAddModelFields,
     updatePlayerDropdowns
 } from "./add-edit-llms.js";
-import { fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable, populateUserGuide } from "./info.js";
+import { populateGameDetailsTable, populatePromptTable, populateLLMTable, populateFAQTable, populateUserGuide } from "./info.js";
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -25,12 +26,6 @@ const BEDROCK_URL = "https://v5fb43ch74.execute-api.us-east-1.amazonaws.com/devp
 
 // OpenAI URL
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-
-// URLs for JSON data
-const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
-const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
-const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/gameDetails.json';
-const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FAQs.json';
 
 // Gameplay flags
 let bulkEnabled = false; // This flag determines whether the game will generate a "bulk" ZIP file.
@@ -91,15 +86,13 @@ async function playGame() {
 
     // Get game class.
     let game;
-    if (gameType === "tic-tac-toe") {
+    if (gameType === "tic-tac-toe")
         game = TicTacToe;
-    }
-    else if (gameType === "connect-four") {
+    else if (gameType === "connect-four")
         game = ConnectFour;
-    }
-    else if (gameType === "gomoku") {
+    else if (gameType === "gomoku")
         game = Gomoku;
-    }
+    // Add conditions for future games here.
 
     // Initialize prompt version, provider email(s), UUID, and game log files array for logging purposes.
     let promptVersion = game.promptVersion();
@@ -523,21 +516,10 @@ function resetProgressDisplays() {
 document.addEventListener("DOMContentLoaded", async function() {
     // Reset stats and show board for selected game when the game type is changed.
     document.getElementById("game-type").addEventListener("change", (event) => {
-        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Update visual statistics immediately.
+        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Show board for selected game type and hide all others.
-        if (event.target.value === "tic-tac-toe") {
-            showBoardWithId("tic-tac-toe-board");
-        }
-        else if (event.target.value === "connect-four") {
-            showBoardWithId("connect-four-board");
-        }
-        else if (event.target.value === "gomoku") {
-            showBoardWithId("gomoku-board");
-        }
-        else if (event.target.value === "") {
-            // Additional game types here.
-        }
+        showBoardWithId(event.target.value + "-board");
 
         // Update "info" display with current selections.
         document.getElementById("info-game-type").innerHTML = event.target.value;
@@ -548,7 +530,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("prompt-type").addEventListener("change", (event) => {
         updatePlayerDropdowns();
 
-        // Match selected "progress visualization type" with newly-selected prompt type.
+        // Match selected "progress display type" with newly-selected prompt type.
         let radioButtons = document.getElementsByName("progress-display-type");
         for (let i = 0; i < radioButtons.length; i++) {
             if (radioButtons[i].value === event.target.value) {
@@ -611,9 +593,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         document.getElementById("manage-llms").style.display = "none";
     });
 
-    // When the "reset stats" button is clicked, reset the stats both visually and internally.
+    // When the "reset stats" button is clicked, reset the stats.
     document.getElementById("reset-btn").addEventListener("click", () => {
-        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // Reset visual stats immediately.
+        updateStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     });
 
     // When the "run" button is clicked, start gameplay.
@@ -660,59 +642,29 @@ document.addEventListener("DOMContentLoaded", async function() {
         addModel();
     });
 
+    // Populate game details table and show game details popup when game details button is clicked.
+    document.getElementById("gameDetailsButton").addEventListener("click", () => {
+        populateGameDetailsTable();
+    });
+
     // Populate prompt list table and show prompt list when prompt list button is clicked.
     document.getElementById("promptListButton").addEventListener("click", () => {
-        fetchJSON(promptListURL).then(data => {
-            populatePromptTable(data);
-            document.getElementById("promptListPopup").style.display = "block";
-        });
+        populatePromptTable();
     });
 
     // Populate LLM list table and show LLM list when LLM list button is clicked.
     document.getElementById("LLMListButton").addEventListener("click", () => {
-        fetchJSON(LLMListURL).then(data => {
-            populateLLMTable(data);
-            document.getElementById("LLMListPopup").style.display = "block";
-        });
+        populateLLMTable();
     });
 
-    // Populate game details table and show game details popup when game details button is clicked.
-    document.getElementById("gameDetailsButton").addEventListener("click", () => {
-        fetchJSON(gameDetailsURL).then(data => {
-            populateGameDetailsTable(data);
-            document.getElementById("gameDetailsPopup").style.display = "block";
-        });
-    });
-
-    // Populate FAQ table and show FAQ popup when FAQ button is clicked.
+    // Populate FAQ table and show FAW popup when FAW button is clicked.
     document.getElementById("FAQsButton").addEventListener("click", () => {
-        fetchJSON(faqURL).then(data => {
-            populateFAQTable(data);
-            document.getElementById("faqPopup").style.display = "block";
-        });
+        populateFAQTable();
     });
 
     // Event listener for the game details button
     document.getElementById("userGuideButton").addEventListener("click", () => {
-        // Example data for demonstration
-        const userGuideData = {
-            title: "How to use the benchmark",
-            description: `
-            <ol>
-                <li>Select game type</li>
-                <li>Select prompt type</li>
-                <li>Select LLM for 1st and 2nd player</li>
-                <li>Enter the number of games to be played</li>
-                <li>The progress during the game (the current status after each move) can be displayed as a list, illustration, or image.</li>
-                <li>Select 'Run' or 'Bulk' ('Bulk Run' button makes all the LLM's in the list of players compete against each other)</li>
-                <li>Choose the 'results' file destination when the games are done (results automatically download when the games are completed).</li>
-                <li>The results include files for submission to the leaderboard and several other files for further analysis of the games.</li>
-            </ol>
-        `
-    };
-    
-        // Call function to populate the popup with data
-        populateUserGuide(userGuideData);
+        populateUserGuide();
     });
 
     // Hide popups when a popup's close button has been clicked.
@@ -731,17 +683,17 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 

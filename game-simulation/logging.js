@@ -251,6 +251,7 @@ export function downloadBulkZipFile(allLogFiles) {
     let gameType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).GameType;
     let promptType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).PromptType;
 
+    let jsonFileContentAllSubmission = "[\n";
     let csvFileContentAll = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds\n";
     let csvFileContentAllMoves = "UUID,DateTime,GameType,PromptType,PromptVersion,GameNumber,Player1,Player2,Result,GameDuration,TotalMoves,Player1Moves,Player2Moves,Player1MovesPerWin,Player2MovesPerWin,Player1InvalidAlreadyTaken,Player2InvalidAlreadyTaken,Player1InvalidFormat,Player2InvalidFormat,Player1OutOfBounds,Player2OutOfBounds,MoveNumber,MovePlayer,MoveRow,MoveCol,MoveOutcome,CurrentStatus,Response,FinalGameState\n";
     let csvFileContentAllSubmission = "GameType,PromptType,PromptVersion,LLM1stPlayer,LLM2ndPlayer,WinRatio-1st,WinRatio-2nd,Wins-1st,Wins-2nd,Disqualifications-1st,Disqualifications-2nd,Draws,InvalidMovesRatio-1st,InvalidMovesRatio-2nd,TotalMoves-1st,TotalMoves-2nd,ProviderEmail,DateTime,UUID\n";
@@ -259,6 +260,8 @@ export function downloadBulkZipFile(allLogFiles) {
     for (let i = 0; i < allLogFiles.length; i++) {
         bulkZipFile.file(allLogFiles[i][0][0], allLogFiles[i][0][1]); // Add JSON submission file for current game to bulk ZIP file.
         bulkZipFile.file(allLogFiles[i][0][2], allLogFiles[i][0][3]); // Add CSV submission file for current game to bulk ZIP file.
+
+        jsonFileContentAllSubmission += allLogFiles[i][0][1].substring(2, allLogFiles[i][0][1].length - 2) + ",\n"; // Add submission file object for current game to list of all submission file JSON objects for the entire bulk run.
         csvFileContentAllSubmission += allLogFiles[i][0][3].split("\n")[1] + "\n"; // Add CSV submission file information for current game to "all submission" CSV file content.
         for (let gameLogs of allLogFiles[i][1]) {
             bulkZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
@@ -289,6 +292,9 @@ export function downloadBulkZipFile(allLogFiles) {
         }
     }
 
+    // Remove last ",\n" from All Submission JSON content and append closing newline and bracket "\n]".
+    jsonFileContentAllSubmission = jsonFileContentAllSubmission.substring(0, jsonFileContentAllSubmission.length - 2);
+    jsonFileContentAllSubmission += "\n]";
     // Remove last newline character from CSV file contents.
     csvFileContentAll = csvFileContentAll.substring(0, csvFileContentAll.length - 1);
     csvFileContentAllMoves = csvFileContentAllMoves.substring(0, csvFileContentAllMoves.length - 1);
@@ -299,11 +305,13 @@ export function downloadBulkZipFile(allLogFiles) {
 
     // Generate file names.
     let zipFileName = gameType + "_" + promptType + "_" + dateTime + "_bulk";
+    let jsonFileNameAllSubmission = gameType + "_" + promptType + "_" + dateTime + "_all_submission.json";
     let csvFileNameAll = gameType + "_" + promptType + "_" + dateTime + "_all.csv";
     let csvFileNameAllMoves = gameType + "_" + promptType + "_" + dateTime + "_all_moves.csv";
     let csvFileNameAllSubmission = gameType + "_" + promptType + "_" + dateTime + "_all_submission.csv";
 
-    // Add "all" CSV file contents to the bulk ZIP file.
+    // Add "all" file contents to the bulk ZIP file.
+    bulkZipFile.file(jsonFileNameAllSubmission, jsonFileContentAllSubmission);
     bulkZipFile.file(csvFileNameAll, csvFileContentAll);
     bulkZipFile.file(csvFileNameAllMoves, csvFileContentAllMoves);
     bulkZipFile.file(csvFileNameAllSubmission, csvFileContentAllSubmission);

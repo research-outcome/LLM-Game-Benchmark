@@ -206,8 +206,7 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
 export function cleanResponse(response) {
     response = response.replaceAll("\n", "");
     response = response.replaceAll("\\\\\"", "\"");
-    response = response.replaceAll("'row'", "\"row\"");
-    response = response.replaceAll("'column'", "\"column\"");
+    response = response.replaceAll("'", "\"");
     response = response.replaceAll("\"{", "{");
     response = response.replaceAll("}\"", "}");
     response = response.replaceAll("'}", "}");
