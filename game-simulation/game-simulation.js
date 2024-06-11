@@ -12,7 +12,7 @@ import {
     updateAddModelFields,
     updatePlayerDropdowns
 } from "./add-edit-llms.js";
-import { fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable } from "./info.js";
+import { fetchJSON, populateFAQTable, populateGameDetailsTable, populateLLMTable, populatePromptTable, populateUserGuide } from "./info.js";
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
@@ -684,12 +684,35 @@ document.addEventListener("DOMContentLoaded", async function() {
         });
     });
 
-    // Populate FAQ table and show FAW popup when FAW button is clicked.
+    // Populate FAQ table and show FAQ popup when FAQ button is clicked.
     document.getElementById("FAQsButton").addEventListener("click", () => {
         fetchJSON(faqURL).then(data => {
             populateFAQTable(data);
             document.getElementById("faqPopup").style.display = "block";
         });
+    });
+
+    // Event listener for the game details button
+    document.getElementById("userGuideButton").addEventListener("click", () => {
+        // Example data for demonstration
+        const userGuideData = {
+            title: "How to use the benchmark",
+            description: `
+            <ol>
+                <li>Select game type</li>
+                <li>Select prompt type</li>
+                <li>Select LLM for 1st and 2nd player</li>
+                <li>Enter the number of games to be played</li>
+                <li>The progress during the game (the current status after each move) can be displayed as a list, illustration, or image.</li>
+                <li>Select 'Run' or 'Bulk' ('Bulk Run' button makes all the LLM's in the list of players compete against each other)</li>
+                <li>Choose the 'results' file destination when the games are done (results automatically download when the games are completed).</li>
+                <li>The results include files for submission to the leaderboard and several other files for further analysis of the games.</li>
+            </ol>
+        `
+    };
+    
+        // Call function to populate the popup with data
+        populateUserGuide(userGuideData);
     });
 
     // Hide popups when a popup's close button has been clicked.
