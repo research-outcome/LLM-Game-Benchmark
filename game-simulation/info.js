@@ -133,22 +133,23 @@ export function populateFAQTable() {
 }
 
 // Function to populate the User Guide pop up data
-// Function to populate the User Guide pop up data
 export function populateUserGuide() {
     // Example data for demonstration
     const data = {
-        title: "How to use the benchmark",
+        title: "How to Run the Game Simulation",
         description: `
+            <p>Please follow the steps outlined below to run the game simulation:</p>
             <ol>
-                <li>Select game type</li>
-                <li>Select prompt type</li>
-                <li>Select LLM for 1st and 2nd player</li>
-                <li>Enter the number of games to be played</li>
+                <li>Select game type.</li>
+                <li>Select prompt type.</li>
+                <li>Select LLM for 1st and 2nd player.</li>
+                <li>Enter the number of games to be played.</li>
                 <li>The progress during the game (the current status after each move) can be displayed as a list, illustration, or image.</li>
-                <li>Select 'Run' or 'Bulk' ('Bulk Run' button makes all the LLM's in the list of players compete against each other)</li>
+                <li>Select 'Run' or 'Bulk' ('Bulk Run' button makes all the LLM's in the list of players compete against each other).</li>
                 <li>Choose the 'results' file destination when the games are done (results automatically download when the games are completed).</li>
                 <li>The results include files for submission to the leaderboard and several other files for further analysis of the games.</li>
             </ol>
+            <p>Below is a video demonstration of the steps:</p>
         `
     };
 
