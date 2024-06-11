@@ -113,3 +113,14 @@ export function populateFAQTable(data) {
         tableBody.appendChild(row);
     });
 }
+
+// Function to populate the User Guide pop up data
+export function populateUserGuide(data) {
+    const titleElement = document.getElementById('userGuideTitle');
+    const descriptionElement = document.getElementById('userGuideDescription');
+
+    titleElement.textContent = data.title; 
+    descriptionElement.innerHTML = data.description;
+
+    document.getElementById("userGuidePopup").style.display = "block";
+}
