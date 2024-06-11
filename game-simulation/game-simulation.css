@@ -278,6 +278,9 @@ button {
 #progress-auto-scroll { /* Styling for the container that holds the "Auto-Scroll Progress Displays" and "Allow LLMs to Play Against Themselves in Bulk Runs" checkboxes. */
     margin-bottom: 1vh;
 }
+#empty-email-warning-popup { /* Styling for "empty email" warning popup. */
+    text-align: center;
+}
 
 /* Styling for game boards and progress displays. */
 #gameplay-area { /* Styling for area that contains game board and progress displays. */
