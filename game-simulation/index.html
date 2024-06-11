@@ -182,6 +182,19 @@
             </div>
         </div>
 
+        <!-- Warning popup that appears before starting a bulk run if the "email address(es)" field is empty. -->
+        <div class="popup-container" id="empty-email-warning-popup-container">
+            <div class="popup" id="empty-email-warning-popup">
+                You have not entered any submission file email address.<br>
+                If you plan to submit your results to the benchmark's leaderboard, you must enter an email address in the 'Manage LLMs' section to be included in the generated submission files.<br>
+                Do you want to continue without entering an email address?
+                <div class="button-container">
+                    <button class="small-button" id="empty-email-continue-btn">Yes</button>
+                    <button class="small-button" id="empty-email-cancel-btn">No</button>
+                </div>
+            </div>
+        </div>
+
 
 
         <!-- Gameplay Area container holds game boards as well as game progress displays for each player. -->

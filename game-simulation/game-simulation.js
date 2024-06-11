@@ -607,12 +607,18 @@ document.addEventListener("DOMContentLoaded", async function() {
         playGame();
     });
 
-    // When the "bulk run" button is clicked, display the total number of games and ask the user if they are sure they want to continue.
+    // When the "bulk run" button is clicked, if "email" field in "Manage LLMs" popup is empty, display a warning about it.
+    // Otherwise, display the total number of games and ask the user if they are sure they want to continue.
     document.getElementById("bulk-run-btn").addEventListener("click", () => {
-        document.getElementById("bulk-run-warning-popup-container").style.display = "block";
-        document.getElementById("bulk-run-warning-popup").style.display = "block";
+        if (document.getElementById("provider-email").value === "") {
+            document.getElementById("empty-email-warning-popup-container").style.display = "block";
+            document.getElementById("empty-email-warning-popup").style.display = "block";
+        } else {
+            document.getElementById("bulk-run-warning-popup-container").style.display = "block";
+            document.getElementById("bulk-run-warning-popup").style.display = "block";
 
-        document.getElementById("bulk-run-game-count").innerHTML = getBulkRunGameCount();
+            document.getElementById("bulk-run-game-count").innerHTML = getBulkRunGameCount();
+        }
     });
 
     // When the "yes" button on the bulk run warning popup is clicked, hide the popup and start the bulk run.
@@ -626,6 +632,23 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("cancel-bulk-run-btn").addEventListener("click", () => {
         document.getElementById("bulk-run-warning-popup-container").style.display = "none";
         document.getElementById("bulk-run-warning-popup").style.display = "none";
+    });
+
+    // When the "yes" button on the empty email warning popup is clicked, hide the popup and show the bulk run game count warning.
+    document.getElementById("empty-email-continue-btn").addEventListener("click", () => {
+        document.getElementById("empty-email-warning-popup-container").style.display = "none";
+        document.getElementById("empty-email-warning-popup").style.display = "none";
+
+        document.getElementById("bulk-run-warning-popup-container").style.display = "block";
+        document.getElementById("bulk-run-warning-popup").style.display = "block";
+
+        document.getElementById("bulk-run-game-count").innerHTML = getBulkRunGameCount();
+    });
+
+    // When the "no" button on the empty email warning popup is clicked, hide the popup.
+    document.getElementById("empty-email-cancel-btn").addEventListener("click", () => {
+        document.getElementById("empty-email-warning-popup-container").style.display = "none";
+        document.getElementById("empty-email-warning-popup").style.display = "none";
     });
 
     // Stop gameplay and clear progress displays when the "stop" button is clicked.
