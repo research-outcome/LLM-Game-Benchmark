@@ -1,1 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Adding Games to LLM Game Simulation</title>
+    <link rel="stylesheet" href="add-games-guide.css">
+</head>
+<body>
+    <h1><strong>Adding Your Own Games to the LLM Game Simulation</strong></h1>
+    <div id="add-games-guide">
+        This guide will instruct you on how to add games to the LLM Benchmark.<br><br>
+        The example code in this guide is based on our Tic-Tac-Toe implementation.<br><br>
+        You can copy/paste the code examples provided in this guide into your IDE and modify them as instructed.<br><br>
+        <ol id="guide-sections">
+            <li>
+                <strong>Implementing the Game Board</strong><br>
+                In this section, you will be modifying the "index.html" file for the Game Simulation page.<br><br>
+                <ol type="a">
+                    <li>
+                        Within the "game-type" select element, add an option for your game.
+                        <div class="code-snippet">
+                            <span class="yellow">&lt;select </span>id<span class="green">="game-type</span>"</span> <span class="yellow">name</span><span class="green">="game-type"</span><span class="yellow">&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;option</span> value<span class="green">="tic-tac-toe"</span><span class="yellow">&gt;</span>Tic-Tac-Toe<span class="yellow">&lt;</span><span class="yellow">/option</span><span class="yellow">&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;option</span> value<span class="green">="connect-four"</span><span class="yellow">&gt;</span>Connect Four<span class="yellow">&lt;</span><span class="yellow">/option</span><span class="yellow">&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;option</span> value<span class="green">="gomoku"</span><span class="yellow">&gt;</span>Gomoku<span class="yellow">&lt;</span><span class="yellow">/option</span><span class="yellow">&gt;</span><br>
+                            &emsp;<span class="highlight">&lt;!-- Add an option for your game here. --&gt;</span><br>
+                            <span class="yellow">&lt;</span><span class="yellow">/select</span><span class="yellow">&gt;</span>
+                        </div>
+                    </li>
+                    <li>
+                        Within the "board-container" div, add the HTML necessary to display your game (we will discuss styling in the next section.)<br>
+                        <em>The ID of your game board should be the value you set for your game in the select dropdown above with "-board" appended to it.</em>
+                        <div class="code-snippet">
+                            <span class="yellow">&lt;div </span>id<span class="green">="board-container"</span><span class="yellow">&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;div </span>id<span class="green">="tic-tac-toe-board"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-1-1"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-1-2"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-1-3"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-2-1"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-2-2"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-2-3"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-3-1"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-3-2"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="tic-tac-toe-3-3"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;/div&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;/div&gt;</span><br>
+                            <br>
+                            &emsp;<span class="gray">&lt;!-- Code lines skipped for this guide... --&gt;</span>
+                            <br>
+                            &emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-14"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-15"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;<span class="yellow">&lt;/div&gt;</span><br>
+                            &emsp;<span class="highlight">&lt;!-- Add HTML for your game here. --&gt;</span><br>
+                            <span class="yellow">&lt;/div&gt;</span>
 
+                        </div>
+                    </li>
+                </ol>
+            </li>
+            <li>
+                <strong>Styling Your Game Board</strong><br>
+                In this section, you will be modifying the "game-simulation.css" file.<br><br>
+                Note that your game's styling may vary significantly compared to the styles used in our study. We have provided our tic-tac-toe board's styling for your review.<br><br>
+                <u>Your game board's height (and ideally, width) should total 60vh.</u><br><br>
+                <ol type="a">
+                    <li>
+                        Styling for entire game board div:<br>
+                        <div class="code-snippet">
+                            <span class="yellow">#tic-tac-toe-board</span>,<br>
+                            <span class="yellow">#connect-four-board</span>,<br>
+                            <span class="yellow">#gomoku-board</span> {<br>
+                            &emsp;display: <span class="green">table</span><span class="yellow">;</span><br>
+                            &emsp;width: <span class="cyan">60</span><span class="green">vh</span><span class="yellow">;</span><br>
+                            &emsp;height: <span class="cyan">60</span><span class="green">vh</span><span class="yellow">;</span><br>
+                            &emsp;margin-right: <span class="cyan">1</span><span class="green">vh</span><span class="yellow">;</span><br>
+                            &emsp;margin-left: <span class="cyan">1</span><span class="green">vh</span><span class="yellow">;</span><br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Styling for game board rows:<br>
+                        <div class="code-snippet">
+                            <span class="yellow">#tic-tac-toe-board</span> .<span class="yellow">board-row</span>,<br>
+                            <span class="yellow">#connect-four-board</span> .<span class="yellow">board-row</span>,<br>
+                            <span class="yellow">#gomoku-board</span> .<span class="yellow">board-row</span> {<br>
+                            &emsp;display: <span class="green">table-row</span><span class="yellow">;</span><br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Styling for game board cells:<br><br>
+
+                        We are aiming for a width/height of 60vh. Therefore, accounting for the 3vh of total borders for each row/column, the width/height of each cell in our 3x3 tic-tac-toe board should be (60 - 3) / 3 = 19vh.<br>
+                        <div class="code-snippet">
+                            <span class="yellow">#tic-tac-toe-board</span> .<span class="yellow">board-cell</span> {<br>
+                            &emsp;display: <span class="green">table-cell</span>;<br>
+                            &emsp;text-align: <span class="green">center</span>;<br>
+                            &emsp;vertical-align: <span class="green">middle</span>;<br>
+                            }
+
+                            <span class="yellow">#tic-tac-toe-board</span> .<span class="yellow">board-cell</span> {<br>
+                            &emsp;width: <span class="cyan">19</span><span class="green">vh</span>;<br>
+                            &emsp;height: <span class="cyan">19</span><span class="green">vh</span>;<br>
+                            &emsp;font-size: <span class="cyan">13</span><span class="green">vh</span>;<br>
+                            &emsp;background-color: <span class="green">white</span>;<br>
+                            }
+
+                            <span class="yellow">#tic-tac-toe-1-1</span> {<br>
+                            &emsp;border-left: <span class="cyan">0.5</span><span class="green">vh solid white</span>;<br>
+                            &emsp;border-top: <span class="cyan">0.5</span><span class="green">vh solid white</span>;<br>
+                            &emsp;border-right: <span class="cyan">0.5</span><span class="green">vh solid black</span>;<br>
+                            &emsp;border-bottom: <span class="cyan">0.5</span><span class="green">vh solid black</span>;<br>
+                            }
+
+                            <span class="yellow">#tic-tac-toe-1-2</span> {<br>
+                            &emsp;border-left: <span class="cyan">0.5</span><span class="green">vh solid black</span>;<br>
+                            &emsp;border-top: <span class="cyan">0.5</span><span class="green">vh solid white</span>;<br>
+                            &emsp;border-right: <span class="cyan">0.5</span><span class="green">vh solid black</span>;<br>
+                            &emsp;border-bottom: <span class="cyan">0.5</span><span class="green">vh solid black</span>;<br>
+                            }<br><br>
+
+                            <span class="gray">... <br>
+                                /* Other lines are omitted for this guide, but a unique set of borders is applied to each cell to create a tic-tac-toe board. */
+                            </span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+            <li>
+                <strong>Implementing the Game Class</strong><br>
+                <ol type="a">
+                    <li>
+                        Create a JavaScript file for your game in the "game-simulation" folder.<br><br>
+
+                        <em>
+                            For the rest of this section, you will be modifying the file you've just created.
+                        </em><br><br>
+                    </li>
+                    <li>
+                        At the top of your game flass file, import the Move class using this line:
+                        <div class="code-snippet">
+                            <span class="orange">import</span> { Move } <span class="orange">from</span> <span class="green">"</span><span class="green">./classes.js</span><span class="green">"</span>;
+                        </div>
+                    </li>
+                    <li>
+                        Create a class for your game and be sure to use the "export" keyword so that your game can be accessed in other JavaScript files.
+                        <div class="code-snippet">
+                            <span class="orange">export</span> <span class="orange">class</span> TicTacToe {<br>
+                            <span class="gray">...</span><br>
+                            <span class="gray">(Internal methods (discussed below.)</span><br>
+                            <span class="gray">...</span><br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static explainGame() method. This method should return your game explanation prompt, ending with a space and a newline character \n.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">explainGame</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="green">"</span><span class="green">Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat.</span><span class="orange"> \n</span><span class="green">"</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static formatNextMove() method. This method should return your move formatting prompt, starting with a space and ending with a space and a newline character \n. You should ask the LLM to request the move in a JSON format.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">formatNextMove</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="green">" Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. </span><span class="orange">\n</span><span class="green">"</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static systemPrompt() method. This method should return the system prompt for your LLM.<br><br>
+
+                        <em>Note that none of the LLMs in our study required a "system prompt" parameter, but you may use/modify this method in case any LLMs you use require a system prompt.</em><br>
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">systemPrompt</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="orange">this</span>.<span class="blue">formatNextMove</span>();<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static invalidMoveWarning() method. This method should return a warning to the LLM about disqualification after they make a certain number of invalid moves, starting with a space and ending with a space and a newline character \n.<br><br>
+
+                        <em>Note that this warning calls the getMaxInvalidMoves() method in your class to obtain the maximum number of invalid moves.</em><br>
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">invalidMoveWarning</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="green">" Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than "</span> + <span class="orange">this</span>.<span class="blue">getMaxInvalidMoves</span>() + <span class="green">" invalid moves will result in disqualification. </span><span class="orange">\n</span><span class="green">"</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static promptVersion() method. This method should return the date that the prompts in your game class were last modified in YYYY-MM-DD format.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">promptVersion</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="green">"2024-06-04"</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static getMaxMoves() method. This method should return the maximum total number of moves allowed in the game. The game will be cancelled if the total number of moves made during the game (from both LLMs combined) reaches this amount.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">getMaxMoves</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="cyan">20</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static getMaxInvalidMoves() method. This method should return the maximum total number of moves allowed in the game. If a player's invalid move count goes above this number, they will be disqualified.<br><br>
+
+                        For this study, this figure was calculated as "MaxInvalidMoves = (rowCount + columnCount)", but this may be modified for your game.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">getMaxInvalidMoves</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="cyan">6</span>;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static listPlayerMoves(player) method. For the grid-based games used in this study, this method accepts the current player number and returns a string list of coordinates where they have placed moves in the format (row, column). This method may be modified for non-grid-based games.<br><br>
+
+                        For example, if player 1 (X) in tic-tac-toe has placed in the first row/column and the last (3rd) row/column, the list returned from listPlayerMoves(1) would be [“1,1”, “3,3”].
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">listPlayerMoves</span>(player) {<br>
+                            &emsp;<span class="orange">let</span> movesList = [];<br>
+                            &emsp;<span class="orange">let</span> playerSymbol = (player === <span class="cyan">1</span>) ? <span class="green">"X"</span> : <span class="green">"O"</span>;<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i <span class="white"><</span> <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">0</span>; j <span class="white"><</span> <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (<span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span> === playerSymbol) {<br>
+                            &emsp;&emsp;&emsp;&emsp;movesList.<span class="blue">push</span>((i + <span class="cyan">1</span>) + <span class="green">","</span> + (j + <span class="cyan">1</span>));<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;}<br>
+                            &emsp;<span class="orange">return</span> movesList;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static listBoard() method, which will be called when using the "list" prompt type or progress display type. To obtain a list of the player moves, we call the listPlayerMoves() method defined above for each player, but your implementation cna be modified.<br><br>
+
+                        This method should return a string consisting of the following, in order:
+                        <ol>
+                            <li>
+                                An explanation of how the state of the game will be provided in this prompt, starting with a space and ending with a space and a newline character \n.
+                            </li>
+                            <li>
+                                The following string: “ The current state of the game is as follows: \n”
+                            </li>
+                            <li>
+                                The following string: “ The locations occupied by the first player: “
+                            </li>
+                            <li>
+                                A string list of moves made (or locations occupied) by the first player, formatted as described in your explanation, ending with a space and a newline character \n.
+                            </li>
+                            <li>
+                                The following string: “ The locations occupied by the second player: “
+                            </li>
+                            <li>
+                                A string list of moves made (or locations occupied) by the second player, formatted as described in your explanation, ending with a space and a newline character \n.
+                            </li>
+                        </ol>
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">listBoard</span>() {<br>
+                            &emsp;<span class="orange">let</span> gameStatus = <span class="green">""</span>;<br>
+                            &emsp;<span class="orange">let</span> firstPlayerMoves = <span class="orange">this</span>.<span class="blue">listPlayerMoves</span>(<span class="cyan">1</span>);<br>
+                            &emsp;<span class="orange">let</span> secondPlayerMoves = <span class="orange">this</span>.<span class="blue">listPlayerMoves</span>(<span class="cyan">2</span>);<br>
+                            &emsp;gameStatus += <span class="green">" The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1.</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;gameStatus += <span class="green">" The current state of the game is as follows:</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;gameStatus += <span class="green">" The locations occupied by the first player: "</span>;<br>
+                            &emsp;gameStatus += (firstPlayerMoves.<span class="pink">length</span> ? firstPlayerMoves.<span class="blue">join</span>(<span class="green">"; "</span>) : <span class="green">"None"</span>) + <span class="green">"</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;gameStatus += <span class="green">" The locations occupied by the second player: "</span>;<br>
+                            &emsp;gameStatus += (secondPlayerMoves.<span class="pink">length</span> ? secondPlayerMoves.<span class="blue">join</span>(<span class="green">"; "</span>) : <span class="green">"None"</span>) + <span class="green">"</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;<span class="orange">return</span> gameStatus;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static imagePrompt() method, which will be called when using the "image" prompt type. This method should return a string describing the board screenshots that will be provided to the LLMs, starting with a space and ending with a newline character \n.<br>
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">drawBoard</span>() {<br>
+                            &emsp;<span class="orange">let</span> gameStatus = <span class="green">""</span>;<br>
+                            &emsp;gameStatus += <span class="green">" The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position.</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;gameStatus += <span class="green">" The current state of the game is as follows:</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">0</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;gameStatus += (<span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span> === <span class="green">""</span>) ? <span class="green">"."</span> : <span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span>;<br>
+                            &emsp;}<br>
+                            &emsp;gameStatus += <span class="green">"</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;}<br>
+                            &emsp;<span class="orange">return</span> gameStatus;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static imagePrompt() method, which will be called when using the "image" prompt type. This method should return a string describing the board screenshots that will be provided to the LLMs, starting with a space and ending with a space and a newline character \n.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">imagePrompt</span>() {<br>
+                            &emsp;<span class="orange">return</span> <span class="green">" The current state of the game is depicted in an image showing a 3 by 3 grid, where 'X' represents positions taken by the first player and 'O' represents positions taken by the second player.</span> <span class="orange">\n</span><span class="green">"</span>;<br>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static screenshotBoard() method, which which will be called when using the “image” prompt type or progress display type. You should simply change the ID in the query selector below to match the HTML ID of your game board.<br><br>
+
+                        To maintain consistency with our study, you should also modify the parameters of the html2canvas() call as necessary to ensure that your screenshots are 512px by 512px in size. However, this may need to be modified for games that do not use square boards.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="orange">async</span> <span class="blue">screenshotBoard</span>() {<br>
+                            &emsp;<span class="orange">return new</span> <span class="blue">Promise</span>((resolve, reject) => {<br>
+                            &emsp;&emsp;<span class="pink">html2canvas</span>(<span class="pink">document</span>.<span class="blue">querySelector</span>(<span class="green">"#tic-tac-toe-board"</span>), { <span class="pink">width</span>: <span class="cyan">512</span>, <span class="pink">height</span>: <span class="cyan">512</span>, <span class="pink">windowWidth</span>: <span class="cyan">1677</span>, <span class="pink">windowHeight</span>: <span class="cyan">854</span>, <span class="pink">scale</span>: <span class="cyan">1</span>, <span class="pink">logging</span>: <span class="orange">false</span> }).<span class="blue">then</span>((canvas) => {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">return</span> canvas.<span class="blue">toDataURL</span>(<span class="green">"image/png;base64"</span>);<br>
+                            &emsp;&emsp;}).<span class="blue">then</span>(data => {<br>
+                            &emsp;&emsp;&emsp;resolve(data);<br>
+                            &emsp;&emsp;}).<span class="blue">catch</span>(error => {<br>
+                            &emsp;&emsp;&emsp;reject(error);<br>
+                            &emsp;&emsp;});<br>
+                            });<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static processMove() method, which will check that an LLM’s move was valid, display the move on the board if possible, and return a Move object. Begin by checking whether each JSON value you requested from the LLM exists and is of the correct type; if not, throw an error. After that, validate the move according to the rules of your game. If the move is valid, update your game board accordingly and return a new Move object with the “Valid” outcome. If the move is invalid, determine the type of invalid move and return a new Move object with an outcome matching the type of invalid move.<br><br>
+
+                        The "classes.js" file in the "game-simulation" folder contains the Move class implementation if you'd like to view the constructor parameters and their meanings.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {<br>
+                            &emsp;<span class="orange">let</span> row;<br>
+                            &emsp;<span class="orange">let</span> col;<br>
+                            &emsp;<span class="orange">let</span> symbol = (currentPlayer === <span class="cyan">1</span>) ? <span class="green">"X"</span> : <span class="green">"O"</span>;<br>
+                            <br>
+                            &emsp;<span class="orange">if</span> (response.row !== <span class="orange">undefined</span> && <span class="orange">typeof</span> response.row === <span class="green">"number"</span>) {<br>
+                            &emsp;&emsp;row = response.row;<br>
+                            &emsp;} <span class="orange">else</span> {<br>
+                            &emsp;<span class="orange">throw new</span> <span class="blue">Error</span>();<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="orange">if</span> (response.column !== <span class="orange">undefined</span> && <span class="orange">typeof</span> response.column === <span class="green">"number"</span>) {<br>
+                            &emsp;&emsp;col = response.column;<br>
+                            &emsp;} <span class="orange">else</span> {<br>
+                            &emsp;<span class="orange">throw new</span> <span class="blue">Error</span>();<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="orange">if</span> (row >= <span class="cyan">1</span> && row <= <span class="cyan">3</span> && col >= <span class="cyan">1</span> && col <= <span class="cyan">3</span>) {<br>
+                            &emsp;&emsp;<span class="orange">if</span> (document.<span class="pink">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + row + <span class="green">"-"</span> + col).<span class="pink">innerText</span> === <span class="green">""</span>) {<br>
+                            &emsp;&emsp;&emsp;document.<span class="pink">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + row + <span class="green">"-"</span> + col).<span class="pink">innerText</span> = symbol;<br>
+                            <br>
+                            &emsp;&emsp;&emsp;document.<span class="pink">getElementById</span><span class="green">("tic-tac-toe-"</span> + row + <span class="green">"-"</span> + col).<span class="pink">style</span>.<span class="pink">color</span> = (symbol === <span class="green">"X"</span>) ? <span class="green">"blue"</span> : <span class="green">"red"</span>;<br>
+                            <br>
+                            &emsp;&emsp;&emsp;<span class="pink">console</span>.<span class="blue">log</span>(<span class="green">"Move "</span> + currentMoveCount + <span class="green">": "</span> + model.<span class="blue">getName</span>() + <span class="green">" ("</span> + symbol + <span class="green">") places at space ("</span> + row + <span class="green">", "</span> + col + <span class="green">")."</span>);<br>
+                            &emsp;&emsp;&emsp;<span class="orange">return</span> <span class="blue">new</span> <span class="blue">Move</span>(currentMoveCount, currentPlayer, row, col, <span class="green">"Valid"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
+                            &emsp;&emsp;} <span class="orange">else</span> {<br>
+                            &emsp;&emsp;&emsp;<span class="pink">console</span>.<span class="blue">log</span>("Move " + currentMoveCount + ": " + model.<span class="blue">getName</span>() + <span class="green">" (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken."</span>);<br>
+                            &emsp;&emsp;&emsp;<span class="orange">return new</span> Move(currentMoveCount, currentPlayer, row, col, <span class="green">"Already Taken"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;} <span class="orange">else</span> {<br>
+                            &emsp;&emsp;<span class="pink">console</span>.<span class="blue">log</span>(<span class="green">"Move "</span> + currentMoveCount + <span class="green">": "</span> + model.<span class="blue">getName</span>() + <span class="green">" ("</span> + symbol + <span class="green">") tried to place at space (" + row + ", " + col + ") which is out of bounds."</span>);<br>
+                            &emsp;&emsp;<span class="orange">return new</span> Move(currentMoveCount, currentPlayer, row, col, <span class="green">"Out of Bounds"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
+                            &emsp;}<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static visualizeBoardState() function, which will be used to generate the board visualizations for the text file logs. This should return a text-based visualization of the board, with each line of the visualization followed by a newline character \n. Append another \n to the visualization for proper spacing in the text file log.<br><br>
+
+                        Note that this method is very similar to the drawBoard method, with the main difference being that we add vertical separators | between each space here, while we do not add separators in the drawBoard() method. If you’d like your text file logs to be the same as your “illustration” prompts, you can replace the logic in the function below with the same board visualization logic from your drawBoard() implementation.
+                        <ol>
+                            <li>
+                                Example drawBoard() board state:<br>
+                                    .O. <br>
+                                    X.. <br>
+                                    X.. <br>
+                            </li>
+                            <li>
+                                Example visualizeBoardState() output:<br>
+                                    .|O|. <br>
+                                    X|.|. <br>
+                                    X|.|. <br>
+                                    <br>
+                            </li>
+                        </ol>
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">visualizeBoardState</span>() {<br>
+                            &emsp;<span class="orange">let</span> boardState = <span class="green">""</span>;<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">0</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> cellValue = <span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span>;<br>
+                            &emsp;&emsp;&emsp;boardState += (cellValue === <span class="green">""</span>) ? <span class="green">"."</span> : cellValue;<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (j < <span class="cyan">2</span>) {<br>
+                            &emsp;&emsp;&emsp;&emsp;boardState += <span class="green">"|"</span>;<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;&emsp;boardState += <span class="green">"</span><span class="orange">\n</span><span class="green">"</span>;<br>
+                            &emsp;}<br>
+                            &emsp;<span class="orange">return</span> boardState + <span class="green">"</span><span class="orange">\n</span><span class="green">"</span>;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static checkForWin() function, which will return ‘true’ if a player has won the game, and false otherwise.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">checkForWin</span>() {<br>
+                            &emsp;<span class="orange">let</span> field = <span class="orange">new</span> <span class="pink">Array</span>(<span class="cyan">3</span>);<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;field[i] = <span class="orange">new</span> <span class="pink">Array</span>(<span class="cyan">3</span>);<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">0</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;field[i][j] = <span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span>;<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="gray">// Check rows</span><br>
+                            &emsp;&emsp;<span class="orange">if</span> (field[i][<span class="cyan">0</span>] !== <span class="green">""</span>) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> firstMark = field[i][<span class="cyan">0</span>];<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> allSame = <span class="orange">true</span>;<br>
+                            &emsp;&emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">1</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;&emsp;<span class="orange">if</span> (firstMark !== field[i][j]) {<br>
+                            &emsp;&emsp;&emsp;&emsp;&emsp;allSame = <span class="orange">false</span>;<br>
+                            &emsp;&emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (allSame) <span class="orange">return</span> <span class="orange">true</span>;<br>
+                            &emsp;&emsp;}<br>
+                            <br>
+                            &emsp;&emsp;<span class="gray">// Check columns</span><br>
+                            &emsp;&emsp;<span class="orange">if</span> (field[<span class="cyan">0</span>][i] !== <span class="green">""</span>) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> firstMark = field[<span class="cyan">0</span>][i];<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> allSame = <span class="orange">true</span>;<br>
+                            &emsp;&emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">1</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;&emsp;<span class="orange">if</span> (firstMark !== field[j][i]) {<br>
+                            &emsp;&emsp;&emsp;&emsp;&emsp;allSame = <span class="orange">false</span>;<br>
+                            &emsp;&emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (allSame) <span class="orange">return</span> <span class="orange">true</span>;<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="gray">// Check top-left to bottom-right diagonal</span><br>
+                            &emsp;<span class="orange">if</span> (field[<span class="cyan">0</span>][<span class="cyan">0</span>] !== <span class="green">""</span>) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> firstMark = field[<span class="cyan">0</span>][<span class="cyan">0</span>];<br>
+                            &emsp;&emsp;&emsp;<span class="orange">let</span> allSame = <span class="orange">true</span>;<br>
+                            &emsp;&emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">1</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;&emsp;&emsp;<span class="orange">if</span> (firstMark !== field[i][i]) {<br>
+                            &emsp;&emsp;&emsp;&emsp;&emsp;allSame = <span class="orange">false</span>;<br>
+                            &emsp;&emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (allSame) <span class="orange">return</span> <span class="orange">true</span>;<br>
+                            &emsp;}<br>
+                            <br>
+                            &emsp;<span class="gray">// Check top-right to bottom-left diagonal</span><br>
+                            &emsp;<span class="orange">if</span> (field[<span class="cyan">0</span>][<span class="cyan">3</span> - <span class="cyan">1</span>] !== <span class="green">""</span>) {<br>
+                            &emsp;&emsp;<span class="orange">let</span> firstMark = field[<span class="cyan">0</span>][<span class="cyan">3</span> - <span class="cyan">1</span>];<br>
+                            &emsp;&emsp;<span class="orange">let</span> allSame = <span class="orange">true</span>;<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">1</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (firstMark !== field[i][<span class="cyan">3</span> - i - <span class="cyan">1</span>]) {<br>
+                            &emsp;&emsp;&emsp;&emsp;allSame = <span class="orange">false</span>;<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;&emsp;<span class="orange">if</span> (allSame) <span class="orange">return</span> <span class="orange">true</span>;<br>
+                            &emsp;}<br>
+                            &emsp;<span class="orange">return</span> <span class="orange">false</span>;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static checkForFullBoard() method, which will return true if the board is full, or false otherwise.<br><br>
+
+                        If your game’s board cannot be full, you may simply return ‘false’ here.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">checkForFullBoard</span>() {<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span> (<span class="orange">let</span> j = <span class="cyan">0</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (<span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span> === <span class="green">""</span>) {<br>
+                            &emsp;&emsp;&emsp;&emsp;<span class="orange">return false</span>;<br>
+                            &emsp;&emsp;&emsp;}<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;}<br>
+                            &emsp;<span class="orange">return true</span>;<br>
+                            }<br>
+                        </div>
+                    </li>
+                    <li>
+                        Implement the static resetBoard() method, which will clear the board of moves.
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">resetBoard</span>() {<br>
+                            &emsp;<span class="orange">for</span> (<span class="orange">let</span> i = <span class="cyan">0</span>; i < <span class="cyan">3</span>; i++) {<br>
+                            &emsp;&emsp;<span class="orange">for</span>(<span class="orange">let</span> j = <span class="cyan">0</span>; j < <span class="cyan">3</span>; j++) {<br>
+                            &emsp;&emsp;&emsp;<span class="pink">document</span>.<span class="blue">getElementById</span>(<span class="green">"tic-tac-toe-"</span> + (i + <span class="cyan">1</span>) + <span class="green">"-"</span> + (j + <span class="cyan">1</span>)).<span class="pink">innerText</span> = <span class="green">""</span>;<br>
+                            &emsp;&emsp;}<br>
+                            &emsp;}<br>
+                            }<br>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+            <li>
+                <strong>Importing and Adding Your Game Class</strong><br>
+                In this section, you will be modifying the "game-simulation.js" file in the "game-simulation" folder.<br><br>
+
+                <ol type="a">
+                    <li>
+                        Import your completed game class at the top of the "game-simulation.js" file.
+                        <div class="code-snippet">
+                            <span class="orange">import</span> { TicTacToe } <span class="orange">from</span> <span class="green">"./tic-tac-toe.js"</span>;<br>
+                            <span class="orange">import</span> { ConnectFour } <span class="orange">from</span> <span class="green">"./connect-four.js"</span>;<br>
+                            <span class="orange">import</span> { Gomoku } <span class="orange">from</span> <span class="green">"./gomoku.js"</span>;<br>
+                            <span class="highlight">// Add imports for future game classes here.</span>
+                        </div>
+                    </li>
+                    <li>
+                        Once your game’s class is imported, add a line to the “get game class” conditional under the playGame() function to add your game. The “gameType” you’re checking for should match the “value” you set for your game in the select element in Section 1 Part a.
+                        <div class="code-snippet">
+                            <span class="orange">let</span> game;<br>
+                            <span class="orange">if</span> (gameType === <span class="green">"tic-tac-toe"</span>)<br>
+                            &emsp;game = TicTacToe;<br>
+                            <span class="orange">else if</span> (gameType === <span class="green">"connect-four"</span>)<br>
+                            &emsp;game = ConnectFour;<br>
+                            <span class="orange">else if</span> (gameType === <span class="green">"gomoku"</span>)<br>
+                            &emsp;game = Gomoku;<br>
+                            <span class="highlight">// Add conditions for future games here.</span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+            <li>
+                <strong>Updating the Game Details and Prompt List for Your Game</strong><br>
+                Now that your game is fully implemented, you should update the "Game Details" and "Prompt list" popup contents with the details of your new game and examples of your game's prompts, respectively.<br><br>
+
+                <ol>
+                    <li>
+                        Download the “gameDetails.json” file from the “gameDetailsURL” listed in the “info.js” file in the "game-simulation" folder.
+                    </li>
+                    <li>
+                        Update the “gameDetails.json” file with information for your new game, following the format used for the existing games:
+                        <div class="code-snippet">
+                            [<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game type"</span>: <span class="green">"Tic-Tac-Toe"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Details"</span>: <span class="green">"Tic-Tac-Toe is a two-player game and is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. Please see here for more details: https://en.wikipedia.org/wiki/Tic-tac-toe"</span><br>
+                            &emsp;},<br>
+                            &emsp;<span class="gray">... (Extra lines omitted for this guide.) ...</span><br>
+                            &emsp;<span class="highlight">(Your game’s details here.)</span><br>
+                            ]<br>
+                        </div>
+                    </li>
+                    <li>
+                        Upload the “gameDetails.json” file online (our study used GitHub) and update the “gameDetailsURL” in the “info.js” file accordingly with the URL of your updated JSON file.
+                    </li>
+                    <li>
+                        Download the “promptList.json” file from the “promptListURL” listed in the “info.js” file.
+                    </li>
+                    <li>
+                        Update the “promptList.json” file with information for your new game’s prompts, following the format used for the existing games:
+                        <div class="code-snippet">
+                            [<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Tic-Tac-Toe"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"list"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="green">"Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat. <br> The current state of the game is recorded in a specific format: each occupied location is delineated by a semicolon (';'), and for each occupied location, the row number is listed first, followed by the column number, separated by a comma (','). If no locations are occupied by a player, 'None' is noted. Both the row and column numbers start from 1, with the top left corner of the grid indicated by 1,1. <br> The current state of the game is as follows: <br> The locations occupied by the first player: 2,2 <br> The locations occupied by the second player: 1,1 <br> You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the first player. What would be your next move? <br> Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. <br> Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than 6 invalid moves will result in disqualification. <br> You currently have 0 invalid moves."</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Connect-Four"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"list"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Gomoku"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"list"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;},<br>
+                            &emsp;<span class="highlight">(Your game’s list prompt example here.)</span><br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Tic-Tac-Toe"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"illustration"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="green">"Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat. <br> The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. <br> The current state of the game is as follows: <br>... <br>.X. <br>O.X <br> You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the second player. What would be your next move? <br> Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. <br> Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than 6 invalid moves will result in disqualification. <br> You currently have 1 invalid moves."</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Connect4"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"illustration"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Gomoku"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"illustration"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;},<br>
+                            &emsp;<span class="highlight">(Your game’s illustration prompt example here.)</span><br>
+                            &emsp;{
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Tic-Tac-Toe"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"image"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="green">"Tic-Tac-Toe is a two-player game played on a 3 by 3 grid. The first player uses X symbols, and the second player uses O symbols. Players take turns placing their symbols in an empty cell on the grid. The objective is to align three of your symbols either horizontally, vertically, or diagonally. The player who first aligns three of their symbols wins the game. Strategic placement is crucial; besides aiming to align their symbols, players must also block their opponent's potential alignments to avoid defeat. <br> The current state of the game is depicted in an image showing a 3 by 3 grid, where 'X' represents positions taken by the first player and 'O' represents positions taken by the second player. <br> The current state of the game is given in the attached image. <br> You are an adept strategic player, aiming to win the game in the fewest moves possible. You are the second player. What would be your next move? <br> Suggest your next move in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. Do not include any additional commentary in your response. Replace RowNumber and ColumnNumber with the appropriate numbers for your move. Both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 3, as the grid is 3 by 3. <br> Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than 6 invalid moves will result in disqualification. <br> You currently have 0 invalid moves. [THE IMAGE IS SENT SEPARATELY IN BASE64 FORMAT]"</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Connect-Four"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"image"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;},<br>
+                            &emsp;{<br>
+                            &emsp;&emsp;<span class="pink">"Game Type"</span>: <span class="green">"Gomoku"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Type"</span>: <span class="green">"image"</span>,<br>
+                            &emsp;&emsp;<span class="pink">"Prompt Example"</span>: <span class="gray">... (Omitted for this guide) ...</span><br>
+                            &emsp;}<br>
+                            ]<br>
+                        </div>
+                    </li>
+                    <li>
+                        Upload the “promptList.json” file online (our study used GitHub) and update the “promptListURL” in the “info.js” file accordingly with the URL of your updated JSON file.
+                    </li>
+                </ol>
+            </li>
+        </ol>
+    </div>
+</body>
+</html>
