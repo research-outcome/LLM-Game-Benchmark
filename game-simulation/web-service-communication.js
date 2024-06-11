@@ -204,8 +204,11 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
 
 // Clean the LLM's response by reformatting certain characters and parsing it into a JSON object.
 export function cleanResponse(response) {
+    response = response.replaceAll("\t", "");
     response = response.replaceAll("\n", "");
     response = response.replaceAll("\\\\\"", "\"");
+    response = response.replaceAll("\\\"", "\"");
+    response = response.replaceAll("\\'", "\"");
     response = response.replaceAll("'", "\"");
     response = response.replaceAll("\"{", "{");
     response = response.replaceAll("}\"", "}");
@@ -216,13 +219,7 @@ export function cleanResponse(response) {
             response = response.substring(0, response.lastIndexOf("}") + 1);
         }
     }
-    try {
-        return JSON.parse(response);
-    }
-    catch(e) {
-        // If there was an error parsing the JSON, return an empty string.
-        return "Invalid Response";
-    }
+    return response;
 }
 
 // Determine if the LLM's move was valid. Return a "Move" object which contains the model name and move outcome ("Y" for valid moves, explanations for invalid moves)
@@ -231,16 +228,14 @@ export async function processMove(game, response, currentPlayer, model, currentM
 
     // Attempt to process the move. If the move had an invalid format, return a move object with an "Invalid Format" outcome.
     try {
-        if (response === "Invalid Response") {
-            throw new Error();
-        }
+        response = JSON.parse(response); // Attempt to parse the response. If parsing fails, the move has an invalid format.
 
         // Generate a Move object given the LLM response and display its move on the game board if it was valid.
         return game.processMove(response, currentPlayer, model, currentMoveCount, currentStatus);
     }
     catch (e) {
         console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
-        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(response));
+        return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, response);
     }
 }
 

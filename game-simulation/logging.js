@@ -39,7 +39,7 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
         let moveCol = move.getCol();
         let moveOutcome = move.getOutcome();
         let currentStatus = move.getCurrentStatus().replaceAll("\n", "\\n");
-        let response = move.getResponse().replaceAll("\n", "\\n").replaceAll("\"", "'");
+        let response = move.getResponse().toString().replaceAll("\n", "\\n").replaceAll("\"", "'");
 
         // Convert move object to JSON string and append it to jsonMoves string.
         jsonMoves += "\t\t{\n" +
