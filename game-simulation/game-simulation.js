@@ -313,8 +313,10 @@ async function playGame() {
         // Pause game to allow user to view results. Then, reset the board and update game information.
         await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
         game.resetBoard();
+
         currentGameCount++;
-        document.getElementById("info-current-game-number").innerHTML = (bulkEnabled) ? (existingGameCount + currentGameCount).toString() : currentGameCount.toString();
+        console.log("Existing Game Count: " + existingGameCount + " Current Game Count - 1: " + currentGameCount - 1);
+        document.getElementById("info-current-game-number").innerHTML = (bulkEnabled) ? (existingGameCount + currentGameCount - 1).toString() : currentGameCount.toString();
         if (parseInt(document.getElementById("info-current-game-number").innerHTML) > parseInt(document.getElementById("info-total-game-count").innerHTML)) {
             document.getElementById("info-current-game-number").innerHTML = document.getElementById("info-total-game-count").innerHTML; // Game count will internally be totalGameCount + 1 after last game. This prevents displaying that.
         }
