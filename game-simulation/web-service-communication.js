@@ -86,6 +86,8 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
     let modelName = model.getName();
     let apiKey = model.getApiKey();
 
+    console.log("Prompt: " + prompt);
+
     // If we are attempting to call a Google model, call the model through the Google API.
     if (modelType === "Google") {
         try {

@@ -171,6 +171,8 @@ async function playGame() {
             // "moves[moves.length - 1]" gives the latest move. We do this to check if the last move was invalid to explain the LLM's previous mistake.
             let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1]);
 
+            console.log("Initial Response: " + response);
+
             if (response === "Network Error Occurred") {
                 result = "networkerror";
                 finalGameState = await getFinalGameState(game, promptType);
