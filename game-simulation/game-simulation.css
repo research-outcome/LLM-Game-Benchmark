@@ -488,6 +488,6 @@ button {
 
 .modal-content iframe {
     width: 50%; /* Responsive width */
-    height: auto; /* Height is set automatically based on aspect ratio */
+    height: auto;
     aspect-ratio: 16 / 9; /* Maintain a 16:9 aspect ratio */
 }
