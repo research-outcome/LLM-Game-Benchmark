@@ -15,7 +15,7 @@ function validateData(jsonData) {
         'WinRatio-2nd', 'Wins-1st', 'Wins-2nd', 'Disqualifications-1st',
         'Disqualifications-2nd', 'Draws', 'InvalidMovesRatio-1st',
         'InvalidMovesRatio-2nd', 'TotalMoves-1st', 'TotalMoves-2nd',
-        'ProviderEmail', 'SubmissionDate', 'UUID'
+        'ProviderEmail', 'DateTime', 'UUID'
     ];
 
     return jsonData.every(entry => requiredFields.every(field => field in entry));
@@ -81,16 +81,16 @@ function mergeAndRecalculate(allData, newSubmission) {
         const totalGames = existingData["Wins-1st"] + existingData["Wins-2nd"] + existingData.Draws;
 
         // Recalculate Win Ratios
-        existingData["WinRatio-1st"] = (existingData["Wins-1st"] / totalGames).toFixed(2);
-        existingData["WinRatio-2nd"] = (existingData["Wins-2nd"] / totalGames).toFixed(2);
+        existingData["WinRatio-1st"] = existingData["Wins-1st"] / totalGames;
+        existingData["WinRatio-2nd"] = existingData["Wins-2nd"] / totalGames;
 
         // Recalculate Invalid Moves Ratios
         const totalInvalidMoves1st = (existingData["InvalidMovesRatio-1st"] * existingData["TotalMoves-1st"]) + (newSubmission["InvalidMovesRatio-1st"] * newSubmission["TotalMoves-1st"]);
         const totalInvalidMoves2nd = (existingData["InvalidMovesRatio-2nd"] * existingData["TotalMoves-2nd"]) + (newSubmission["InvalidMovesRatio-2nd"] * newSubmission["TotalMoves-2nd"]);
         const totalMoves1st = existingData["TotalMoves-1st"] + newSubmission["TotalMoves-1st"];
         const totalMoves2nd = existingData["TotalMoves-2nd"] + newSubmission["TotalMoves-2nd"];
-        existingData["InvalidMovesRatio-1st"] = (totalInvalidMoves1st / totalMoves1st).toFixed(2);
-        existingData["InvalidMovesRatio-2nd"] = (totalInvalidMoves2nd / totalMoves2nd).toFixed(2);
+        existingData["InvalidMovesRatio-1st"] = totalInvalidMoves1st / totalMoves1st;
+        existingData["InvalidMovesRatio-2nd"] = totalInvalidMoves2nd / totalMoves2nd;
 
         // Update Total Moves
         existingData["TotalMoves-1st"] = totalMoves1st;
@@ -101,8 +101,8 @@ function mergeAndRecalculate(allData, newSubmission) {
         existingData.ProviderEmail = Array.from(emails).join(', ');
 
         // Handle multiple submission dates and UUIDs
-        let dates = new Set(existingData.SubmissionDate.split(', ').concat(newSubmission.SubmissionDate.split(', ')));
-        existingData.SubmissionDate = Array.from(dates).join(', ');
+        let dates = new Set(existingData.DateTime.split(', ').concat(newSubmission.DateTime.split(', ')));
+        existingData.DateTime = Array.from(dates).join(', ');
 
         let uuids = new Set(existingData.UUID.split(', ').concat(newSubmission.UUID.split(', ')));
         existingData.UUID = Array.from(uuids).join(', ');

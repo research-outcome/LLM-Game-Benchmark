@@ -20,7 +20,7 @@ $(document).ready(function() {
             item["TotalMoves-1st"],
             item["TotalMoves-2nd"],
             item.ProviderEmail,
-            item.SubmissionDate,
+            item["DateTime"],
             item.UUID
         ]);
 
@@ -44,7 +44,7 @@ $(document).ready(function() {
                 { title: "Total Moves (1st)" },
                 { title: "Total Moves (2nd)" },
                 { title: "Provider Email" },
-                { title: "Submission Date" },
+                { title: "Date-Time" },
                 { title: "UUID" }
             ],
             // Adjust positioning of dom to move search bar and 
