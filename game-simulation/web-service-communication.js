@@ -54,7 +54,7 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     // If the most recent move was invalid, it was this LLM's mistake. Provide the move's content and the reason it was invalid so the LLM can correct itself.
     if (previousMove !== undefined) {
         if (previousMove.getOutcome() !== "Valid") {
-            prompt += " Your previous response was '" + previousMove.getResponse() + "'. This is move was deemed invalid for the following reason: '" + previousMove.getOutcome() + "'. Please adjust accordingly. \n";
+            prompt += " Your previous response was '" + previousMove.getResponse() + "'. This move was deemed invalid for the following reason: '" + previousMove.getOutcome() + "'. Please adjust accordingly. \n";
         }
     }
 
