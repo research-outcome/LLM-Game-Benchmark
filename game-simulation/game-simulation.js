@@ -56,6 +56,8 @@ async function playGame() {
             progressDisplayType = radioButtons[i].value;
         }
     }
+    // Only set this flag if checkbox is checked and we are NOT using image prompt. Image prompt will automatically save the images.
+    let saveProgressImages = (document.getElementById("checkbox-save-progress-images").checked && promptType !== "image");
 
     // If bulk play is enabled, reset stats for every session. We should not keep stats from sessions from previous LLM combinations.
     if (bulkEnabled) {
@@ -99,6 +101,7 @@ async function playGame() {
     let providerEmail = document.getElementById("provider-email").value;
     let uuid = uuidv7();
     let gameLogFiles = [];
+    let boardScreenshots = []; // 2-D array of board screenshots for each game.
 
     // Initialize game progress displays.
     document.getElementById("first-player-game-progress").innerHTML = "<strong><u>First Player:</u> " + document.getElementById("first-player").value + "</strong><br>";
@@ -125,6 +128,12 @@ async function playGame() {
         let secondPlayerMovesPerWin = 0;
         let currentPlayer = 1;
         let moves = [];
+        boardScreenshots[currentGameCount - 1] = [];
+        // If the "save progress images" flag is set, take an initial screenshot of the board.
+        if (saveProgressImages) {
+            let imageData = await game.screenshotBoard();
+            boardScreenshots[currentGameCount - 1].push(imageData);
+        }
         let firstPlayerCurrentInvalidMoves = 0;
         let secondPlayerCurrentInvalidMoves = 0;
         let gameLog = "";
@@ -159,7 +168,10 @@ async function playGame() {
             let model = getCurrentModel(currentPlayer);
 
             // Get initial response from the corresponding API for the model.
-            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
+            // "moves[moves.length - 1]" gives the latest move. We do this to check if the last move was invalid to explain the LLM's previous mistake.
+            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1]);
+
+            console.log("Initial Response: " + response);
 
             if (response === "Network Error Occurred") {
                 result = "networkerror";
@@ -285,6 +297,12 @@ async function playGame() {
             let newSecondPlayerTotalInvalidMoves = (parseInt(previousSecondPlayerTotalInvalidMoves) + secondPlayerTotalInvalidMoves).toString();
             updateStatistics(newFirstPlayerWins, newSecondPlayerWins, newDraws, newFirstPlayerDisqualifications, newSecondPlayerDisqualifications, newFirstPlayerTotalMoveCount, newSecondPlayerTotalMoveCount, newFirstPlayerTotalInvalidMoves, newSecondPlayerTotalInvalidMoves, firstPlayerMovesPerWin, secondPlayerMovesPerWin);
 
+            // If the "save progress images" flag is set, screenshot the board and append it to "board screenshots" list.
+            if (saveProgressImages) {
+                let imageData = await game.screenshotBoard();
+                boardScreenshots[currentGameCount - 1].push(imageData);
+            }
+
             // Increment move count, because a move was just made.
             currentMoveCount++;
 
@@ -315,7 +333,6 @@ async function playGame() {
         game.resetBoard();
 
         currentGameCount++;
-        console.log("Existing Game Count: " + existingGameCount + " Current Game Count - 1: " + currentGameCount - 1);
         document.getElementById("info-current-game-number").innerHTML = (bulkEnabled) ? (existingGameCount + currentGameCount - 1).toString() : currentGameCount.toString();
         if (parseInt(document.getElementById("info-current-game-number").innerHTML) > parseInt(document.getElementById("info-total-game-count").innerHTML)) {
             document.getElementById("info-current-game-number").innerHTML = document.getElementById("info-total-game-count").innerHTML; // Game count will internally be totalGameCount + 1 after last game. This prevents displaying that.
@@ -333,10 +350,10 @@ async function playGame() {
     if (gameLogFiles.length > 0) {
         let submissionFiles = generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid);
         if (bulkEnabled) {
-            return [submissionFiles, gameLogFiles];
+            return [submissionFiles, gameLogFiles, boardScreenshots];
         }
         else {
-            downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer);
+            downloadZipFile(submissionFiles, gameLogFiles, boardScreenshots, gameType, promptType, firstPlayer, secondPlayer);
         }
     }
 }
@@ -344,7 +361,7 @@ async function playGame() {
 // Run games with all combinations of LLMs in the player dropdowns.
 async function bulkRun() {
     bulkEnabled = true; // Set bulkEnabled flag to true, since we are performing a bulk run.
-    let allLogFiles = [] // Each index here contains [submissionFiles, gameLogFiles] for a given set of games.
+    let allLogFiles = [] // Each index here contains [submissionFiles, gameLogFiles, boardScreenshots] for a given set of games.
 
     // Update game info display's "Total # of Games" value to the total number of bulk games, and reset Current Game # to 1.
     document.getElementById("info-total-game-count").innerHTML = getBulkRunGameCount();

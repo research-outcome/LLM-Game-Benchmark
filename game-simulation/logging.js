@@ -201,7 +201,7 @@ export function generateSubmissionFiles(gameType, promptType, promptVersion, fir
 }
 
 // Download a ZIP file for the current gameplay session.
-export function downloadZipFile(submissionFiles, gameLogFiles, gameType, promptType, firstPlayer, secondPlayer) {
+export function downloadZipFile(submissionFiles, gameLogFiles, boardScreenshots, gameType, promptType, firstPlayer, secondPlayer) {
     let logZipFile = new JSZip();
     let dateTime = formatDateTime(new Date());
 
@@ -209,6 +209,7 @@ export function downloadZipFile(submissionFiles, gameLogFiles, gameType, promptT
     let zipFileName = gameType + "_" + promptType + "_" + firstPlayer + "_" + secondPlayer + "_" + dateTime + ".zip";
 
     // Add each game's text, JSON, and CSV files to ZIP file.
+    let gameIndex = 0;
     for (let gameLogs of gameLogFiles) {
         // Add text, JSON, and CSV files for each game to ZIP file.
         logZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
@@ -222,7 +223,7 @@ export function downloadZipFile(submissionFiles, gameLogFiles, gameType, promptT
             let finalBoardImageData = JSON.parse(gameLogs.getJsonFileContent()).FinalGameState.split(',')[1];
             for (let i = 0; i <= moves.length; i++) {
                 let imageFileName = gameLogs.getJsonFileName();
-                imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
+                imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
                 imageFileName = imageFileName + "_move" + i.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
 
                 // If we have iterated through all moves in the moves list, save the final board state screenshot.
@@ -232,17 +233,33 @@ export function downloadZipFile(submissionFiles, gameLogFiles, gameType, promptT
                 logZipFile.file(imageFileName, imageData, { base64:true });
             }
         }
+
+        // Save board screenshots for this game, if there are any. These are only saved when "save progress images in ZIP file" is checked and promptType is NOT "image".
+        for (let i = 0; i < boardScreenshots[gameIndex].length; i++) {
+            let imageFileName = gameLogs.getJsonFileName();
+            imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
+            imageFileName = imageFileName + "_move" + i.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
+
+            // If we have iterated through all moves in the moves list, save the final board state screenshot.
+            // The data for this screenshot is stored in the FinalGameState value in the JSON file.
+            let imageData = boardScreenshots[gameIndex][i].split(',')[1]; // Obtain raw base64-encoded screenshot data.
+
+            logZipFile.file(imageFileName, imageData, { base64:true });
+        }
+
+
+        // Add final submission JSON and CSV files to session's ZIP file.
+        // submissionFiles[0] = JSON name, submissionFiles[1] = JSON content,
+        // submissionFiles[2] = CSV name, and submissionFiles[3] = CSV content.
+        logZipFile.file(submissionFiles[0], submissionFiles[1]);
+        logZipFile.file(submissionFiles[2], submissionFiles[3]);
+
+        logZipFile.generateAsync({type:"blob"}).then(function (blob) {
+            saveAs(blob, zipFileName);
+        });
+
+        gameIndex++;
     }
-
-    // Add final submission JSON and CSV files to session's ZIP file.
-    // submissionFiles[0] = JSON name, submissionFiles[1] = JSON content,
-    // submissionFiles[2] = CSV name, and submissionFiles[3] = CSV content.
-    logZipFile.file(submissionFiles[0], submissionFiles[1]);
-    logZipFile.file(submissionFiles[2], submissionFiles[3]);
-
-    logZipFile.generateAsync({type:"blob"}).then(function (blob) {
-        saveAs(blob, zipFileName);
-    });
 }
 
 // For bulk running only, download a "bulk" zip file which contains all outcomes and move information in CSV format.
@@ -263,6 +280,7 @@ export function downloadBulkZipFile(allLogFiles) {
 
         jsonFileContentAllSubmission += allLogFiles[i][0][1].substring(2, allLogFiles[i][0][1].length - 2) + ",\n"; // Add submission file object for current game to list of all submission file JSON objects for the entire bulk run.
         csvFileContentAllSubmission += allLogFiles[i][0][3].split("\n")[1] + "\n"; // Add CSV submission file information for current game to "all submission" CSV file content.
+        let gameIndex = 0;
         for (let gameLogs of allLogFiles[i][1]) {
             bulkZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
             bulkZipFile.file(gameLogs.getJsonFileName(), gameLogs.getJsonFileContent());
@@ -279,7 +297,7 @@ export function downloadBulkZipFile(allLogFiles) {
                 let finalBoardImageData = JSON.parse(gameLogs.getJsonFileContent()).FinalGameState.split(',')[1];
                 for (let i = 0; i <= moves.length; i++) {
                     let imageFileName = gameLogs.getJsonFileName();
-                    imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
+                    imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
                     imageFileName = imageFileName + "_move" + i.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
 
                     // If we have iterated through all moves in the moves list, save the final board state screenshot.
@@ -289,6 +307,21 @@ export function downloadBulkZipFile(allLogFiles) {
                     bulkZipFile.file(imageFileName, imageData, { base64:true });
                 }
             }
+
+            // Save board screenshots for this game, if there are any. These are only saved when "save progress images in ZIP file" is checked and promptType is NOT "image".
+            for (let j = 0; j < allLogFiles[i][2][gameIndex].length; j++) {
+                let imageFileName = gameLogs.getJsonFileName();
+                imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
+                imageFileName = imageFileName + "_move" + j.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
+
+                // If we have iterated through all moves in the moves list, save the final board state screenshot.
+                // The data for this screenshot is stored in the FinalGameState value in the JSON file.
+                let imageData = allLogFiles[i][2][gameIndex][j].split(',')[1]; // Obtain raw base64-encoded screenshot data.
+
+                bulkZipFile.file(imageFileName, imageData, { base64:true });
+            }
+
+            gameIndex++;
         }
     }
 

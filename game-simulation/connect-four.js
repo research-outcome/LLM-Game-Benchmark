@@ -19,7 +19,7 @@ export class ConnectFour {
     }
     // Return the prompt version in YYYY-MM-DD format.
     static promptVersion() {
-        return "2024-06-04";
+        return "2024-06-12";
     }
     // Return the maximum total allowed moves for the game.
     static getMaxMoves() {
@@ -27,8 +27,7 @@ export class ConnectFour {
     }
     // Return the maximum allowed invalid moves for a player. If a player exceeds this amount of invalid moves in a game, they will be disqualified in that match.
     static getMaxInvalidMoves() {
-        // Invalid Moves formula: (rows + columns)
-        return 13;
+        return 7;
     }
 
     static boardInitialized = false; // Flag indicating whether the board has been initialized.
@@ -133,6 +132,11 @@ export class ConnectFour {
         if (response.column !== undefined && typeof response.column === "number") {
             col = response.column;
         } else {
+            return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, JSON.stringify(response));
+        }
+
+        // If response's JSON object has any more items than 'column', it is invalid.
+        if (Object.keys(response).length > 1) {
             throw new Error();
         }
 
