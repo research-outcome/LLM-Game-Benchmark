@@ -255,6 +255,7 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 1vh;
 }
 #progress-display-type label { /* Styling for the radio button labels in the "Progress Display Type" display. */
     margin-right: 2vh;

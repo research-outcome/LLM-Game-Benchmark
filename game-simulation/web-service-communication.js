@@ -4,8 +4,8 @@ import {Move} from "./classes.js";
 
 let currentStatus = "";
 
-// Generate a prompt to call the LLM with based on the prompt type, game type, and model to be called..
-async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
+// Generate a prompt to call the LLM with based on the prompt type, game type, and model to be called.
+async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
     let prompt = ""; // This string will contain the text-based prompt.
     let imageData = ""; // This string will contain the base64-encoded image data for the "image" prompt type.
     let playerInvalidMoves; // This variable will store the current player's invalid moves.
@@ -51,8 +51,15 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
     // Append the warning about disqualification for invalid moves to the text-based prompt.
     prompt += game.invalidMoveWarning();
 
+    // If the most recent move was invalid, it was this LLM's mistake. Provide the move's content and the reason it was invalid so the LLM can correct itself.
+    if (previousMove !== undefined) {
+        if (previousMove.getOutcome() !== "Valid") {
+            prompt += " Your previous response was '" + previousMove.getResponse() + "'. This is move was deemed invalid for the following reason: '" + previousMove.getOutcome() + "'. Please adjust accordingly. \n";
+        }
+    }
+
     // Append the player's current number of invalid moves to the text-based prompt.
-    prompt += " You currently have " + playerInvalidMoves + " invalid moves."
+    prompt += " You currently have " + playerInvalidMoves + " invalid move(s). " + (game.getMaxInvalidMoves() - playerInvalidMoves + 1) + " more invalid moves will result in disqualification.";
 
     // Clean the prompt for the web service call.
     prompt = prompt.replaceAll("\n", "\\n");
@@ -79,6 +86,8 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
     let modelName = model.getName();
     let apiKey = model.getApiKey();
 
+    console.log("Prompt: " + prompt);
+
     // If we are attempting to call a Google model, call the model through the Google API.
     if (modelType === "Google") {
         try {
@@ -102,10 +111,6 @@ export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData
             }
 
             let response = await result.response;
-            if (modelName === "gemini-1.5-flash") {
-                await new Promise(resolve => setTimeout(resolve, 4500)); // 4.5-second delay to meet free quota.
-
-            }
             return response.candidates[0].content.parts[0].text;
         }
         catch (e) {
@@ -240,9 +245,9 @@ export async function processMove(game, response, currentPlayer, model, currentM
 }
 
 // Generate a prompt, call the LLM with the prompt, and return its response.
-export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves) {
+export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
     // Generate prompts and image data.
-    let [prompt, imageData] = await createPrompt(gameType, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves);
+    let [prompt, imageData] = await createPrompt(gameType, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
     let systemPrompt = createSystemPrompt();
 
     // Call LLM with the prompt and return its response.
