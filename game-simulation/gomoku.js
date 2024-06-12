@@ -19,7 +19,7 @@ export class Gomoku {
     }
     // Return the prompt version in YYYY-MM-DD format.
     static promptVersion() {
-        return "2024-06-04";
+        return "2024-06-12";
     }
     // Return the maximum total allowed moves for the game.
     static getMaxMoves() {
