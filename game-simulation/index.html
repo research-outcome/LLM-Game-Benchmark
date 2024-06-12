@@ -101,7 +101,7 @@
 
         <!-- Game Stats display shows users the current game statistics. -->
         <div id="game-stats">
-            <div><strong><em>Stats:</em></strong></div>
+            <div id="stats-label"><strong><em>Stats for the Current 1st vs. 2nd Player:</em></strong></div>
             <div id="stats-table">
                 <div class="stats-row">
                     <div class="stats-cell stats-header">1st Player Wins</div>
@@ -130,7 +130,9 @@
                     <div class="stats-cell" id="second-player-moves-per-win">0</div>
                 </div>
             </div>
-            <button id="reset-btn"><strong>Reset Stats</strong></button>
+            <div class="button-container" id="reset-btn-container">
+                <button id="reset-btn"><strong>Reset Stats</strong></button>
+            </div>
         </div>
 
         <!-- Run buttons start gameplay, while stop button stops gameplay. -->
@@ -187,15 +189,13 @@
             <div class="popup" id="empty-email-warning-popup">
                 You have not entered any submission file email address.<br>
                 If you plan to submit your results to the benchmark's leaderboard, you must enter an email address in the 'Manage LLMs' section to be included in the generated submission files.<br>
-                Do you want to continue without entering an email address?
+                Do you want to continue without entering an email address?<br>
                 <div class="button-container">
                     <button class="small-button" id="empty-email-continue-btn">Yes</button>
                     <button class="small-button" id="empty-email-cancel-btn">No</button>
                 </div>
             </div>
         </div>
-
-
 
         <!-- Gameplay Area container holds game boards as well as game progress displays for each player. -->
         <div id="gameplay-area">
@@ -549,7 +549,7 @@
             <button class="large-button" id="LLMListButton">LLM List</button>
             <button class="large-button" id="FAQsButton">FAQs</button>
             <button class="large-button" id="userGuideButton">User Guide</button>
-            <a href="../add-games-guide/index.html"><button class="large-button">How to Add Your Own Game</button></a>
+            <a href="../add-games-guide/index.html" target="_blank"><button class="large-button">How to Add Your Own Game</button></a>
         </div>
 
         <!-- Manage LLMs menu allows users to add, modify, and remove LLM models. -->
