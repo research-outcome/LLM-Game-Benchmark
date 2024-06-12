@@ -1,6 +1,11 @@
 $(document).ready(function() {
     const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/newLeaderboard.json';
 
+    function formatDecimal(value) {
+        const number = parseFloat(value);
+        return Number.isInteger(number) ? number : number.toFixed(2);
+    }
+
     $.getJSON(jsonURL, function(data) {
         const formattedData = data.map(item => [
             item.GameType,
@@ -8,19 +13,19 @@ $(document).ready(function() {
             item.PromptVersion,
             item.LLM1stPlayer,
             item.LLM2ndPlayer,
-            item["WinRatio-1st"],
-            item["WinRatio-2nd"],
+            formatDecimal(item["WinRatio-1st"]),
+            formatDecimal(item["WinRatio-2nd"]),
             item["Wins-1st"],
             item["Wins-2nd"],
             item["Disqualifications-1st"],
             item["Disqualifications-2nd"],
             item.Draws,
-            item["InvalidMovesRatio-1st"],
-            item["InvalidMovesRatio-2nd"],
+            formatDecimal(item["InvalidMovesRatio-1st"]),
+            formatDecimal(item["InvalidMovesRatio-2nd"]),
             item["TotalMoves-1st"],
             item["TotalMoves-2nd"],
             item.ProviderEmail,
-            item["DateTime"],
+            item.DateTime,
             item.UUID
         ]);
 
