@@ -61,11 +61,11 @@ export class TicTacToe {
     // Draw the board in text format.
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += " The current state of the game is illustrated on a 3 by 3 grid. 'X' represents positions taken by the first player and 'O' represents positions taken by the second player, while 'e' indicates an empty (available) position. \n";
         gameStatus += " The current state of the game is as follows: \n";
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                gameStatus += (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "." : document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
+                gameStatus += (document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText === "") ? "e" : document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
             }
             gameStatus += " \n";
         }
@@ -98,7 +98,7 @@ export class TicTacToe {
     }
 
     // Construct a Move object given the model's response and display the move if it is valid.
-    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {
+    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging) {
         let row;
         let col;
         let symbol = (currentPlayer === 1) ? "X" : "O";
@@ -130,18 +130,18 @@ export class TicTacToe {
                 document.getElementById("tic-tac-toe-" + row + "-" + col).style.color = (symbol === "X") ? "blue" : "red";
 
                 // Return successful move.
-                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
+                if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") places at space (" + row + ", " + col + ").");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
             }
             else {
                 // Return unsuccessful move because LLM attempted to play in a space that was already taken.
-                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
+                if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(response));
             }
         }
         else {
             // Return unsuccessful move because LLM attempted to play in a space that was out of bounds.
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
+            if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is out of bounds.");
             return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
@@ -153,7 +153,7 @@ export class TicTacToe {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 let cellValue = document.getElementById("tic-tac-toe-" + (i + 1) + "-" + (j + 1)).innerText;
-                boardState += (cellValue === "") ? "." : cellValue;
+                boardState += (cellValue === "") ? "e" : cellValue;
                 if (j < 2) {
                     boardState += "|";
                 }

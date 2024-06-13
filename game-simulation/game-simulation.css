@@ -1,3 +1,9 @@
+html, body { /* Disable scrolling on page. */
+    margin: 0 1vh 0;
+    height: 100%;
+    overflow: hidden
+}
+
 /* Set default font style for page and input fields. */
 body {
     font-family: 'Tahoma', sans-serif;
@@ -412,16 +418,24 @@ button {
 }
 /* Gomoku styling. */
 #gomoku-board { /* Gomoku board styling. */
-    background-color: transparent;
+    background-color: #e7ae75;
     border-spacing: 0;
     border-collapse: collapse;
-    transform: translate(1.89vh, 1.89vh);
+    overflow: hidden;
+}
+#gomoku-board-cells {
+    width: 57vh;
+    height: 57vh;
+    max-width: 57vh;
+    max-height: 57vh;
+    overflow: hidden;
+    transform: translate(3.493vh, 3.493vh);
 }
 #gomoku-board .board-cell { /* Styling for every cell in the Gomoku board. */
-    width: 3.78vh;
-    height: 3.78vh;
-    min-width: 3.78vh;
-    min-height: 3.78vh;
+    width: 3.586vh;
+    height: 3.586vh;
+    min-width: 3.586vh;
+    min-height: 3.586vh;
     background-color: #e7ae75;
     border: 0.2vh solid #562509;
 }
@@ -443,7 +457,7 @@ button {
     border-radius: 50%;
     display: inline-block;
     position: relative;
-    transform: translate(-2vh,-2vh);
+    transform: translate(-1.893vh,-1.893vh);
 }
 .white-stone { /* Styling for white Gomoku stones. */
     background-color: white;
@@ -489,6 +503,6 @@ button {
 
 .modal-content iframe {
     width: 50%; /* Responsive width */
-    height: auto;
+    height: auto; /* Height is set automatically based on aspect ratio */
     aspect-ratio: 16 / 9; /* Maintain a 16:9 aspect ratio */
 }

@@ -61,7 +61,7 @@ export class Gomoku {
     // Draw the board in text format.
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is illustrated on a 15 by 15 grid. 'B' represents positions taken by the first player and 'W' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += " The current state of the game is illustrated on a 15 by 15 grid. 'B' represents positions taken by the first player and 'W' represents positions taken by the second player, while 'e' indicates an empty (available) position. \n";
         gameStatus += " The current state of the game is as follows: \n";
         for (let row = 1; row <= 15; row++) {
             for (let col = 1; col <= 15; col++) {
@@ -72,7 +72,7 @@ export class Gomoku {
                     gameStatus += "W";
                 }
                 else {
-                    gameStatus += ".";
+                    gameStatus += "e";
                 }
             }
             gameStatus += " \n";
@@ -91,7 +91,7 @@ export class Gomoku {
             // Screenshot size is standardized at 512px * 512px, regardless of user's window dimensions.
             // Board is offset down and right by 17 pixels to account for stones placed on the edge of the board.
             // This is because we are internally using a 15x15 grid to store stones, but we hide the last row/column of spaces.
-            html2canvas(document.querySelector("#gomoku-board"), { width: 512, height: 512, x: -17, y: -17, windowWidth: 1677, windowHeight: 854, scale: 1, logging: false }).then((canvas) => {
+            html2canvas(document.querySelector("#gomoku-board"), { width: 512, height: 512, windowWidth: 1677, windowHeight: 854, scale: 1, logging: false }).then((canvas) => {
                 // Download screenshot of board (for testing purposes).
                 //canvas.toBlob(function(blob) {
                     //saveAs(blob, "Gomoku Game Board.png");
@@ -108,7 +108,7 @@ export class Gomoku {
     }
 
     // Construct a Move object given the model's response and display the move if it is valid.
-    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {
+    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging) {
         let row;
         let col;
         let color = (currentPlayer === 1) ? "black" : "white";
@@ -137,18 +137,18 @@ export class Gomoku {
                 document.getElementById("gomoku-" + row + "-" + col).innerHTML = "<div class=\"" + color + "-stone\"></div>";
 
                 // Return successful move.
-                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at space (" + row + ", " + col + ").");
+                if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at space (" + row + ", " + col + ").");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
             }
             else {
                 // Return unsuccessful move because AI attempted to play in a space that was already taken.
-                console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
+                if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is already taken.");
                 return new Move(currentMoveCount, currentPlayer, row, col, "Already Taken", currentStatus, JSON.stringify(response));
             }
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is out of bounds");
+            if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at space (" + row + ", " + col + ") which is out of bounds");
             return new Move(currentMoveCount, currentPlayer, row, col, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
@@ -166,7 +166,7 @@ export class Gomoku {
                     boardState += "W";
                 }
                 else {
-                    boardState += ".";
+                    boardState += "e";
                 }
 
                 if (col < 15) {

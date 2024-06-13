@@ -31,6 +31,7 @@ const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 let bulkEnabled = false; // This flag determines whether the game will generate a "bulk" ZIP file.
 let playersCanBeTheSame = document.getElementById("checkbox-bulk-run-same-players").checked; // This flag determines whether LLMs will go against themselves during a bulk run.
 let gameStopped = false; // This flag is used to halt gameplay when the user presses the "stop" button.
+let useConsoleLogging = true;
 
 // Main gameplay loop
 async function playGame() {
@@ -169,15 +170,15 @@ async function playGame() {
 
             // Get initial response from the corresponding API for the model.
             // "moves[moves.length - 1]" gives the latest move. We do this to check if the last move was invalid to explain the LLM's previous mistake.
-            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1]);
+            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1], useConsoleLogging);
 
-            console.log("Initial Response: " + response);
+            if (useConsoleLogging) console.log("Initial Response: " + response);
 
             if (response === "Network Error Occurred") {
                 result = "networkerror";
                 finalGameState = await getFinalGameState(game, promptType);
                 gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                console.log("Game was canceled because a network error occurred.");
+                if (useConsoleLogging) console.log("Game was canceled because a network error occurred.");
                 isGameActive = false;
                 continue;
             }
@@ -190,7 +191,7 @@ async function playGame() {
             }
 
             // Get move object, which includes LLM and outcome ('Y' for valid move, or a description of how the move was invalid).
-            let move = await processMove(game, response, currentPlayer, model, currentMoveCount);
+            let move = await processMove(game, response, currentPlayer, model, currentMoveCount, useConsoleLogging);
             moves.push(move);
 
             // If a valid move was made, process it.
@@ -223,7 +224,7 @@ async function playGame() {
                     // Log the current game to output files and set gameplay as inactive because game has concluded.
                     finalGameState = await getFinalGameState(game, promptType);
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                    console.log(result);
+                    if (useConsoleLogging) console.log(result);
                     isGameActive = false;
                 }
                 // If a draw has taken place, process it accordingly.
@@ -232,7 +233,7 @@ async function playGame() {
                     draws++;
                     finalGameState = await getFinalGameState(game, promptType);
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                    console.log("Draw");
+                    if (useConsoleLogging) console.log("Draw");
                     isGameActive = false;
                 }
 
@@ -262,7 +263,7 @@ async function playGame() {
                     firstPlayerDisqualifications++;
                     finalGameState = await getFinalGameState(game, promptType);
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                    console.log("Player 1 was disqualified; they made too many invalid moves.");
+                    if (useConsoleLogging) console.log("Player 1 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
                 else if (secondPlayerCurrentInvalidMoves > game.getMaxInvalidMoves()) {
@@ -270,7 +271,7 @@ async function playGame() {
                     secondPlayerDisqualifications++;
                     finalGameState = await getFinalGameState(game, promptType);
                     gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                    console.log("Player 2 was disqualified; they made too many invalid moves.");
+                    if (useConsoleLogging) console.log("Player 2 was disqualified; they made too many invalid moves.");
                     isGameActive = false;
                 }
             }
@@ -312,7 +313,7 @@ async function playGame() {
             if (currentMoveCount === game.getMaxMoves() + 1) {
                 finalGameState = await getFinalGameState(game, promptType);
                 gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount - 1, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                console.log("Game Cancelled");
+                if (useConsoleLogging) console.log("Game Cancelled");
                 isGameActive = false;
             }
         }
@@ -670,7 +671,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Stop gameplay and clear progress displays when the "stop" button is clicked.
     document.getElementById("stop-btn").addEventListener("click", () => {
-        console.log("Stopping gameplay...");
+        if (useConsoleLogging) console.log("Stopping gameplay...");
         gameStopped = true;
     });
 
@@ -725,17 +726,17 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
     // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
-    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
 

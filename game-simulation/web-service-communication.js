@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import {Move} from "./classes.js";
+import { Move } from "./classes.js";
 
 let currentStatus = "";
 
@@ -81,12 +81,12 @@ function createSystemPrompt(game) {
 }
 
 // Call an LLM with a given prompt and base64-encoded board screenshot (if any) and return its response.
-export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData, model) {
+export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData, model, useConsoleLogging) {
     let modelType = model.getType();
     let modelName = model.getName();
     let apiKey = model.getApiKey();
 
-    console.log("Prompt: " + prompt);
+    if (useConsoleLogging) console.log("Prompt: " + prompt);
 
     // If we are attempting to call a Google model, call the model through the Google API.
     if (modelType === "Google") {
@@ -228,7 +228,7 @@ export function cleanResponse(response) {
 }
 
 // Determine if the LLM's move was valid. Return a "Move" object which contains the model name and move outcome ("Y" for valid moves, explanations for invalid moves)
-export async function processMove(game, response, currentPlayer, model, currentMoveCount) {
+export async function processMove(game, response, currentPlayer, model, currentMoveCount, useConsoleLogging) {
     response = cleanResponse(response); // Preprocess the response string into a JSON-formatted move.
 
     // Attempt to process the move. If the move had an invalid format, return a move object with an "Invalid Format" outcome.
@@ -239,17 +239,17 @@ export async function processMove(game, response, currentPlayer, model, currentM
         return game.processMove(response, currentPlayer, model, currentMoveCount, currentStatus);
     }
     catch (e) {
-        console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
+        if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
         return new Move(currentMoveCount, currentPlayer, -1, -1, "Invalid Format", currentStatus, response);
     }
 }
 
 // Generate a prompt, call the LLM with the prompt, and return its response.
-export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
+export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove, useConsoleLogging) {
     // Generate prompts and image data.
     let [prompt, imageData] = await createPrompt(gameType, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
     let systemPrompt = createSystemPrompt();
 
     // Call LLM with the prompt and return its response.
-    return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, model);
+    return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, model, useConsoleLogging);
 }

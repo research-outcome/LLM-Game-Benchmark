@@ -66,7 +66,7 @@ export class ConnectFour {
     // Draw the board in text format.
     static drawBoard() {
         let gameStatus = "";
-        gameStatus += " The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while '.' indicates an available position. \n";
+        gameStatus += " The current state of the game is displayed on a 6 by 7 grid. 'R' represents positions taken by the first player and 'Y' represents positions taken by the second player, while 'e' indicates an empty (available) position. \n";
         gameStatus += " The current state of the game is as follows: \n";
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 7; j++) {
@@ -79,7 +79,7 @@ export class ConnectFour {
                         gameStatus += "Y";
                         break;
                     default:
-                        gameStatus += ".";
+                        gameStatus += "e";
                         break;
                 }
             }
@@ -114,7 +114,7 @@ export class ConnectFour {
     }
 
     // Construct a Move object given the model's response and display the move if it is valid.
-    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {
+    static processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging) {
         let col;
         let color = (currentPlayer === 1) ? "red" : "yellow";
 
@@ -149,18 +149,18 @@ export class ConnectFour {
                     document.getElementById("connect-four-" + row + "-" + col).querySelector('.connect-four-space').style.backgroundColor = color;
     
                     // Return successful move.
-                    console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
+                    if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") places at column " + col + ".");
                     return new Move(currentMoveCount, currentPlayer, row, col, "Valid", currentStatus, JSON.stringify(response));
                 }
             }
     
             // Return unsuccessful move because the column is full
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
+            if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place in full column " + col + ".");
             return new Move(currentMoveCount, currentPlayer, -1, col, "Already Taken", currentStatus, JSON.stringify(response));
         }
         else {
             // Return unsuccessful move because AI attempted to play in a column that was out of bounds.
-            console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
+            if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + " (" + color + ") tried to place at column " + col + " which is out of bounds.");
             return new Move(currentMoveCount, currentPlayer, -1, col, "Out of Bounds", currentStatus, JSON.stringify(response));
         }
     }
@@ -174,7 +174,7 @@ export class ConnectFour {
                 let cell = document.getElementById("connect-four-" + (i + 1) + "-" + (j + 1)).querySelector('.connect-four-space');
                 let cellColor = cell.style.backgroundColor;
                 // Assign symbols based on color
-                let symbol = '.';
+                let symbol = 'e';
                 if (cellColor === "red") {
                     symbol = 'R';
                 } else if (cellColor === "yellow") {
