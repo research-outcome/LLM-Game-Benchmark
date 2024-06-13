@@ -52,9 +52,10 @@
                             <br>
                             &emsp;<span class="gray">&lt;!-- Code lines skipped for this guide... --&gt;</span>
                             <br>
-                            &emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
-                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-14"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
-                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-15"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-row"</span><span class="yellow">&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-14"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;&emsp;<span class="yellow">&lt;div </span>class<span class="green">="board-cell"</span> id<span class="green">="gomoku-15-15"</span><span class="yellow">&gt;&lt;/div&gt;</span><br>
+                            &emsp;&emsp;<span class="yellow">&lt;/div&gt;</span><br>
                             &emsp;<span class="yellow">&lt;/div&gt;</span><br>
                             &emsp;<span class="highlight">&lt;!-- Add HTML for your game here. --&gt;</span><br>
                             <span class="yellow">&lt;/div&gt;</span>
@@ -213,10 +214,10 @@
                     <li>
                         Implement the static getMaxInvalidMoves() method. This method should return the maximum total number of moves allowed in the game. If a player's invalid move count goes above this number, they will be disqualified.<br><br>
 
-                        For this study, this figure was calculated as "MaxInvalidMoves = (rowCount + columnCount)", but this may be modified for your game.
+                        For this study, this figure was calculated as the average number of cells in a row/column of the board, but this may be modified for your game.
                         <div class="code-snippet">
                             <span class="orange">static</span> <span class="blue">getMaxInvalidMoves</span>() {<br>
-                            &emsp;<span class="orange">return</span> <span class="cyan">6</span>;<br>
+                            &emsp;<span class="orange">return</span> <span class="cyan">3</span>;<br>
                             }<br>
                         </div>
                     </li>
@@ -326,7 +327,7 @@
 
                         The "classes.js" file in the "game-simulation" folder contains the Move class implementation if you'd like to view the constructor parameters and their meanings.
                         <div class="code-snippet">
-                            <span class="orange">static</span> processMove(response, currentPlayer, model, currentMoveCount, currentStatus) {<br>
+                            <span class="orange">static</span> processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging) {<br>
                             &emsp;<span class="orange">let</span> row;<br>
                             &emsp;<span class="orange">let</span> col;<br>
                             &emsp;<span class="orange">let</span> symbol = (currentPlayer === <span class="cyan">1</span>) ? <span class="green">"X"</span> : <span class="green">"O"</span>;<br>
@@ -334,13 +335,13 @@
                             &emsp;<span class="orange">if</span> (response.row !== <span class="orange">undefined</span> && <span class="orange">typeof</span> response.row === <span class="green">"number"</span>) {<br>
                             &emsp;&emsp;row = response.row;<br>
                             &emsp;} <span class="orange">else</span> {<br>
-                            &emsp;<span class="orange">throw new</span> <span class="blue">Error</span>();<br>
+                            &emsp;&emsp;<span class="orange">return new</span> <span class="blue">Move</span>(currentMoveCount, currentPlayer, -<span class="cyan">1</span>, -<span class="cyan">1</span>, <span class="green">"Invalid Format"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
                             &emsp;}<br>
                             <br>
                             &emsp;<span class="orange">if</span> (response.column !== <span class="orange">undefined</span> && <span class="orange">typeof</span> response.column === <span class="green">"number"</span>) {<br>
                             &emsp;&emsp;col = response.column;<br>
                             &emsp;} <span class="orange">else</span> {<br>
-                            &emsp;<span class="orange">throw new</span> <span class="blue">Error</span>();<br>
+                            &emsp;&emsp;<span class="orange">return new</span> <span class="blue">Move</span>(currentMoveCount, currentPlayer, -<span class="cyan">1</span>, -<span class="cyan">1</span>, <span class="green">"Invalid Format"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
                             &emsp;}<br>
                             <br>
                             &emsp;<span class="orange">if</span> (row >= <span class="cyan">1</span> && row <= <span class="cyan">3</span> && col >= <span class="cyan">1</span> && col <= <span class="cyan">3</span>) {<br>
@@ -349,10 +350,10 @@
                             <br>
                             &emsp;&emsp;&emsp;document.<span class="pink">getElementById</span><span class="green">("tic-tac-toe-"</span> + row + <span class="green">"-"</span> + col).<span class="pink">style</span>.<span class="pink">color</span> = (symbol === <span class="green">"X"</span>) ? <span class="green">"blue"</span> : <span class="green">"red"</span>;<br>
                             <br>
-                            &emsp;&emsp;&emsp;<span class="pink">console</span>.<span class="blue">log</span>(<span class="green">"Move "</span> + currentMoveCount + <span class="green">": "</span> + model.<span class="blue">getName</span>() + <span class="green">" ("</span> + symbol + <span class="green">") places at space ("</span> + row + <span class="green">", "</span> + col + <span class="green">")."</span>);<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (useConsoleLogging) <span class="pink">console</span>.<span class="blue">log</span>(<span class="green">"Move "</span> + currentMoveCount + <span class="green">": "</span> + model.<span class="blue">getName</span>() + <span class="green">" ("</span> + symbol + <span class="green">") places at space ("</span> + row + <span class="green">", "</span> + col + <span class="green">")."</span>);<br>
                             &emsp;&emsp;&emsp;<span class="orange">return</span> <span class="blue">new</span> <span class="blue">Move</span>(currentMoveCount, currentPlayer, row, col, <span class="green">"Valid"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
                             &emsp;&emsp;} <span class="orange">else</span> {<br>
-                            &emsp;&emsp;&emsp;<span class="pink">console</span>.<span class="blue">log</span>("Move " + currentMoveCount + ": " + model.<span class="blue">getName</span>() + <span class="green">" (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken."</span>);<br>
+                            &emsp;&emsp;&emsp;<span class="orange">if</span> (useConsoleLogging) <span class="pink">console</span>.<span class="blue">log</span>("Move " + currentMoveCount + ": " + model.<span class="blue">getName</span>() + <span class="green">" (" + symbol + ") tried to place at space (" + row + ", " + col + ") which is already taken."</span>);<br>
                             &emsp;&emsp;&emsp;<span class="orange">return new</span> Move(currentMoveCount, currentPlayer, row, col, <span class="green">"Already Taken"</span>, currentStatus, <span class="pink">JSON</span>.<span class="blue">stringify</span>(response));<br>
                             &emsp;&emsp;}<br>
                             &emsp;} <span class="orange">else</span> {<br>
