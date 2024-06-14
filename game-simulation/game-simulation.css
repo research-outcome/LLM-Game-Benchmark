@@ -499,9 +499,3 @@ button {
 #game-type-column {
     width: 10%;
 }
-
-.modal-content iframe {
-    width: 50%; /* Responsive width */
-    height: auto; /* Height is set automatically based on aspect ratio */
-    aspect-ratio: 16 / 9; /* Maintain a 16:9 aspect ratio */
-}
