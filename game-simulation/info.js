@@ -133,7 +133,6 @@ export function populateFAQTable() {
 }
 
 // Function to populate the User Guide pop up data
-// Function to populate the User Guide pop up data
 export function populateUserGuide() {
     // Example data for demonstration
     const data = {
