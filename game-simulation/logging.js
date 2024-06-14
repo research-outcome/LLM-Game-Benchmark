@@ -168,6 +168,10 @@ export function generateSubmissionFiles(gameType, promptType, promptVersion, fir
     let submissionJsonName = gameType + "_" + promptType + "_" + firstPlayer + "_" + secondPlayer + "_" + dateTime + "_submission.json";
     let submissionCsvName = gameType + "_" + promptType + "_" + firstPlayer + "_" + secondPlayer + "_" + dateTime + "_submission.csv";
 
+    // Calculate invalid move ratios.
+    let firstPlayerInvalidMovesRatio = (firstPlayerTotalMoveCount === 0) ? 0 : firstPlayerTotalInvalidMoves/firstPlayerTotalMoveCount;
+    let secondPlayerInvalidMovesRatio = (secondPlayerTotalMoveCount === 0) ? 0: secondPlayerTotalInvalidMoves/secondPlayerTotalMoveCount;
+
     // Generate the submission file content.
     let submissionJsonContent = "[\n" +
             "\t{\n" +
@@ -183,8 +187,8 @@ export function generateSubmissionFiles(gameType, promptType, promptVersion, fir
                 "\t\t\"Disqualifications-1st\": \"" + firstPlayerDisqualifications + "\",\n" +
                 "\t\t\"Disqualifications-2nd\": \"" + secondPlayerDisqualifications + "\",\n" +
                 "\t\t\"Draws\": \"" + draws + "\",\n" +
-                "\t\t\"InvalidMovesRatio-1st\": \"" + firstPlayerTotalInvalidMoves/firstPlayerTotalMoveCount + "\",\n" +
-                "\t\t\"InvalidMovesRatio-2nd\": \"" + secondPlayerTotalInvalidMoves/secondPlayerTotalMoveCount + "\",\n" +
+                "\t\t\"InvalidMovesRatio-1st\": \"" + firstPlayerInvalidMovesRatio + "\",\n" +
+                "\t\t\"InvalidMovesRatio-2nd\": \"" + secondPlayerInvalidMovesRatio + "\",\n" +
                 "\t\t\"TotalMoves-1st\": \"" + firstPlayerTotalMoveCount + "\",\n" +
                 "\t\t\"TotalMoves-2nd\": \"" + secondPlayerTotalMoveCount + "\",\n" +
                 "\t\t\"ProviderEmail\": \"" + providerEmail + "\",\n" +
@@ -194,7 +198,7 @@ export function generateSubmissionFiles(gameType, promptType, promptVersion, fir
         "]";
 
     let submissionCsvContent = "GameType,PromptType,PromptVersion,LLM1stPlayer,LLM2ndPlayer,WinRatio-1st,WinRatio-2nd,Wins-1st,Wins-2nd,Disqualifications-1st,Disqualifications-2nd,Draws,InvalidMovesRatio-1st,InvalidMovesRatio-2nd,TotalMoves-1st,TotalMoves-2nd,ProviderEmail,DateTime,UUID\n" +
-        gameType + "," + promptType + "," + promptVersion + "," + firstPlayer + "," + secondPlayer + "," + firstPlayerWins/gameCount + "," + secondPlayerWins/gameCount + "," + firstPlayerWins + "," + secondPlayerWins + "," + firstPlayerDisqualifications + "," + secondPlayerDisqualifications + "," + draws + "," + firstPlayerTotalInvalidMoves/firstPlayerTotalMoveCount + "," + secondPlayerTotalInvalidMoves/secondPlayerTotalMoveCount + "," + firstPlayerTotalMoveCount + "," + secondPlayerTotalMoveCount + "," + providerEmail + "," + dateTime + "," + uuid;
+        gameType + "," + promptType + "," + promptVersion + "," + firstPlayer + "," + secondPlayer + "," + firstPlayerWins/gameCount + "," + secondPlayerWins/gameCount + "," + firstPlayerWins + "," + secondPlayerWins + "," + firstPlayerDisqualifications + "," + secondPlayerDisqualifications + "," + draws + "," + firstPlayerInvalidMovesRatio + "," + secondPlayerInvalidMovesRatio + "," + firstPlayerTotalMoveCount + "," + secondPlayerTotalMoveCount + "," + providerEmail + "," + dateTime + "," + uuid;
 
     // Download the generated submission files to be compiled into the session's ZIP file.
     return [submissionJsonName, submissionJsonContent, submissionCsvName, submissionCsvContent];
@@ -265,8 +269,17 @@ export function downloadZipFile(submissionFiles, gameLogFiles, boardScreenshots,
 // For bulk running only, download a "bulk" zip file which contains all outcomes and move information in CSV format.
 export function downloadBulkZipFile(allLogFiles) {
     let bulkZipFile = new JSZip();
-    let gameType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).GameType;
-    let promptType = JSON.parse(allLogFiles[0][1][0].getJsonFileContent()).PromptType;
+    let gameType;
+    let promptType;
+    try {
+        gameType = JSON.parse(allLogFiles[0][0][1])[0].GameType;
+        promptType = JSON.parse(allLogFiles[0][0][1])[0].PromptType;
+    }
+    catch (e) {
+        alert("An error occurred while obtaining game type or prompt type for bulk zip file. Replacing them with their default values and attempting to continue.");
+        gameType = "error-getting-game-type";
+        promptType = "error-getting-prompt-type";
+    }
 
     let jsonFileContentAllSubmission = "[\n";
     let jsonFileContentAllMoves = "{\n";
@@ -275,84 +288,107 @@ export function downloadBulkZipFile(allLogFiles) {
     let csvFileContentAllSubmission = "GameType,PromptType,PromptVersion,LLM1stPlayer,LLM2ndPlayer,WinRatio-1st,WinRatio-2nd,Wins-1st,Wins-2nd,Disqualifications-1st,Disqualifications-2nd,Draws,InvalidMovesRatio-1st,InvalidMovesRatio-2nd,TotalMoves-1st,TotalMoves-2nd,ProviderEmail,DateTime,UUID\n";
 
     // Add all individual game log files from all games to bulk ZIP file.
-    for (let i = 0; i < allLogFiles.length; i++) {
-        bulkZipFile.file(allLogFiles[i][0][0], allLogFiles[i][0][1]); // Add JSON submission file for current game to bulk ZIP file.
-        bulkZipFile.file(allLogFiles[i][0][2], allLogFiles[i][0][3]); // Add CSV submission file for current game to bulk ZIP file.
+    try {
+        for (let i = 0; i < allLogFiles.length; i++) {
+            bulkZipFile.file(allLogFiles[i][0][0], allLogFiles[i][0][1]); // Add JSON submission file for current game to bulk ZIP file.
+            bulkZipFile.file(allLogFiles[i][0][2], allLogFiles[i][0][3]); // Add CSV submission file for current game to bulk ZIP file.
 
-        jsonFileContentAllSubmission += allLogFiles[i][0][1].substring(2, allLogFiles[i][0][1].length - 2) + ",\n"; // Add submission file object for current game to list of all submission file JSON objects for the entire bulk run.
-        csvFileContentAllSubmission += allLogFiles[i][0][3].split("\n")[1] + "\n"; // Add CSV submission file information for current game to "all submission" CSV file content.
-        let gameIndex = 0;
-        for (let gameLogs of allLogFiles[i][1]) {
-            bulkZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
-            bulkZipFile.file(gameLogs.getJsonFileName(), gameLogs.getJsonFileContent());
-            bulkZipFile.file(gameLogs.getCsvFileName(), gameLogs.getCsvFileContent());
-            bulkZipFile.file(gameLogs.getMovesCsvFileName(), gameLogs.getMovesCsvFileContent());
-            csvFileContentAll += gameLogs.getCsvFileContent().split("\n")[1] + "\n"; // Add game outcomes to "all" CSV file content.
-            for(let move of gameLogs.getMovesCsvFileContent().split("\n").slice(1)) {
-                csvFileContentAllMoves += move + "\n"; // Add move information to "all moves" CSV file content.
-            }
+            jsonFileContentAllSubmission += allLogFiles[i][0][1].substring(2, allLogFiles[i][0][1].length - 2) + ",\n"; // Add submission file object for current game to list of all submission file JSON objects for the entire bulk run.
+            csvFileContentAllSubmission += allLogFiles[i][0][3].split("\n")[1] + "\n"; // Add CSV submission file information for current game to "all submission" CSV file content.
+            let gameIndex = 0;
+            for (let gameLogs of allLogFiles[i][1]) {
+                bulkZipFile.file(gameLogs.getTextFileName(), gameLogs.getTextFileContent());
+                bulkZipFile.file(gameLogs.getJsonFileName(), gameLogs.getJsonFileContent());
+                bulkZipFile.file(gameLogs.getCsvFileName(), gameLogs.getCsvFileContent());
+                bulkZipFile.file(gameLogs.getMovesCsvFileName(), gameLogs.getMovesCsvFileContent());
+                csvFileContentAll += gameLogs.getCsvFileContent().split("\n")[1] + "\n"; // Add game outcomes to "all" CSV file content.
+                for(let move of gameLogs.getMovesCsvFileContent().split("\n").slice(1)) {
+                    csvFileContentAllMoves += move + "\n"; // Add move information to "all moves" CSV file content.
+                }
 
-            let jsonContent = JSON.parse(gameLogs.getJsonFileContent());
-            let moveObjectName = "Moves_" + gameLogs.getJsonFileName();
-            moveObjectName = moveObjectName.substring(0, moveObjectName.length - 5);
-            jsonFileContentAllMoves += "\t\"" + moveObjectName + "\": [\n";
-            for (let move of jsonContent.Moves) {
-                jsonFileContentAllMoves += "\t\t{\n";
-                jsonFileContentAllMoves += "\t\t\t\"MoveNumber\": " + JSON.stringify(move.Row) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"Player\": " + JSON.stringify(move.Player) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"Row\": " + JSON.stringify(move.Row) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"Column\": " + JSON.stringify(move.Column) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"Outcome\": " + JSON.stringify(move.Outcome) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"CurrentStatus\": " + JSON.stringify(move.CurrentStatus) + ",\n";
-                jsonFileContentAllMoves += "\t\t\t\"Response\": " + JSON.stringify(move.Response) + "\n";
-                jsonFileContentAllMoves += "\t\t},\n";
-            }
-            jsonFileContentAllMoves = jsonFileContentAllMoves.substring(0, jsonFileContentAllMoves.length - 2);
-            jsonFileContentAllMoves += "\n\t],\n";
+                let jsonContent = JSON.parse(gameLogs.getJsonFileContent());
+                let moveObjectName = "Moves_" + gameLogs.getJsonFileName();
+                moveObjectName = moveObjectName.substring(0, moveObjectName.length - 5);
+                jsonFileContentAllMoves += "\t\"" + moveObjectName + "\": [\n";
+                for (let move of jsonContent.Moves) {
+                    jsonFileContentAllMoves += "\t\t{\n";
+                    jsonFileContentAllMoves += "\t\t\t\"MoveNumber\": " + JSON.stringify(move.Row) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"Player\": " + JSON.stringify(move.Player) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"Row\": " + JSON.stringify(move.Row) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"Column\": " + JSON.stringify(move.Column) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"Outcome\": " + JSON.stringify(move.Outcome) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"CurrentStatus\": " + JSON.stringify(move.CurrentStatus) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"Response\": " + JSON.stringify(move.Response) + "\n";
+                    jsonFileContentAllMoves += "\t\t},\n";
+                }
+                jsonFileContentAllMoves = jsonFileContentAllMoves.substring(0, jsonFileContentAllMoves.length - 2);
+                jsonFileContentAllMoves += "\n\t],\n";
 
-            // If we are using an "image" prompt type, add each board screenshot to the ZIP file.
-            if (promptType === "image") {
-                let moves = JSON.parse(gameLogs.getJsonFileContent()).Moves;
-                let finalBoardImageData = JSON.parse(gameLogs.getJsonFileContent()).FinalGameState.split(',')[1];
-                for (let i = 0; i <= moves.length; i++) {
+                // If we are using an "image" prompt type, add each board screenshot to the ZIP file.
+                if (promptType === "image") {
+                    let moves = JSON.parse(gameLogs.getJsonFileContent()).Moves;
+                    let finalBoardImageData = JSON.parse(gameLogs.getJsonFileContent()).FinalGameState.split(',')[1];
+                    for (let i = 0; i <= moves.length; i++) {
+                        let imageFileName = gameLogs.getJsonFileName();
+                        imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
+                        imageFileName = imageFileName + "_move" + i.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
+
+                        // If we have iterated through all moves in the moves list, save the final board state screenshot.
+                        // The data for this screenshot is stored in the FinalGameState value in the JSON file.
+                        let imageData = (i === moves.length) ? finalBoardImageData : moves[i].CurrentStatus.split(',')[1]; // Obtain raw base64-encoded screenshot data.
+
+                        bulkZipFile.file(imageFileName, imageData, { base64:true });
+                    }
+                }
+
+                // Save board screenshots for this game, if there are any. These are only saved when "save progress images in ZIP file" is checked and promptType is NOT "image".
+                for (let j = 0; j < allLogFiles[i][2][gameIndex].length; j++) {
                     let imageFileName = gameLogs.getJsonFileName();
                     imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
-                    imageFileName = imageFileName + "_move" + i.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
+                    imageFileName = imageFileName + "_move" + j.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
 
                     // If we have iterated through all moves in the moves list, save the final board state screenshot.
                     // The data for this screenshot is stored in the FinalGameState value in the JSON file.
-                    let imageData = (i === moves.length) ? finalBoardImageData : moves[i].CurrentStatus.split(',')[1]; // Obtain raw base64-encoded screenshot data.
+                    let imageData = allLogFiles[i][2][gameIndex][j].split(',')[1]; // Obtain raw base64-encoded screenshot data.
 
                     bulkZipFile.file(imageFileName, imageData, { base64:true });
                 }
+
+                gameIndex++;
             }
-
-            // Save board screenshots for this game, if there are any. These are only saved when "save progress images in ZIP file" is checked and promptType is NOT "image".
-            for (let j = 0; j < allLogFiles[i][2][gameIndex].length; j++) {
-                let imageFileName = gameLogs.getJsonFileName();
-                imageFileName = imageFileName.substring(0, imageFileName.length - 5); // Get json file name and remove ".json" extension.
-                imageFileName = imageFileName + "_move" + j.toString().padStart(3, "0") + ".png"; // Append "_moven.png" to filename to finalize image file name. n is padded with 0s to (at least) 3 decimal places.
-
-                // If we have iterated through all moves in the moves list, save the final board state screenshot.
-                // The data for this screenshot is stored in the FinalGameState value in the JSON file.
-                let imageData = allLogFiles[i][2][gameIndex][j].split(',')[1]; // Obtain raw base64-encoded screenshot data.
-
-                bulkZipFile.file(imageFileName, imageData, { base64:true });
-            }
-
-            gameIndex++;
         }
+    }
+    catch (e) {
+        alert("An error occurred while generating the bulk ZIP file's contents. Downloading all files that were generated before the error.");
     }
 
     // Remove last ",\n" from "All" JSON content and append closing newline and bracket "\n]".
     jsonFileContentAllSubmission = jsonFileContentAllSubmission.substring(0, jsonFileContentAllSubmission.length - 2);
-    jsonFileContentAllSubmission += "\n]";
+    if (jsonFileContentAllSubmission !== "") {
+        jsonFileContentAllSubmission += "\n]";
+    } else {
+        alert ("\"All Submission\" JSON content was not generated, meaning no logs were successfully made. Exiting.");
+        return;
+    }
+
     jsonFileContentAllMoves = jsonFileContentAllMoves.substring(0, jsonFileContentAllMoves.length - 2);
-    jsonFileContentAllMoves += "\n}";
+    if (jsonFileContentAllMoves !== "") {
+        jsonFileContentAllMoves += "\n}";
+    } else {
+        alert ("\"All Moves\" JSON content was not generated, meaning no logs were successfully made. Exiting.");
+        return;
+    }
+
     // Remove last newline character from CSV file contents.
-    csvFileContentAll = csvFileContentAll.substring(0, csvFileContentAll.length - 1);
-    csvFileContentAllMoves = csvFileContentAllMoves.substring(0, csvFileContentAllMoves.length - 1);
-    csvFileContentAllSubmission = csvFileContentAllSubmission.substring(0, csvFileContentAllSubmission.length - 1);
+    if (csvFileContentAll.split("\n")[1] === "" || csvFileContentAllMoves.split("\n")[1] === "" || csvFileContentAllSubmission.split("\n")[1] === "") {
+        alert("\"All\" CSV file content was not generated, meaning no logs were successfully made. Exiting.");
+        return;
+    }
+    else {
+        csvFileContentAll = csvFileContentAll.substring(0, csvFileContentAll.length - 1);
+        csvFileContentAllMoves = csvFileContentAllMoves.substring(0, csvFileContentAllMoves.length - 1);
+        csvFileContentAllSubmission = csvFileContentAllSubmission.substring(0, csvFileContentAllSubmission.length - 1);
+    }
 
     // Generate a dateTime to be used for the ZIP file name.
     let dateTime = formatDateTime(new Date());
@@ -365,15 +401,20 @@ export function downloadBulkZipFile(allLogFiles) {
     let csvFileNameAllMoves = gameType + "_" + promptType + "_" + dateTime + "_all_moves.csv";
     let csvFileNameAllSubmission = gameType + "_" + promptType + "_" + dateTime + "_all_submission.csv";
 
-    // Add "all" file contents to the bulk ZIP file.
-    bulkZipFile.file(jsonFileNameAllSubmission, jsonFileContentAllSubmission);
-    bulkZipFile.file(jsonFileNameAllMoves, jsonFileContentAllMoves);
-    bulkZipFile.file(csvFileNameAll, csvFileContentAll);
-    bulkZipFile.file(csvFileNameAllMoves, csvFileContentAllMoves);
-    bulkZipFile.file(csvFileNameAllSubmission, csvFileContentAllSubmission);
+    try {
+        // Add "all" file contents to the bulk ZIP file.
+        bulkZipFile.file(jsonFileNameAllSubmission, jsonFileContentAllSubmission);
+        bulkZipFile.file(jsonFileNameAllMoves, jsonFileContentAllMoves);
+        bulkZipFile.file(csvFileNameAll, csvFileContentAll);
+        bulkZipFile.file(csvFileNameAllMoves, csvFileContentAllMoves);
+        bulkZipFile.file(csvFileNameAllSubmission, csvFileContentAllSubmission);
 
-    // Download bulk ZIP file.
-    bulkZipFile.generateAsync({type:"blob"}).then(function (blob) {
-        saveAs(blob, zipFileName);
-    });
+        // Download bulk ZIP file.
+        bulkZipFile.generateAsync({type:"blob"}).then(function (blob) {
+            saveAs(blob, zipFileName);
+        });
+    }
+    catch (e) {
+        alert("Could not download bulk ZIP file due to an error.");
+    }
 }
