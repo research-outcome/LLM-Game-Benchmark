@@ -428,7 +428,6 @@ button {
     height: 57vh;
     max-width: 57vh;
     max-height: 57vh;
-    overflow: hidden;
     transform: translate(3.493vh, 3.493vh);
 }
 #gomoku-board .board-cell { /* Styling for every cell in the Gomoku board. */
