@@ -705,11 +705,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         populateFAQTable();
     });
 
-    // Event listener for the game details button
-    document.getElementById("userGuideButton").addEventListener("click", () => {
-        populateUserGuide();
-    });
-
     // Hide popups when a popup's close button has been clicked.
     document.querySelectorAll(".popup-container .close").forEach(closeButton => {
         closeButton.addEventListener("click", () => {
