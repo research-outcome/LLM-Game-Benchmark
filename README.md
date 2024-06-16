@@ -16,6 +16,3 @@ This repository **welcomes contributions and suggestions**. The LLM Game Benchma
 We have published the details of this study. If you use the output data, please cite the publication:
 - Link to the publication
 
-Use the following tags when made public:
-#llm #game #benchmark #large-language-models #deep-learning #nlp #agi #reasoning #strategic-thinking #performance-testing #evaluation
-
