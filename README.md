@@ -7,8 +7,7 @@ This repository is developed to evaluate Large Language Models (LLMs) via Game P
 - The datasets to analyze the details of the games that are presented on the leaderboard
   - Link to the datasets
 
-This repository **welcomes contributions and suggestions**. 
-The LLM Game Benchmark repository is shared under the ..... license.
+This repository **welcomes contributions and suggestions**. The LLM Game Benchmark repository is shared under the MIT License.
 
 | Tic-Tac-Toe  | Connect Four | Gomoku |
 | ------------- | ------------- | ------------- |
