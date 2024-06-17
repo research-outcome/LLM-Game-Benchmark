@@ -103,7 +103,7 @@ function canBlockWin(board, player) {
     return checkLineConditions(board, opponentSymbol);
 }
 
-// determine whether there are winning conditions met on the board for a given symbol 
+// Determine whether there are winning conditions met on the board for a given symbol 
 function checkLineConditions(board, symbol) {
     // This function aggregates checks across rows, columns, and diagonals
     return checkLines(board, symbol) || checkDiagonals(board, symbol);
