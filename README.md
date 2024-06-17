@@ -1,11 +1,11 @@
 # LLM Game Benchmark
 This repository is developed to evaluate Large Language Models (LLMs) via Game Playing. It includes the following components:
-- A leaderboard to view and compare the results of previous games among LLMs. We **welcome submissions** to the leaderboard.
-  - Link to the Leaderboard webpage
-- An extensible game simulation software to test LLMs via games such as Tic-Tac-Toe, Connect Four, and Gomoku
-  - Link to the Game Simulation webpage
-- The detailed output files of game runs to analyze the details of the games that are presented on the leaderboard
-  - Link to the datasets
+- A leaderboard to view and compare the results of previous games among LLMs. We **welcome submissions** to the leaderboard. To review the current status of the leaderboard, please see the leaderboard folder.
+  
+- An extensible game simulation software to test LLMs via games such as Tic-Tac-Toe, Connect Four, and Gomoku. For more information and try out the game simulations, please see the game-simulation folder.
+  
+- The detailed output files of game runs to analyze the details of the games that are presented on the leaderboard. Please see the outputs folder.
+  
 
 This repository **welcomes contributions and suggestions**. The LLM Game Benchmark repository is shared under the MIT License.
 
