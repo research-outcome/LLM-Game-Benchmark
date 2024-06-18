@@ -46,34 +46,30 @@ function analyzeMoves() {
 function performAnalysis(data) {
     const results = { missedWins: [], missedBlocks: [] };
     const board = initializeBoard(3, 3); // 3x3 board for Tic-Tac-Toe
-    let previousBoardState = null; // Keep track of the previous state to check for missed opportunities
 
     data.Moves.forEach((move, index) => {
+        // Update the board with the current move
         updateBoard(board, move);
-        
-        // Store current board state for comparison on next move
-        if (previousBoardState && move.Player === data.Moves[index - 1].Player) {
-            // Check if the previous move by the same player had a winning opportunity
-            if (canWin(previousBoardState, move.Player)) {
-                results.missedWins.push(`Player ${move.Player} missed a chance to win at move number ${data.Moves[index - 1].MoveNumber}`);
-            }
+
+        // Check if the current move resulted in a win
+        const isWinningMove = canWin(board, move.Player);
+
+        // Check for missed block opportunities by the previous player
+        if (index > 0 && !isWinningMove && canWin(board, data.Moves[index - 1].Player)) {
+            results.missedBlocks.push(`Player ${data.Moves[index - 1].Player} missed a chance to block at move number ${data.Moves[index - 1].MoveNumber}`);
         }
 
-        // Update previousBoardState with a copy of the current board
-        previousBoardState = board.map(row => row.slice());
-
-        // Check for missed block opportunities only if there is a next move
-        if (data.Moves[index + 1]) {
+        // Check for missed win opportunities if the current move is not a winning move
+        if (index < data.Moves.length - 1 && !isWinningMove) {
             const nextMove = data.Moves[index + 1];
-            if (canWin(board, nextMove.Player)) {
-                results.missedBlocks.push(`Player ${nextMove.Player} missed a chance to block at move number ${move.MoveNumber}`);
+            if (nextMove.Player === move.Player && !canWin(board, move.Player) && canWin(board, nextMove.Player)) {
+                results.missedWins.push(`Player ${move.Player} missed a chance to win at move number ${move.MoveNumber}`);
             }
         }
     });
 
     return results;
 }
-
 
 function initializeBoard(rows, cols) {
     return Array.from(Array(rows), () => new Array(cols).fill(null));
@@ -84,26 +80,11 @@ function updateBoard(board, move) {
     board[move.Row - 1][move.Column - 1] = symbol;
 }
 
-function missedOpportunity(board, currentPlayer, nextPlayer) {
-    const currentSymbol = currentPlayer === 1 ? 'X' : 'O';
-    const nextSymbol = nextPlayer === 1 ? 'X' : 'O';
-    if (canWin(board, currentSymbol) || canBlockWin(board, nextSymbol)) {
-        return true;
-    }
-    return false;
-}
-
 function canWin(board, player) {
     const symbol = player === 1 ? 'X' : 'O';
     return checkLineConditions(board, symbol);
 }
 
-function canBlockWin(board, player) {
-    const opponentSymbol = player === 1 ? 'O' : 'X';
-    return checkLineConditions(board, opponentSymbol);
-}
-
-// Determine whether there are winning conditions met on the board for a given symbol 
 function checkLineConditions(board, symbol) {
     // This function aggregates checks across rows, columns, and diagonals
     return checkLines(board, symbol) || checkDiagonals(board, symbol);
