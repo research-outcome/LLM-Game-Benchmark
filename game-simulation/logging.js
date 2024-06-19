@@ -312,7 +312,7 @@ export function downloadBulkZipFile(allLogFiles) {
                 jsonFileContentAllMoves += "\t\"" + moveObjectName + "\": [\n";
                 for (let move of jsonContent.Moves) {
                     jsonFileContentAllMoves += "\t\t{\n";
-                    jsonFileContentAllMoves += "\t\t\t\"MoveNumber\": " + JSON.stringify(move.Row) + ",\n";
+                    jsonFileContentAllMoves += "\t\t\t\"MoveNumber\": " + JSON.stringify(move.MoveNumber) + ",\n";
                     jsonFileContentAllMoves += "\t\t\t\"Player\": " + JSON.stringify(move.Player) + ",\n";
                     jsonFileContentAllMoves += "\t\t\t\"Row\": " + JSON.stringify(move.Row) + ",\n";
                     jsonFileContentAllMoves += "\t\t\t\"Column\": " + JSON.stringify(move.Column) + ",\n";
