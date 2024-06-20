@@ -1,5 +1,12 @@
 function analyzeMoves() {
     const fileInput = document.getElementById('fileInput');
+    const resultsContainer = document.getElementById('results');
+    const bulkResultsContainer = document.getElementById('bulkResults');
+
+    // Clear both previous results
+    resultsContainer.innerHTML = '';
+    bulkResultsContainer.innerHTML = '';
+
     if (fileInput.files.length === 0) {
         alert('Please upload a file!');
         return;
@@ -39,6 +46,55 @@ function analyzeMoves() {
     reader.readAsText(file);
 }
 
+function bulkRun() {
+    const bulkFileInput = document.getElementById('bulkFileInput');
+    const resultsContainer = document.getElementById('results');
+    const bulkResultsContainer = document.getElementById('bulkResults');
+
+    // Clear both previous results
+    resultsContainer.innerHTML = '';
+    bulkResultsContainer.innerHTML = '';
+
+    if (bulkFileInput.files.length === 0) {
+        alert('Please upload files!');
+        return;
+    }
+
+    const results = {};
+    let processedFiles = 0;
+
+    for (let i = 0; i < bulkFileInput.files.length; i++) {
+        const file = bulkFileInput.files[i];
+        if (!file.name.endsWith('.json')) {
+            alert('Invalid file type. Please upload JSON files.');
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                analyzeBulkData(data, results);
+                processedFiles++;
+
+                if (processedFiles === bulkFileInput.files.length) {
+                    displayBulkResults(results);
+                }
+            } catch (error) {
+                alert('Invalid file. There was an error processing your file. Please ensure it is a valid JSON.');
+                console.error('Error reading or parsing the file:', error);
+            }
+        };
+
+        reader.onerror = function() {
+            alert('Error reading the file. Please try again.');
+        };
+
+        reader.readAsText(file);
+    }
+}
+
 function initializeBoard(rows, cols) {
     return Array.from(Array(rows), () => new Array(cols).fill(null));
 }
@@ -56,7 +112,15 @@ function performAnalysis(data) {
     const board = initializeBoard(3, 3); // 3x3 board for Tic-Tac-Toe
     const potentialWinsMap = new Map(); // To track potential wins for each player
 
+    let lastValidMoveIndex = -1; // Index of the last valid move
+    let currentPlayerLastMoveIndex = { 1: -1, 2: -1 }; // Track the last valid move for each player
+
     data.Moves.forEach((move, index) => {
+        if (move.Outcome !== "Valid") {
+            console.log(`Skipping invalid move number ${move.MoveNumber} by Player ${move.Player}`);
+            return; // Skip invalid moves
+        }
+
         console.log(`Processing move number ${move.MoveNumber} by Player ${move.Player}`);
         console.log('Current board state before move:');
         console.table(board);
@@ -76,20 +140,18 @@ function performAnalysis(data) {
         }
 
         // Check for missed win opportunities for the previous turn of the current player
-        if (index > 1 && !isWinningMove) {
-            const playerToCheck = move.Player;
-            const previousPlayerMove = data.Moves[index - 2];
-            if (previousPlayerMove.Player === playerToCheck) {
-                const potentialWins = potentialWinsMap.get(playerToCheck);
-                if (potentialWins && potentialWins.length > 0) {
-                    const missedWins = potentialWins.filter(pos => board[pos.row - 1][pos.col - 1] === null);
-                    if (missedWins.length > 0) {
-                        results.missedWins.push(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2} by not placing at ${missedWins.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
-                        console.log(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2}`);
-                    }
+        const playerToCheck = move.Player;
+        if (currentPlayerLastMoveIndex[playerToCheck] > -1 && !isWinningMove) {
+            const previousPlayerMove = data.Moves[currentPlayerLastMoveIndex[playerToCheck]];
+            const potentialWins = potentialWinsMap.get(playerToCheck);
+            if (potentialWins && potentialWins.length > 0) {
+                const missedWins = potentialWins.filter(pos => board[pos.row - 1][pos.col - 1] === null);
+                if (missedWins.length > 0) {
+                    results.missedWins.push(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2} by not placing at ${missedWins.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
+                    console.log(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2}`);
                 }
-                potentialWinsMap.delete(playerToCheck); // Reset after checking
             }
+            potentialWinsMap.delete(playerToCheck); // Reset after checking
         }
 
         // Track potential wins for the current player for their next turn
@@ -97,12 +159,13 @@ function performAnalysis(data) {
             const potentialWins = checkTwoInARow(board, move.Player);
             if (potentialWins.length > 0) {
                 potentialWinsMap.set(move.Player, potentialWins);
+                console.log(`Potential wins for player ${move.Player}:`, potentialWins);
             }
         }
 
         // Check if the previous player missed a block opportunity
-        if (index > 0) {
-            const previousMove = data.Moves[index - 1];
+        if (lastValidMoveIndex > -1) {
+            const previousMove = data.Moves[lastValidMoveIndex];
             const previousPlayer = previousMove.Player;
             const currentPlayer = move.Player;
 
@@ -117,8 +180,12 @@ function performAnalysis(data) {
                 }
             }
         }
+
+        lastValidMoveIndex = index; // Update the last valid move index
+        currentPlayerLastMoveIndex[move.Player] = index; // Update the last valid move index for the current player
     });
 
+    console.log('Final results:', results);
     return results;
 }
 
@@ -209,4 +276,86 @@ function displayResults(results) {
     resultsContainer.innerHTML = `<h3>Missed Opportunities:</h3>
         <p>Missed Wins: ${results.missedWins.length ? results.missedWins.join(', ') : 'None'}</p>
         <p>Missed Blocks: ${results.missedBlocks.length ? results.missedBlocks.join(', ') : 'None'}</p>`;
+}
+
+function analyzeBulkData(data, results) {
+    for (const key in data) {
+        const parts = key.split('_');
+        const llm1 = parts[3];
+        const llm2 = parts[4];
+
+        if (!results[llm1]) {
+            results[llm1] = {
+                totalGames: 0,
+                missedWinsP1: 0,
+                missedWinsP2: 0,
+                missedBlocksP1: 0,
+                missedBlocksP2: 0
+            };
+        }
+        if (!results[llm2]) {
+            results[llm2] = {
+                totalGames: 0,
+                missedWinsP1: 0,
+                missedWinsP2: 0,
+                missedBlocksP1: 0,
+                missedBlocksP2: 0
+            };
+        }
+
+        results[llm1].totalGames += 1;
+        results[llm2].totalGames += 1;
+
+        console.log(`[LOG] Analyzing game ${key} for ${llm1} and ${llm2}`);
+
+        // Analyze the combined moves for capturing missed wins and blocks
+        const combinedMoves = { Moves: data[key] };
+        const combinedAnalysisResults = performAnalysis(combinedMoves);
+
+        console.log(`[LOG] Results for game ${key}:`);
+        console.log(combinedAnalysisResults);
+
+        results[llm1].missedWinsP1 += combinedAnalysisResults.missedWins.filter(miss => miss.includes('Player 1')).length;
+        results[llm2].missedWinsP2 += combinedAnalysisResults.missedWins.filter(miss => miss.includes('Player 2')).length;
+        results[llm1].missedBlocksP1 += combinedAnalysisResults.missedBlocks.filter(block => block.includes('Player 1')).length;
+        results[llm2].missedBlocksP2 += combinedAnalysisResults.missedBlocks.filter(block => block.includes('Player 2')).length;
+    }
+}
+
+function displayBulkResults(results) {
+    const resultsContainer = document.getElementById('bulkResults');
+    let tableHtml = `
+        <table style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">LLM</th>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">Total Games</th>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">Number of Win Opportunities Missed As Player 1</th>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">Number of Win Opportunities Missed As Player 2</th>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">Number of Block Opportunities Missed As Player 1</th>
+                    <th style="border: 1px solid black; padding: 8px; text-align: right;">Number of Block Opportunities Missed As Player 2</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (const llm in results) {
+        tableHtml += `
+            <tr>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${llm}</td>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${results[llm].totalGames}</td>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${results[llm].missedWinsP1}</td>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${results[llm].missedWinsP2}</td>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${results[llm].missedBlocksP1}</td>
+                <td style="border: 1px solid black; padding: 8px; text-align: right;">${results[llm].missedBlocksP2}</td>
+            </tr>
+        `;
+    }
+
+    tableHtml += `
+            </tbody>
+        </table>
+    `;
+
+    resultsContainer.innerHTML = tableHtml;
 }
