@@ -720,7 +720,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     });
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
-    // gpt-3.5-turbo, gemini-pro, and gemini-pro-vision for TESTING ONLY, remove later.
     //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
     addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
@@ -734,6 +733,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    addModel(new Model("Random", "random-play", "Placeholder URL for random play.", "Placeholder API key for random play.", true, true));
 
     // Initialize the game information, statistics, and progress displays.
     document.getElementById("info-game-type").innerHTML = document.getElementById("game-type").value;

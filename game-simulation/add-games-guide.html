@@ -323,6 +323,18 @@
                         </div>
                     </li>
                     <li>
+                        Implement the static randomMove() method, which will return a randomly-generated move according to the JSON format requested by your prompt.
+
+                        <div class="code-snippet">
+                            <span class="orange">static</span> <span class="blue">randomMove</span>() {<br>
+                            &emsp;&emsp;<span class="orange">let</span> row = <span class="pink">Math</span>.<span class="blue">floor</span>(<span class="pink">Math</span>.<span class="blue">random</span>() * <span class="cyan">3</span>) + <span class="cyan">1</span>; <span class="gray">// Obtain a random row number between 1 and 3.</span><br>
+                            &emsp;&emsp;<span class="orange">let</span> col = <span class="pink">Math</span>.<span class="blue">floor</span>(<span class="pink">Math</span>.<span class="blue">random</span>() * <span class="cyan">3</span>) + <span class="cyan">1</span>; <span class="gray">// Obtain a random column number between 1 and 3.</span><br>
+                            &emsp;&emsp;<span class="orange">return</span> <span class="green">"{\"row\": "</span> + row + <span class="green">", \"column\": "</span> + col + <span class="green">"}"</span>;<br>
+                            }<br>
+
+                        </div>
+                    </li>
+                    <li>
                         Implement the static processMove() method, which will check that an LLM’s move was valid, display the move on the board if possible, and return a Move object. Begin by checking whether each JSON value you requested from the LLM exists and is of the correct type; if not, throw an error. After that, validate the move according to the rules of your game. If the move is valid, update your game board accordingly and return a new Move object with the “Valid” outcome. If the move is invalid, determine the type of invalid move and return a new Move object with an outcome matching the type of invalid move.<br><br>
 
                         The "classes.js" file in the "game-simulation" folder contains the Move class implementation if you'd like to view the constructor parameters and their meanings.

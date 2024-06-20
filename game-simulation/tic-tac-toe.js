@@ -97,6 +97,13 @@ export class TicTacToe {
         });
     }
 
+    // Generate a random move for the "Random Play" player type.
+    static randomMove() {
+        let row = Math.floor(Math.random() * 3) + 1; // Obtain a random row number between 1 and 3.
+        let col = Math.floor(Math.random() * 3) + 1; // Obtain a random column number between 1 and 3.
+        return "{\"row\": " + row + ", \"column\": " + col + "}";
+    }
+
     // Construct a Move object given the model's response and display the move if it is valid.
     static processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging) {
         let row;

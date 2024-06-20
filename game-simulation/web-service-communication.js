@@ -81,12 +81,16 @@ function createSystemPrompt(game) {
 }
 
 // Call an LLM with a given prompt and base64-encoded board screenshot (if any) and return its response.
-export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData, model, useConsoleLogging) {
+export async function asynchronousWebServiceCall(game, prompt, systemPrompt, imageData, model, useConsoleLogging) {
     let modelType = model.getType();
     let modelName = model.getName();
     let apiKey = model.getApiKey();
 
     if (useConsoleLogging) console.log("Prompt: " + prompt);
+
+    if (modelType === "Random") {
+        return game.randomMove();
+    }
 
     // If we are attempting to call a Google model, call the model through the Google API.
     if (modelType === "Google") {
@@ -245,11 +249,11 @@ export async function processMove(game, response, currentPlayer, model, currentM
 }
 
 // Generate a prompt, call the LLM with the prompt, and return its response.
-export async function getMove(gameType, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove, useConsoleLogging) {
+export async function getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove, useConsoleLogging) {
     // Generate prompts and image data.
-    let [prompt, imageData] = await createPrompt(gameType, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+    let [prompt, imageData] = await createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
     let systemPrompt = createSystemPrompt();
 
     // Call LLM with the prompt and return its response.
-    return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, model, useConsoleLogging);
+    return await asynchronousWebServiceCall(game, prompt, systemPrompt, imageData, model, useConsoleLogging);
 }
