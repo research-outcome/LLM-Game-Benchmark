@@ -31,7 +31,7 @@ function analyzeMoves() {
                 alert('Invalid JSON file. Not all moves have the required "Row", "Column", and "Player" properties.');
                 return;
             }
-            const analysisResults = performAnalysis(data);
+            const analysisResults = performAnalysis(data, data.GameType || 'tic-tac-toe');
             displayResults(analysisResults);
         } catch (error) {
             alert('Invalid file. There was an error processing your file. Please ensure it is a valid JSON.');
@@ -107,27 +107,31 @@ function updateBoard(board, move) {
     console.log(`Board updated at [${move.Row},${move.Column}] with ${symbol}`); // Logging the move with 1-based indexing
 }
 
-function performAnalysis(data) {
+function performAnalysis(data, gameType) {
     const results = { missedWins: [], missedBlocks: [] };
-    const board = initializeBoard(3, 3); // 3x3 board for Tic-Tac-Toe
+    const board = initializeBoard(gameType === 'connect-four' ? 6 : 3, gameType === 'connect-four' ? 7 : 3); // Board size for each game
     const potentialWinsMap = new Map(); // To track potential wins for each player
 
     let lastValidMoveIndex = -1; // Index of the last valid move
     let currentPlayerLastMoveIndex = { 1: -1, 2: -1 }; // Track the last valid move for each player
+    let effectiveMoveNumber = 0; // Effective move number to handle invalid moves
 
     data.Moves.forEach((move, index) => {
         if (move.Outcome !== "Valid") {
             console.log(`Skipping invalid move number ${move.MoveNumber} by Player ${move.Player}`);
+            // Increment effectiveMoveNumber for invalid moves as well to keep track
+            effectiveMoveNumber++;
             return; // Skip invalid moves
         }
 
+        effectiveMoveNumber++; // Increment the effective move number for valid moves
         console.log(`Processing move number ${move.MoveNumber} by Player ${move.Player}`);
         console.log('Current board state before move:');
         console.table(board);
 
         // Check if the current move blocks any potential winning positions
         const opponentPlayer = move.Player === 1 ? 2 : 1;
-        const opponentPotentialWins = checkTwoInARow(board, opponentPlayer);
+        const opponentPotentialWins = checkPotentialWins(board, opponentPlayer, gameType);
 
         // Update the board with the current move
         updateBoard(board, move);
@@ -135,7 +139,7 @@ function performAnalysis(data) {
         console.table(board);
 
         // Check if the current move resulted in a win
-        const isWinningMove = canWin(board, move.Player);
+        const isWinningMove = canWin(board, move.Player, gameType);
         console.log(`Is move number ${move.MoveNumber} a winning move? ${isWinningMove}`);
 
         // Skip analysis for the last move
@@ -151,8 +155,8 @@ function performAnalysis(data) {
             if (potentialWins && potentialWins.length > 0) {
                 const missedWins = potentialWins.filter(pos => board[pos.row - 1][pos.col - 1] === null);
                 if (missedWins.length > 0) {
-                    results.missedWins.push(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2} by not placing at ${missedWins.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
-                    console.log(`Player ${playerToCheck} missed a chance to win at move number ${previousPlayerMove.MoveNumber + 2}`);
+                    results.missedWins.push(`Player ${playerToCheck} missed a chance to win at move number ${move.MoveNumber} by not placing at ${missedWins.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
+                    console.log(`Player ${playerToCheck} missed a chance to win at move number ${move.MoveNumber}`);
                 }
             }
             potentialWinsMap.delete(playerToCheck); // Reset after checking
@@ -160,7 +164,7 @@ function performAnalysis(data) {
 
         // Track potential wins for the current player for their next turn
         if (!isWinningMove) {
-            const potentialWins = checkTwoInARow(board, move.Player);
+            const potentialWins = checkPotentialWins(board, move.Player, gameType);
             if (potentialWins.length > 0) {
                 potentialWinsMap.set(move.Player, potentialWins);
                 console.log(`Potential wins for player ${move.Player}:`, potentialWins);
@@ -198,23 +202,23 @@ function performAnalysis(data) {
     return results;
 }
 
-function canWin(board, player) {
+function canWin(board, player, gameType) {
     const symbol = player === 1 ? 'X' : 'O';
-    const win = checkLineConditions(board, symbol);
+    const win = checkLineConditions(board, symbol, gameType);
     console.log(`Checking win conditions for player ${player} with symbol ${symbol}: ${win}`);
     return win;
 }
 
-function checkLineConditions(board, symbol) {
-    return checkLines(board, symbol) || checkDiagonals(board, symbol);
+function checkLineConditions(board, symbol, gameType) {
+    return checkLines(board, symbol, gameType) || checkDiagonals(board, symbol, gameType);
 }
 
-function checkLines(board, symbol) {
+function checkLines(board, symbol, gameType) {
     let size = board.length;
     for (let i = 0; i < size; i++) {
         let row = board[i];
         let column = board.map(row => row[i]);
-        if (checkWin(row, symbol) || checkWin(column, symbol)) {
+        if (checkWin(row, symbol, gameType) || checkWin(column, symbol, gameType)) {
             console.log(`Winning line found for ${symbol}`);
             return true;
         }
@@ -222,61 +226,93 @@ function checkLines(board, symbol) {
     return false;
 }
 
-function checkDiagonals(board, symbol) {
+function checkDiagonals(board, symbol, gameType) {
     let size = board.length;
     let diag1 = [], diag2 = [];
     for (let i = 0; i < size; i++) {
         diag1.push(board[i][i]); // Main diagonal
         diag2.push(board[i][size - i - 1]); // Counter diagonal
     }
-    if (checkWin(diag1, symbol) || checkWin(diag2, symbol)) {
+    if (checkWin(diag1, symbol, gameType) || checkWin(diag2, symbol, gameType)) {
         console.log(`Winning diagonal found for ${symbol}`);
         return true;
     }
     return false;
 }
 
-function checkWin(line, symbol) {
+function checkWin(line, symbol, gameType) {
+    let requiredLength = gameType === 'connect-four' ? 4 : 3;
     let win = line.every(cell => cell === symbol);
     console.log(`Line check for win: ${line.join(',')}, Result: ${win}`);
     return win;
 }
 
-function checkTwoInARow(board, player) {
+function checkPotentialWins(board, player, gameType) {
     const symbol = player === 1 ? 'X' : 'O';
     const potentialWins = [];
 
-    // Check rows and columns for potential wins
-    for (let i = 1; i <= 3; i++) {
-        // Check rows
-        let row = board[i - 1];
-        let emptyCellsRow = row.reduce((acc, cell, idx) => cell === null ? acc.concat([[i, idx + 1]]) : acc, []);
-        if (row.filter(cell => cell === symbol).length === 2 && emptyCellsRow.length === 1) {
-            potentialWins.push({ row: emptyCellsRow[0][0], col: emptyCellsRow[0][1] });
+    if (gameType === 'connect-four') {
+        // Connect Four logic for checking three in a row
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 7; col++) {
+                if (board[row][col] === null) {
+                    // Check if the position is accessible
+                    if (row < 5 && board[row + 1][col] === null) {
+                        continue;
+                    }
+
+                    // Check vertically
+                    if (row <= 2 && board[row + 1][col] === symbol && board[row + 2][col] === symbol && board[row + 3][col] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                    }
+                    // Check horizontally
+                    if (col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                    }
+                    // Check diagonally (bottom-left to top-right)
+                    if (row <= 2 && col <= 3 && board[row + 1][col + 1] === symbol && board[row + 2][col + 2] === symbol && board[row + 3][col + 3] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                    }
+                    // Check diagonally (top-left to bottom-right)
+                    if (row >= 3 && col <= 3 && board[row - 1][col + 1] === symbol && board[row - 2][col + 2] === symbol && board[row - 3][col + 3] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                    }
+                }
+            }
+        }
+    } else {
+        // Tic-Tac-Toe logic for checking two in a row
+        for (let i = 1; i <= 3; i++) {
+            // Check rows
+            let row = board[i - 1];
+            let emptyCellsRow = row.reduce((acc, cell, idx) => cell === null ? acc.concat([[i, idx + 1]]) : acc, []);
+            if (row.filter(cell => cell === symbol).length === 2 && emptyCellsRow.length === 1) {
+                potentialWins.push({ row: emptyCellsRow[0][0], col: emptyCellsRow[0][1] });
+            }
+
+            // Check columns
+            let col = board.map(row => row[i - 1]);
+            let emptyCellsCol = col.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, i]]) : acc, []);
+            if (col.filter(cell => cell === symbol).length === 2 && emptyCellsCol.length === 1) {
+                potentialWins.push({ row: emptyCellsCol[0][0], col: emptyCellsCol[0][1] });
+            }
         }
 
-        // Check columns
-        let col = board.map(row => row[i - 1]);
-        let emptyCellsCol = col.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, i]]) : acc, []);
-        if (col.filter(cell => cell === symbol).length === 2 && emptyCellsCol.length === 1) {
-            potentialWins.push({ row: emptyCellsCol[0][0], col: emptyCellsCol[0][1] });
+        // Check diagonals for potential wins
+        let diag1 = [board[0][0], board[1][1], board[2][2]];
+        let emptyCellsDiag1 = diag1.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, idx + 1]]) : acc, []);
+        if (diag1.filter(cell => cell === symbol).length === 2 && emptyCellsDiag1.length === 1) {
+            potentialWins.push({ row: emptyCellsDiag1[0][0], col: emptyCellsDiag1[0][1] });
+        }
+
+        let diag2 = [board[0][2], board[1][1], board[2][0]];
+        let emptyCellsDiag2 = diag2.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, 3 - idx]]) : acc, []);
+        if (diag2.filter(cell => cell === symbol).length === 2 && emptyCellsDiag2.length === 1) {
+            potentialWins.push({ row: emptyCellsDiag2[0][0], col: emptyCellsDiag2[0][1] });
         }
     }
 
-    // Check diagonals for potential wins
-    let diag1 = [board[0][0], board[1][1], board[2][2]];
-    let emptyCellsDiag1 = diag1.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, idx + 1]]) : acc, []);
-    if (diag1.filter(cell => cell === symbol).length === 2 && emptyCellsDiag1.length === 1) {
-        potentialWins.push({ row: emptyCellsDiag1[0][0], col: emptyCellsDiag1[0][1] });
-    }
-
-    let diag2 = [board[0][2], board[1][1], board[2][0]];
-    let emptyCellsDiag2 = diag2.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, 3 - idx]]) : acc, []);
-    if (diag2.filter(cell => cell === symbol).length === 2 && emptyCellsDiag2.length === 1) {
-        potentialWins.push({ row: emptyCellsDiag2[0][0], col: emptyCellsDiag2[0][1] });
-    }
-
-    console.log(`Two in a row check complete for player ${player} with symbol ${symbol}. Potential wins: ${potentialWins.length > 0 ? potentialWins.map(pos => `[${pos.row},${pos.col}]`).join(', ') : 'None'}`);
+    console.log(`Potential wins for player ${player} with symbol ${symbol}: ${potentialWins.length > 0 ? potentialWins.map(pos => `[${pos.row},${pos.col}]`).join(', ') : 'None'}`);
     return potentialWins;
 }
 
@@ -292,6 +328,7 @@ function analyzeBulkData(data, results) {
         const parts = key.split('_');
         const llm1 = parts[3];
         const llm2 = parts[4];
+        const gameType = parts[1]; // Update this to parts[2] if the gameType is the third part
 
         if (!results[llm1]) {
             results[llm1] = {
@@ -318,8 +355,8 @@ function analyzeBulkData(data, results) {
         console.log(`[LOG] Analyzing game ${key} for ${llm1} and ${llm2}`);
 
         // Analyze the combined moves for capturing missed wins and blocks
-        const combinedMoves = { Moves: data[key] };
-        const combinedAnalysisResults = performAnalysis(combinedMoves);
+        const combinedMoves = { Moves: data[key], GameType: gameType };
+        const combinedAnalysisResults = performAnalysis(combinedMoves, gameType);
 
         console.log(`[LOG] Results for game ${key}:`);
         console.log(combinedAnalysisResults);
