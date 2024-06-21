@@ -125,6 +125,10 @@ function performAnalysis(data) {
         console.log('Current board state before move:');
         console.table(board);
 
+        // Check if the current move blocks any potential winning positions
+        const opponentPlayer = move.Player === 1 ? 2 : 1;
+        const opponentPotentialWins = checkTwoInARow(board, opponentPlayer);
+
         // Update the board with the current move
         updateBoard(board, move);
         console.log('Board state after move:');
@@ -171,9 +175,14 @@ function performAnalysis(data) {
 
             if (previousPlayer !== currentPlayer) {
                 console.log(`Evaluating potential missed block after move ${move.MoveNumber} by Player ${currentPlayer}`);
-                const missedBlocks = checkTwoInARow(board, previousPlayer);
-                if (missedBlocks.length > 0) {
-                    results.missedBlocks.push(`Player ${currentPlayer} missed a chance to block at move number ${move.MoveNumber} by not placing at ${missedBlocks.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
+
+                // Determine if the current move blocked any of the opponent's potential winning moves
+                const blockMade = opponentPotentialWins.some(pos => pos.row === move.Row && pos.col === move.Column);
+
+                if (blockMade) {
+                    console.log(`Player ${currentPlayer} successfully blocked a winning move at ${move.Row},${move.Column}`);
+                } else if (opponentPotentialWins.length > 0) {
+                    results.missedBlocks.push(`Player ${currentPlayer} missed a chance to block at move number ${move.MoveNumber} by not placing at ${opponentPotentialWins.map(pos => `[${pos.row},${pos.col}]`).join(', ')}`);
                     console.log(`Player ${currentPlayer} missed a chance to block at move number ${move.MoveNumber}`);
                 } else {
                     console.log(`No missed block detected after move ${move.MoveNumber} for Player ${currentPlayer}`);
