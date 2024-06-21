@@ -17,6 +17,7 @@ import { populateGameDetailsTable, populatePromptTable, populateLLMTable, popula
 
 // Initialize variables
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
+const MAX_GAME_REPEATS = 10; // Max number of times to attempt to repeat a game when network errors occur.
 
 // REMOVE BEFORE RELEASE.
 const OPENAI_API_KEY = "sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il";
@@ -118,6 +119,9 @@ async function playGame() {
     // Get existing game count. In the case of batch gameplay, we will add on to this value.
     let existingGameCount = parseInt(document.getElementById("info-current-game-number").innerHTML);
 
+    // Initialize game repeat counter for network errors.
+    let gameRepeatCounter = 0;
+
     // Main gameplay loop
     while(currentGameCount <= gameCount) {
         // Initialize values.
@@ -144,9 +148,9 @@ async function playGame() {
 
         // Initialize current game's progress information for each player's progress window.
         document.getElementById("first-player-game-progress").innerHTML += "<strong>Game " + currentGameCount + "</strong><br>" +
-            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-first-player\"><em>Match in progress...</em></span><br>";
+            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter + "\"><em>Match in progress...</em></span><br>";
         document.getElementById("second-player-game-progress").innerHTML += "<strong>Game " + currentGameCount + "</strong><br>" +
-            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-second-player\"><em>Match in progress...</em></span><br>";
+            "<strong>Result: </strong><span id=\"game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter + "\"><em>Match in progress...</em></span><br>";
 
         // Scroll the progress displays if "Auto-Scroll Progress Displays" is enabled.
         let autoScrollDisplays = document.getElementById("checkbox-auto-scroll").checked;
@@ -156,7 +160,6 @@ async function playGame() {
             firstPlayerProgressDisplay.scrollTop = firstPlayerProgressDisplay.scrollHeight;
             secondPlayerProgressDisplay.scrollTop = secondPlayerProgressDisplay.scrollHeight;
         }
-
         while(isGameActive) {
             // If gameplay was stopped, exit before attempting to fetch move.
             if (gameStopped) {
@@ -175,12 +178,20 @@ async function playGame() {
             if (useConsoleLogging) console.log("Initial Response: " + response);
 
             if (response === "Network Error Occurred") {
-                result = "networkerror";
-                finalGameState = await getFinalGameState(game, promptType);
-                gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
-                if (useConsoleLogging) console.log("Game was canceled because a network error occurred.");
-                isGameActive = false;
-                continue;
+                if (gameRepeatCounter < MAX_GAME_REPEATS) {
+                    result = "networkerror";
+                    if (useConsoleLogging) console.log("Network error occurred. Repeating game.");
+                    isGameActive = false;
+                    continue;
+                }
+                else {
+                    if (useConsoleLogging) console.log("Attempted to repeat the game the maximum number of times. Cancelling game.");
+                    result = "cancelled-networkerrors";
+                    finalGameState = await getFinalGameState(game, promptType);
+                    gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
+                    game.resetBoard();
+                    break;
+                }
             }
 
             // If gameplay was stopped, exit before attempting to process move.
@@ -311,6 +322,7 @@ async function playGame() {
             // Note that we add 1 to the maximum allowed moves during comparison because we initialize currentMoveCount to 1.
             // Essentially, if getMaxMoves() = 20 and there have been 20 total moves made, we will cancel the game here.
             if (currentMoveCount === game.getMaxMoves() + 1) {
+                result = "Cancelled"
                 finalGameState = await getFinalGameState(game, promptType);
                 gameLogFiles.push(generateGameLogFiles(firstPlayer, secondPlayer, "Cancelled", gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount - 1, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid));
                 if (useConsoleLogging) console.log("Game Cancelled");
@@ -326,14 +338,21 @@ async function playGame() {
         }
 
         // Update game results for progress windows.
-        document.getElementById("game-" + currentGameCount + "-result-first-player").textContent = result;
-        document.getElementById("game-" + currentGameCount + "-result-second-player").textContent = result;
+        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = result;
+        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = result;
+
+        gameRepeatCounter++; // Increment game repeat counter.
 
         // Pause game to allow user to view results. Then, reset the board and update game information.
         await new Promise(resolve => setTimeout(resolve, GAME_RESET_DELAY));
         game.resetBoard();
 
-        currentGameCount++;
+        // Only increment currentGameCount and reset gameRepeatCounter if a network error didn't occur. Otherwise, repeat the game.
+        if (result !== "networkerror") {
+            currentGameCount++;
+            gameRepeatCounter = 0;
+        }
+
         document.getElementById("info-current-game-number").innerHTML = (bulkEnabled) ? (existingGameCount + currentGameCount - 1).toString() : currentGameCount.toString();
         if (parseInt(document.getElementById("info-current-game-number").innerHTML) > parseInt(document.getElementById("info-total-game-count").innerHTML)) {
             document.getElementById("info-current-game-number").innerHTML = document.getElementById("info-total-game-count").innerHTML; // Game count will internally be totalGameCount + 1 after last game. This prevents displaying that.

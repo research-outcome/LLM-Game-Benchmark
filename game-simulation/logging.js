@@ -81,7 +81,14 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
     }
     // Finalize jsonMoves string.
     jsonMoves = jsonMoves.substring(0, jsonMoves.length - 2); // Remove last ',\n' from moves string.
-    jsonMoves += "\n\t]"; // Close jsonMoves array.
+
+    // Only append closing bracket if jsonMoves array is not empty.
+    // If the game was cancelled due to network errors, this will be empty.
+    if (jsonMoves !== "") {
+        jsonMoves += "\n\t]"; // Close jsonMoves array.
+    } else {
+        jsonMoves = "[]";
+    }
 
     // Name the output files.
     let dateTime = formatDateTime(new Date());
@@ -258,12 +265,13 @@ export function downloadZipFile(submissionFiles, gameLogFiles, boardScreenshots,
         logZipFile.file(submissionFiles[0], submissionFiles[1]);
         logZipFile.file(submissionFiles[2], submissionFiles[3]);
 
-        logZipFile.generateAsync({type:"blob"}).then(function (blob) {
-            saveAs(blob, zipFileName);
-        });
-
         gameIndex++;
     }
+
+    // After all files have been added to the game's ZIP file, download the ZIP file.
+    logZipFile.generateAsync({type:"blob"}).then(function (blob) {
+        saveAs(blob, zipFileName);
+    });
 }
 
 // For bulk running only, download a "bulk" zip file which contains all outcomes and move information in CSV format.
