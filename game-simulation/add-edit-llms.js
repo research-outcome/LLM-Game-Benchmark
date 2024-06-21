@@ -39,9 +39,15 @@ export function addModel(predefinedModel) {
     else if (modelType === "Google") {
         modelUrl = "URL is not needed since it is handled by the library.";
     }
+    // Random play does not require a URL field or an API key.
+    else if (modelType === "Random") {
+        modelName = "random-play";
+        modelUrl = "Placeholder URL for random play.";
+        modelApiKey = "Placeholder API Key for random play.";
+    }
     // Other models will require the user to enter the URL manually.
     else {
-        modelUrl = document.getElementById("llm-url").value
+        modelUrl = document.getElementById("llm-url").value;
     }
 
     let supportsTextInput;
@@ -96,6 +102,24 @@ export function addModel(predefinedModel) {
     updateModelLists();
 }
 
+// If the current model name supports text, return true.
+function modelSupportsText(modelName) {
+    // "gemini-pro-vision" is the only predefined model that does NOT support text input without an image component.
+    return modelName !== "gemini-pro-vision";
+}
+
+// If the current model name supports images, return true.
+function modelSupportsImages(modelName) {
+    return modelName === "gpt-4o" ||
+        modelName === "gpt-4-turbo" ||
+        modelName === "gemini-1.5-pro" ||
+        modelName === "gemini-1.5-flash" ||
+        modelName === "gemini-pro-vision" ||
+        modelName === "anthropic.claude-3-sonnet-20240229-v1:0" ||
+        modelName === "anthropic.claude-3-haiku-20240307-v1:0" ||
+        modelName === "random-play";
+}
+
 // Show a popup which asks the user if they are sure they would like to delete a model.
 function confirmRemoveModel(buttonId) {
     let index = buttonId.slice(15); // Remove "remove-btn-id-" from ID. We just want to retrieve the index of the model to remove.
@@ -128,23 +152,6 @@ function removeModel(index) {
     updateModelLists();
 }
 
-// If the current model name supports text, return true.
-function modelSupportsText(modelName) {
-    // "gemini-pro-vision" is the only predefined model that does NOT support text input without an image component.
-    return modelName !== "gemini-pro-vision";
-}
-
-// If the current model name supports images, return true.
-function modelSupportsImages(modelName) {
-    return modelName === "gpt-4o" ||
-        modelName === "gpt-4-turbo" ||
-        modelName === "gemini-1.5-pro" ||
-        modelName === "gemini-1.5-flash" ||
-        modelName === "gemini-pro-vision" ||
-        modelName === "anthropic.claude-3-sonnet-20240229-v1:0" ||
-        modelName === "anthropic.claude-3-haiku-20240307-v1:0";
-}
-
 // Update "Add/Edit LLMs" options depending on which type (company) is selected.
 export function updateAddModelFields(event) {
     if (event.target.value === "OpenAI") { // List LLM options for OpenAI.
@@ -154,9 +161,12 @@ export function updateAddModelFields(event) {
                 "<option value=\"gpt-4o\">gpt-4o</option>" +
                 "<option value=\"gpt-4-turbo\">gpt-4-turbo</option>" +
             "</select>";
-
+        document.getElementById("llm-name-container").style.display = "inline";
+        document.getElementById("llm-name-label").style.display = "inline";
         document.getElementById("llm-url-label").style.display = "none";
         document.getElementById("llm-url").style.display = "none";
+        document.getElementById("llm-api-key-label").style.display = "inline";
+        document.getElementById("llm-api-key").style.display = "inline";
         document.getElementById("llm-supports-text-label").style.display = "none";
         document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
@@ -169,9 +179,12 @@ export function updateAddModelFields(event) {
                 "<option value=\"gemini-1.5-flash\">gemini-1.5-flash</option>" +
                 "<option value=\"gemini-pro-vision\">gemini-pro-vision</option>" +
             "</select>";
-
+        document.getElementById("llm-name-container").style.display = "inline";
+        document.getElementById("llm-name-label").style.display = "inline";
         document.getElementById("llm-url-label").style.display = "none";
         document.getElementById("llm-url").style.display = "none";
+        document.getElementById("llm-api-key-label").style.display = "inline";
+        document.getElementById("llm-api-key").style.display = "inline";
         document.getElementById("llm-supports-text-label").style.display = "none";
         document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
@@ -187,19 +200,38 @@ export function updateAddModelFields(event) {
                 "<option value=\"anthropic.claude-3-haiku-20240307-v1:0\">anthropic.claude-3-haiku-20240307-v1:0</option>" +
                 "<option value=\"mistral.mistral-large-2402-v1:0\">mistral.mistral-large-2402-v1:0</option>" +
             "</select>";
-
+        document.getElementById("llm-name-container").style.display = "inline";
+        document.getElementById("llm-name-label").style.display = "inline";
         document.getElementById("llm-url-label").style.display = "inline";
         document.getElementById("llm-url").style.display = "inline";
+        document.getElementById("llm-api-key-label").style.display = "inline";
+        document.getElementById("llm-api-key").style.display = "inline";
         document.getElementById("llm-supports-text-label").style.display = "none";
         document.getElementById("llm-supports-text").style.display = "none";
         document.getElementById("llm-supports-images-label").style.display = "none";
         document.getElementById("llm-supports-images").style.display = "none";
 
     }
+    else if (event.target.value === "Random") {
+        document.getElementById("llm-name-container").style.display = "none";
+        document.getElementById("llm-name-label").style.display = "none";
+        document.getElementById("llm-url-label").style.display = "none";
+        document.getElementById("llm-url").style.display = "none";
+        document.getElementById("llm-api-key-label").style.display = "none";
+        document.getElementById("llm-api-key").style.display = "none";
+        document.getElementById("llm-supports-text-label").style.display = "none";
+        document.getElementById("llm-supports-text").style.display = "none";
+        document.getElementById("llm-supports-images-label").style.display = "none";
+        document.getElementById("llm-supports-images").style.display = "none";
+    }
     else if (event.target.value === "Other") {
         document.getElementById("llm-name-container").innerHTML = "<input type=\"text\" id=\"llm-name\" name=\"llm-name\">";
+        document.getElementById("llm-name-container").style.display = "inline";
+        document.getElementById("llm-name-label").style.display = "inline";
         document.getElementById("llm-url-label").style.display = "inline";
         document.getElementById("llm-url").style.display = "inline";
+        document.getElementById("llm-api-key-label").style.display = "inline";
+        document.getElementById("llm-api-key").style.display = "inline";
         document.getElementById("llm-supports-text-label").style.display = "inline";
         document.getElementById("llm-supports-text").style.display = "inline";
         document.getElementById("llm-supports-images-label").style.display = "inline";

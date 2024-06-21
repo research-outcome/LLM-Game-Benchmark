@@ -151,7 +151,7 @@
                     <label for="radio-list">Image</label>
                 </div>
                 <div id="save-progress-images">
-                    <input type="checkbox" id="checkbox-save-progress-images" name="save-progress-images" />
+                    <input type="checkbox" id="checkbox-save-progress-images" name="save-progress-images" checked />
                     <label for="checkbox-save-progress-images">Save Progress Images in ZIP File</label>
                 </div>
             </div>
@@ -578,9 +578,10 @@
                         <option value="OpenAI">OpenAI</option>
                         <option value="Google">Google</option>
                         <option value="AWS Bedrock">AWS Bedrock</option>
+                        <option value="Random">Random</option>
                         <option value="Other">Other</option>
                     </select>
-                    <label for="llm-name">LLM: </label>
+                    <label for="llm-name" id="llm-name-label">LLM: </label>
                     <!-- The container below is needed to easily switch between dropdown menus and text input fields depending on the model type. -->
                     <!-- Pre-implemented types such as "OpenAI" will have dropdown menus to select certain models, but "Other" type models will allow users to enter the model name manually. -->
                     <div id="llm-name-container">
