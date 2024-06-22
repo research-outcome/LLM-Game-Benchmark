@@ -21,7 +21,7 @@ To run simulations of Tic-Tac-Toe, Connect Four, and Gomoku games, please visit 
 ![LLM-GameSimulation-Connect4Run](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/a3161af6-2262-45c0-95e8-b15bd5bc4cd1)
 
 
-**Interaction With the LLMs:**
+**Interactions with the LLMs:**
 
 We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in the webservice directory.
 ![App-Web-Interaction](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/6999c68e-3a94-442e-9978-53ae57153e41)
