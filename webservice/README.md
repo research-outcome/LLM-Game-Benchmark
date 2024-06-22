@@ -1,4 +1,3 @@
-**Interactions with the LLMs:**
 
 We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in this directory. To learn how to configure your AWS account for AWS Bedrock, Gateway and Lambda, the following [tutorial would help.](https://www.youtube.com/watch?v=HI80O8fizPg)
 
