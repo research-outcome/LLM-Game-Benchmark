@@ -16,16 +16,19 @@ This repository **welcomes contributions and suggestions**. The LLM Game Benchma
 
 
 **Game Simulation Webpage:**
+
 To run simulations of Tic-Tac-Toe, Connect Four, and Gomoku games, please visit the game simulation page [here]. You can use your OpenAI API Key or Google Gemini API Key to run the simulations yourself. Below is a screenshot of the game simulation page. 
 ![LLM-GameSimulation-Connect4Run](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/a3161af6-2262-45c0-95e8-b15bd5bc4cd1)
 
 
 **Interaction With the LLMs:**
+
 We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in the webservice directory.
 ![App-Web-Interaction](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/6999c68e-3a94-442e-9978-53ae57153e41)
 
 
 **Publication:**
+
 We have published the details of this study. If you utilize the repository, please cite the publication:
 - Link to the publication
 
