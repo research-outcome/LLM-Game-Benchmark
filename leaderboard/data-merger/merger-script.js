@@ -69,26 +69,27 @@ function mergeAndRecalculate(allData, newSubmission) {
         const existingData = allData[existingIndex];
 
         // Update Wins and Draws
-        existingData["Wins-1st"] += newSubmission["Wins-1st"];
-        existingData["Wins-2nd"] += newSubmission["Wins-2nd"];
-        existingData.Draws += newSubmission.Draws;
+        existingData["Wins-1st"] = Number(existingData["Wins-1st"]) + Number(newSubmission["Wins-1st"]);
+        existingData["Wins-2nd"] = Number(existingData["Wins-2nd"]) + Number(newSubmission["Wins-2nd"]);
+        existingData.Draws = Number(existingData.Draws) + Number(newSubmission.Draws);
 
         // Update Disqualifications
-        existingData["Disqualifications-1st"] += newSubmission["Disqualifications-1st"];
-        existingData["Disqualifications-2nd"] += newSubmission["Disqualifications-2nd"];
+        existingData["Disqualifications-1st"] = Number(existingData["Disqualifications-1st"]) + Number(newSubmission["Disqualifications-1st"]);
+        existingData["Disqualifications-2nd"] = Number(existingData["Disqualifications-2nd"]) + Number(newSubmission["Disqualifications-2nd"]);
 
         // Calculate total games
-        const totalGames = existingData["Wins-1st"] + existingData["Wins-2nd"] + existingData.Draws;
+        const totalGames = Number(existingData["Wins-1st"]) + Number(existingData["Wins-2nd"]) + Number(existingData.Draws);
 
         // Recalculate Win Ratios
-        existingData["WinRatio-1st"] = existingData["Wins-1st"] / totalGames;
-        existingData["WinRatio-2nd"] = existingData["Wins-2nd"] / totalGames;
+        existingData["WinRatio-1st"] = Number(existingData["Wins-1st"]) / totalGames;
+        existingData["WinRatio-2nd"] = Number(existingData["Wins-2nd"]) / totalGames;
 
         // Recalculate Invalid Moves Ratios
-        const totalInvalidMoves1st = (existingData["InvalidMovesRatio-1st"] * existingData["TotalMoves-1st"]) + (newSubmission["InvalidMovesRatio-1st"] * newSubmission["TotalMoves-1st"]);
-        const totalInvalidMoves2nd = (existingData["InvalidMovesRatio-2nd"] * existingData["TotalMoves-2nd"]) + (newSubmission["InvalidMovesRatio-2nd"] * newSubmission["TotalMoves-2nd"]);
-        const totalMoves1st = existingData["TotalMoves-1st"] + newSubmission["TotalMoves-1st"];
-        const totalMoves2nd = existingData["TotalMoves-2nd"] + newSubmission["TotalMoves-2nd"];
+        const totalInvalidMoves1st = (Number(existingData["InvalidMovesRatio-1st"]) * Number(existingData["TotalMoves-1st"])) + (Number(newSubmission["InvalidMovesRatio-1st"]) * Number(newSubmission["TotalMoves-1st"]));
+        const totalInvalidMoves2nd = (Number(existingData["InvalidMovesRatio-2nd"]) * Number(existingData["TotalMoves-2nd"])) + (Number(newSubmission["InvalidMovesRatio-2nd"]) * Number(newSubmission["TotalMoves-2nd"]));
+        const totalMoves1st = Number(existingData["TotalMoves-1st"]) + Number(newSubmission["TotalMoves-1st"]);
+        const totalMoves2nd = Number(existingData["TotalMoves-2nd"]) + Number(newSubmission["TotalMoves-2nd"]);
+
         existingData["InvalidMovesRatio-1st"] = totalInvalidMoves1st / totalMoves1st;
         existingData["InvalidMovesRatio-2nd"] = totalInvalidMoves2nd / totalMoves2nd;
 
