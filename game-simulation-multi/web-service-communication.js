@@ -2,10 +2,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { Move } from "./classes.js";
 
+const MULTI_AGENT_SERVER_ADDRESS = "http://localhost:3000"; // Address to the multi-agent implementation web server.
+
 let currentStatus = "";
 
 // Generate a prompt to call the LLM with based on the prompt type, game type, and model to be called.
-async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
+async function createSinglePlayerPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
     let prompt = ""; // This string will contain the text-based prompt.
     let imageData = ""; // This string will contain the base64-encoded image data for the "image" prompt type.
     let playerInvalidMoves; // This variable will store the current player's invalid moves.
@@ -70,7 +72,7 @@ async function createPrompt(game, promptType, currentPlayer, firstPlayerCurrentI
 }
 
 // Create a system prompt given a model.
-function createSystemPrompt(game) {
+function createSinglePlayerSystemPrompt(game) {
     let systemPrompt = "";
 
     // Clean the prompt for the web service call.
@@ -80,24 +82,49 @@ function createSystemPrompt(game) {
     return systemPrompt;
 }
 
+async function createStrategistPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
+    let [prompt, imageData] = await createSinglePlayerPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+    prompt = prompt.split(" You are an adept strategic player")[0]; // We only take the part of the string that explains the game and game state.
+    let player = (currentPlayer === 1) ? "first" : "second";
+    prompt += " You are playing in a team of three: a strategist, a suggester, and a validator, all collaborating as the " + player + " player. You are the strategist: you must analyze the current board and suggest strategic moves to win the game or to avoid defeat. \\n";
+    prompt += " If you have an opportunity to win with the next move, you should suggest taking that move; these types of moves have the highest priority. If the opponent is about to win with one more move, you should suggest blocking that move, if there isn't an available move that would win you the game. Finally, if neither of the previous two move types apply, if you can make a move that will help you win the game in a few short steps, you should suggest making that move. \\n";
+    prompt += " Based on these guidelines, make a suggestion for the best move to make, with a brief explanation. This suggestion will be sent to your teammate, the suggester, who will take your strategy into account while suggesting the next move. \\n";
+    prompt += " Your team is collaborating, playing as the " + player + " player.";
+    console.log("Strategist Prompt: " + prompt);
+    return [prompt, imageData];
+}
+
+async function createSuggesterPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
+    let [prompt, imageData] = await createSinglePlayerPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+    prompt = prompt.split(" You are the")[0];
+    let player = (currentPlayer === 1) ? "first" : "second";
+    prompt += " You are playing in a team of three: a strategist, a suggester, and a validator, all collaborating as the " + player + " player. You are the suggester; your job is to analyze the suggestions from the strategist and then make a suggestion for the next move. \\n";
+    prompt += game.formatNextMove().replaceAll("\n", "\\n");
+    console.log("Original Suggester Prompt (before Strategist/Validator Calls): " + prompt);
+    return [prompt, imageData];
+}
+
+async function createValidatorPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove) {
+    let [prompt, imageData] = await createSinglePlayerPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+    prompt = prompt.split(" You are the")[0];
+    let player = (currentPlayer === 1) ? "first" : "second";
+    prompt += " You are playing in a team of three: a strategist, a suggester, and a validator, all collaborating as the " + player + " player. You are the validator; your job is to check the move given by the suggester. If it conforms to the following guidelines, give the following response: 'Finalize Move'. If it does not conform to the guidelines, give a brief explanation of what is wrong with the move; this explanation will be given back to the suggester so that it can alter the move accordingly. \\n";
+    //prompt += " Moves should use the following JSON format: " + game.formatNextMove().split("format: ")[1].replaceAll("\n", "\\n");
+    prompt += game.moveRequirements().replaceAll("\n", "\\n");
+    console.log("Original Validator Prompt (before Strategist/Suggester Calls): " + prompt);
+    return [prompt, imageData];
+}
+
 // Call an LLM with a given prompt and base64-encoded board screenshot (if any) and return its response.
-export async function asynchronousWebServiceCall(game, prompt, systemPrompt, imageData, model, useConsoleLogging) {
-    let modelType = model.getType();
-    let modelName = model.getName();
-    let apiKey = model.getApiKey();
-
+export async function asynchronousWebServiceCall(prompt, systemPrompt, imageData, modelType, modelName, modelUrl, modelApiKey, useConsoleLogging) {
     if (useConsoleLogging) console.log("Prompt: " + prompt);
-
-    if (modelType === "Random") {
-        return game.randomMove();
-    }
 
     // If we are attempting to call a Google model, call the model through the Google API.
     if (modelType === "Google") {
         try {
-            let genAI = new GoogleGenerativeAI(apiKey);
+            let genAI = new GoogleGenerativeAI(modelApiKey);
             let result;
-            model = genAI.getGenerativeModel({ model: modelName });
+            let model = genAI.getGenerativeModel({ model: modelName });
 
             // If we have image data, call the model with the image.
             if (imageData !== "") {
@@ -118,13 +145,14 @@ export async function asynchronousWebServiceCall(game, prompt, systemPrompt, ima
             return response.candidates[0].content.parts[0].text;
         }
         catch (e) {
+            console.log(e);
             return "Network Error Occurred";
         }
     }
 
     // If we are attempting to call an OpenAI or Bedrock LLM, attempt to fetch the response through its web API.
     return new Promise((resolve) => {
-        let url = new URL(model.getUrl());
+        let url = new URL(modelUrl);
         let requestBody;
 
         // Generate a request for an OpenAI model.
@@ -166,7 +194,7 @@ export async function asynchronousWebServiceCall(game, prompt, systemPrompt, ima
                 requestBody = JSON.stringify({
                     "prompt": prompt,
                     "modelId": modelName,
-                    "apiKey": model.getApiKey(),
+                    "apiKey": modelApiKey,
                     "type": modelName.split('.')[0],
                     "image": imageData.split(',')[1], // Discard the image metadata and only send the base64-encoded image.
                 });
@@ -174,7 +202,7 @@ export async function asynchronousWebServiceCall(game, prompt, systemPrompt, ima
                 requestBody = JSON.stringify({
                     "prompt": prompt,
                     "modelId": modelName,
-                    "apiKey": model.getApiKey(),
+                    "apiKey": modelApiKey,
                     "type": modelName.split('.')[0],
                 });
             }
@@ -184,7 +212,7 @@ export async function asynchronousWebServiceCall(game, prompt, systemPrompt, ima
         fetch(url, {
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + apiKey,
+                "Authorization": "Bearer " + modelApiKey,
                 "Content-Type": "application/json"
             },
             body: requestBody
@@ -240,7 +268,7 @@ export async function processMove(game, response, currentPlayer, model, currentM
         response = JSON.parse(response); // Attempt to parse the response. If parsing fails, the move has an invalid format.
 
         // Generate a Move object given the LLM response and display its move on the game board if it was valid.
-        return game.processMove(response, currentPlayer, model, currentMoveCount, currentStatus);
+        return game.processMove(response, currentPlayer, model, currentMoveCount, currentStatus, useConsoleLogging);
     }
     catch (e) {
         if (useConsoleLogging) console.log("Move " + currentMoveCount + ": " + model.getName() + "'s given move had an invalid format.");
@@ -248,12 +276,77 @@ export async function processMove(game, response, currentPlayer, model, currentM
     }
 }
 
-// Generate a prompt, call the LLM with the prompt, and return its response.
-export async function getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove, useConsoleLogging) {
-    // Generate prompts and image data.
-    let [prompt, imageData] = await createPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
-    let systemPrompt = createSystemPrompt();
+// Get a move by generating a prompt and calling the LLM.
+export async function getMove(game, promptType, currentPlayerType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove, useConsoleLogging) {
+    if (currentPlayerType === "single") {
+        // If we are using a single-player implementation, generate a prompt, call the LLM with the prompt, and return its response.
 
-    // Call LLM with the prompt and return its response.
-    return await asynchronousWebServiceCall(game, prompt, systemPrompt, imageData, model, useConsoleLogging);
+        // Generate prompts and image data (if necessary).
+        let [prompt, imageData] = await createSinglePlayerPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+        let systemPrompt = createSinglePlayerSystemPrompt();
+
+        // Obtain model information.
+        let modelType = model.getType();
+        if (modelType === "Random") { // If we are using random play, there is no need to perform a web service call; just return a random move.
+            return game.randomMove();
+        }
+        let modelName = model.getName();
+        let modelUrl = model.getUrl();
+        let modelApiKey = model.getApiKey();
+
+        // Call LLM with prompts and image data (if it is present).
+        return await asynchronousWebServiceCall(prompt, systemPrompt, imageData, modelType, modelName, modelUrl, modelApiKey, useConsoleLogging);
+    }
+    else if (currentPlayerType === "multi") {
+        // If we are using a multi-agent implementation, call the multi-agent web server to perform the multi-agent collaboration and retrieve a move.
+
+        // Obtain model information.
+        let modelType = model.getType();
+        if (modelType === "Random") { // If we are using random play, there is no need to perform multi-agent collaboration; just return a random move.
+            return game.randomMove();
+        }
+        let modelName = model.getName();
+        let modelUrl = model.getUrl();
+        let modelApiKey = model.getApiKey();
+
+        // Generate prompts and image data (if necessary).
+        let strategistPrompt = await createStrategistPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+        let suggesterPrompt = await createSuggesterPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+        let validatorPrompt = await createValidatorPrompt(game, promptType, currentPlayer, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, previousMove);
+        let systemPrompt = createSinglePlayerSystemPrompt();
+
+        // Generate a request to be sent to the multi-agent implementation server.
+        let requestBody = {
+            strategistPrompt: strategistPrompt[0],
+            suggesterPrompt: suggesterPrompt[0],
+            validatorPrompt: validatorPrompt[0],
+            systemPrompt: systemPrompt,
+            imageData: strategistPrompt[1],
+            modelType: modelType,
+            modelName: modelName,
+            modelUrl: modelUrl,
+            modelApiKey: modelApiKey,
+            useConsoleLogging: useConsoleLogging
+        }
+
+        // Call the multi-agent implementation server, which will perform the multi-agent collaboration and return a move.
+        return await fetch(MULTI_AGENT_SERVER_ADDRESS, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody),
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            else {
+                return "Network Error Occurred";
+            }
+        }).then(data => {
+            return data.response;
+        }).catch(error => {
+            return "Network Error Occurred";
+        });
+    }
 }

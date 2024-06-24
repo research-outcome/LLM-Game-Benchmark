@@ -48,8 +48,24 @@ async function playGame() {
     let gameType = document.getElementById("game-type").value;
     let promptType = document.getElementById("prompt-type").value;
     let gameCount = document.getElementById("game-count").value;
+    let firstPlayerType;
+    let firstPlayerTypeButtons = (document.getElementsByName("first-player-type"));
+    for (let i = 0; i < firstPlayerTypeButtons.length; i++) {
+        if (firstPlayerTypeButtons[i].checked) {
+            firstPlayerType = firstPlayerTypeButtons[i].value;
+        }
+    }
     let firstPlayer = document.getElementById("first-player").value;
+    if (firstPlayer !== "random-play" && firstPlayerType === "multi") firstPlayer += "-multi"; // If first player is not random and is using multi-agent collaboration, append "-multi" to its name in game logs.
+    let secondPlayerType;
+    let secondPlayerTypeButtons = (document.getElementsByName("second-player-type"));
+    for (let i = 0; i < secondPlayerTypeButtons.length; i++) {
+        if (secondPlayerTypeButtons[i].checked) {
+            secondPlayerType = secondPlayerTypeButtons[i].value;
+        }
+    }
     let secondPlayer = document.getElementById("second-player").value;
+    if (secondPlayer !== "random-play" && secondPlayerType === "multi") secondPlayer += "-multi"; // If second player is not random and is using multi-agent collaboration, append "-multi" to its name in game logs.
     let currentGameCount = 1;
     let progressDisplayType;
     let radioButtons = document.getElementsByName("progress-display-type");
@@ -132,6 +148,7 @@ async function playGame() {
         let firstPlayerMovesPerWin = 0;
         let secondPlayerMovesPerWin = 0;
         let currentPlayer = 1;
+        let currentPlayerType = firstPlayerType;
         let moves = [];
         boardScreenshots[currentGameCount - 1] = [];
         // If the "save progress images" flag is set, take an initial screenshot of the board.
@@ -173,7 +190,7 @@ async function playGame() {
 
             // Get initial response from the corresponding API for the model.
             // "moves[moves.length - 1]" gives the latest move. We do this to check if the last move was invalid to explain the LLM's previous mistake.
-            let response = await getMove(game, promptType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1], useConsoleLogging);
+            let response = await getMove(game, promptType, currentPlayerType, currentPlayer, model, firstPlayerCurrentInvalidMoves, secondPlayerCurrentInvalidMoves, moves[moves.length - 1], useConsoleLogging);
 
             if (useConsoleLogging) console.log("Initial Response: " + response);
 
@@ -249,6 +266,7 @@ async function playGame() {
                 }
 
                 currentPlayer = (currentPlayer === 1) ? 2 : 1;  // Swap players since the move was valid.
+                currentPlayerType = (currentPlayer === 1) ? firstPlayerType : secondPlayerType; // Swap player types since the move was valid.
             }
             // An invalid move was made, process it accordingly.
             else {
@@ -458,18 +476,25 @@ function getBulkRunGameCount() {
 // Enable or disable option input fields.
 function disableInputs(disableFlag) {
     document.getElementById("game-type").disabled = disableFlag;
-    document.getElementById("game-count").disabled = disableFlag;
-    document.getElementById("first-player").disabled = disableFlag;
-    document.getElementById("second-player").disabled = disableFlag;
     document.getElementById("prompt-type").disabled = disableFlag;
+    let firstPlayerTypeRadioButtons = document.getElementsByName("first-player-type");
+    for (let i = 0; i < firstPlayerTypeRadioButtons.length; i++) {
+        firstPlayerTypeRadioButtons[i].disabled = disableFlag;
+    }
+    document.getElementById("first-player").disabled = disableFlag;
+    let secondPlayerTypeRadioButtons = document.getElementsByName("second-player-type");
+    for (let i = 0; i < secondPlayerTypeRadioButtons.length; i++) {
+        secondPlayerTypeRadioButtons[i].disabled = disableFlag;
+    }
+    document.getElementById("second-player").disabled = disableFlag;
+    document.getElementById("game-count").disabled = disableFlag;
     document.getElementById("manage-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
 
-    let radioButtons = document.getElementsByName("progress-display-type");
-    for (let i = 0; i < radioButtons.length; i++) {
-        radioButtons[i].disabled = disableFlag;
+    let progressDisplayTypeRadioButtons = document.getElementsByName("progress-display-type");
+    for (let i = 0; i < progressDisplayTypeRadioButtons.length; i++) {
+        progressDisplayTypeRadioButtons[i].disabled = disableFlag;
     }
-
     document.getElementById("checkbox-bulk-run-same-players").disabled = disableFlag;
 }
 
@@ -570,10 +595,10 @@ document.addEventListener("DOMContentLoaded", async function() {
         updatePlayerDropdowns();
 
         // Match selected "progress display type" with newly-selected prompt type.
-        let radioButtons = document.getElementsByName("progress-display-type");
-        for (let i = 0; i < radioButtons.length; i++) {
-            if (radioButtons[i].value === event.target.value) {
-                radioButtons[i].checked = true;
+        let progressDisplayTypeRadioButtons = document.getElementsByName("progress-display-type");
+        for (let i = 0; i < progressDisplayTypeRadioButtons.length; i++) {
+            if (progressDisplayTypeRadioButtons[i].value === event.target.value) {
+                progressDisplayTypeRadioButtons[i].checked = true;
                 break;
             }
         }
@@ -739,17 +764,17 @@ document.addEventListener("DOMContentLoaded", async function() {
     });
 
     // Predefined models to add to LLM model list. This prevents you from having to manually add them every time.
-    //addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
+    addModel(new Model("OpenAI", "gpt-3.5-turbo", OPENAI_URL, OPENAI_API_KEY, true, false));
     //addModel(new Model("OpenAI", "gpt-4", OPENAI_URL, OPENAI_API_KEY, true, false));
-    addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
-    addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4o", OPENAI_URL, OPENAI_API_KEY, true, true));
+    //addModel(new Model("OpenAI", "gpt-4-turbo", OPENAI_URL, OPENAI_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, false));
-    addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
-    addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-1.5-pro", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
+    //addModel(new Model("Google", "gemini-1.5-flash", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, true, true));
     //addModel(new Model("Google", "gemini-pro-vision", "URL is not needed since it is handled by the library.", GOOGLE_API_KEY, false, true));
-    addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
+    //addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
-    addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    //addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("Random", "random-play", "Placeholder URL for random play.", "Placeholder API key for random play.", true, true));

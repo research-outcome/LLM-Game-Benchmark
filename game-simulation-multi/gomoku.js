@@ -17,6 +17,10 @@ export class Gomoku {
     static invalidMoveWarning() {
         return " Please note that your move will be considered invalid if your response does not follow the specified format, or if you provide a RowNumber or ColumnNumber that is out of the allowed range, or already occupied by a previous move. Making more than " + this.getMaxInvalidMoves() + " invalid moves will result in disqualification. \n"
     }
+    // Return an explanation of what the validator should look for during multi-agent play.
+    static moveRequirements() {
+        return " The move given by the suggester must be in the following JSON format: {'row': RowNumber, 'column': ColumnNumber}. RowNumber and ColumnNumber should be replaced with actual numbers. The move must also conform to the RowNumber and ColumnNumber ranges: the ranges for both RowNumber and ColumnNumber start at 1 (top left corner is {'row': 1, 'column': 1}). The maximum value for RowNumber and ColumnNumber is 15, as the grid is 15 by 15. Finally, the move's location must not already be occupied by another move. \n";
+    }
     // Return the prompt version in YYYY-MM-DD format.
     static promptVersion() {
         return "2024-06-12";

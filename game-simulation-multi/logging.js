@@ -16,8 +16,8 @@ function formatDateTime(dateTime) {
 // Write information about the current game to .txt, .json, and .csv formats.
 export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStartTime, gameType, promptType, promptVersion, currentGameCount, gameCount, currentMoveCount, firstPlayerCurrentMoveCount, secondPlayerCurrentMoveCount, firstPlayerMovesPerWin, secondPlayerMovesPerWin, gameLog, moves, finalGameState, uuid) {
     let gameDuration = Math.round((Date.now() - gameStartTime) / 1000); // Calculate game duration in seconds.
-    firstPlayer = firstPlayer.replaceAll("/", "_");
-    secondPlayer = secondPlayer.replaceAll("/", "_");
+    firstPlayer = firstPlayer.replaceAll("/", "-");
+    secondPlayer = secondPlayer.replaceAll("/", "-");
     result = result.replaceAll("/", "_");
     finalGameState = finalGameState.replaceAll("\n", "\\n");
 
@@ -167,8 +167,8 @@ export function generateGameLogFiles(firstPlayer, secondPlayer, result, gameStar
 
 // Generate JSON and CSV files containing aggregated information about a number of games to be submitted to the leaderboard.
 export function generateSubmissionFiles(gameType, promptType, promptVersion, firstPlayer, secondPlayer, firstPlayerWins, secondPlayerWins, gameCount, firstPlayerDisqualifications, secondPlayerDisqualifications, draws, firstPlayerTotalInvalidMoves, secondPlayerTotalInvalidMoves, firstPlayerTotalMoveCount, secondPlayerTotalMoveCount, providerEmail, uuid) {
-    firstPlayer = firstPlayer.replaceAll("/", "_");
-    secondPlayer = secondPlayer.replaceAll("/", "_");
+    firstPlayer = firstPlayer.replaceAll("/", "-");
+    secondPlayer = secondPlayer.replaceAll("/", "-");
 
     // Name the submission file.
     let dateTime = formatDateTime(new Date());
