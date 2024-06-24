@@ -57,7 +57,7 @@ $(document).ready(function() {
             columnDefs: [
                 { targets: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,17], className: 'dt-body-right' },
                 { targets: [0, 1, 2, 3, 4, 16], className: 'dt-body-center' },
-                { targets: [18], visible: false}
+                { targets: [2, 16, 17, 18], visible: false}
             ]
         });
 
