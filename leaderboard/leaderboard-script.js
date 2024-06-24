@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    const jsonURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/newLeaderboard.json';
+    const jsonURL = './leaderboard-data.json'; //'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/newLeaderboard.json';
 
     function formatDecimal(value) {
         const number = parseFloat(value);
