@@ -145,3 +145,19 @@ $(document).ready(function() {
         console.error("An error occurred while fetching the JSON data.");
     });
 });
+
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    // URL of the file to be downloaded
+    const fileUrl = './leaderboard-data.json';
+    // Name of the file to be saved as
+    const fileName = 'leaderboard-data.json';
+
+    // Create an anchor element
+    const a = document.createElement('a');
+    a.href = fileUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+
