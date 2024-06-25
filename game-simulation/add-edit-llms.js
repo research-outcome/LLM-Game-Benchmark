@@ -116,6 +116,7 @@ function modelSupportsImages(modelName) {
         modelName === "gemini-1.5-flash" ||
         modelName === "gemini-pro-vision" ||
         modelName === "anthropic.claude-3-sonnet-20240229-v1:0" ||
+        modelName === "anthropic.claude-3-5-sonnet-20240620-v1:0" ||
         modelName === "anthropic.claude-3-haiku-20240307-v1:0" ||
         modelName === "random-play";
 }
@@ -197,6 +198,7 @@ export function updateAddModelFields(event) {
                 "<option value=\"anthropic.claude-v2\">anthropic.claude-v2</option>" +
                 "<option value=\"anthropic.claude-v2:1\">anthropic.claude-v2:1</option>" +
                 "<option value=\"anthropic.claude-3-sonnet-20240229-v1:0\">anthropic.claude-3-sonnet-20240229-v1:0</option>" +
+                "<option value=\"anthropic.claude-3-5-sonnet-20240620-v1:0\">anthropic.claude-3-5-sonnet-20240620-v1:0</option>" +
                 "<option value=\"anthropic.claude-3-haiku-20240307-v1:0\">anthropic.claude-3-haiku-20240307-v1:0</option>" +
                 "<option value=\"mistral.mistral-large-2402-v1:0\">mistral.mistral-large-2402-v1:0</option>" +
             "</select>";
