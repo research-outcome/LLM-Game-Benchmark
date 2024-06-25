@@ -104,13 +104,25 @@ function updateBoard(board, move) {
     const row = move.Row - 1;
     const col = move.Column - 1;
     board[row][col] = symbol;
-    console.log(`Board updated at [${move.Row},${move.Column}] with ${symbol}`); // Logging the move with 1-based indexing
+    console.log(`Board updated at [${move.Row},${move.Column}] with ${symbol}`); 
 }
 
 function performAnalysis(data, gameType) {
+    let rows, cols;
+    if (gameType === 'connect-four') {
+        rows = 6;
+        cols = 7;
+    } else if (gameType === 'gomoku') {
+        rows = 15;
+        cols = 15;
+    } else {
+        rows = 3;
+        cols = 3;
+    }
+
     const results = { missedWins: [], missedBlocks: [] };
-    const board = initializeBoard(gameType === 'connect-four' ? 6 : 3, gameType === 'connect-four' ? 7 : 3); // Board size for each game
-    const potentialWinsMap = new Map(); // To track potential wins for each player
+    const board = initializeBoard(rows, cols);
+    const potentialWinsMap = new Map(); // Track potential wins for each player
 
     let lastValidMoveIndex = -1; // Index of the last valid move
     let currentPlayerLastMoveIndex = { 1: -1, 2: -1 }; // Track the last valid move for each player
@@ -240,8 +252,7 @@ function checkDiagonals(board, symbol, gameType) {
     return false;
 }
 
-function checkWin(line, symbol, gameType) {
-    let requiredLength = gameType === 'connect-four' ? 4 : 3;
+function checkWin(line, symbol) {
     let win = line.every(cell => cell === symbol);
     console.log(`Line check for win: ${line.join(',')}, Result: ${win}`);
     return win;
@@ -250,6 +261,15 @@ function checkWin(line, symbol, gameType) {
 function checkPotentialWins(board, player, gameType) {
     const symbol = player === 1 ? 'X' : 'O';
     const potentialWins = [];
+    
+    const logBoard = (board) => {
+        for (let row = 0; row < board.length; row++) {
+            console.log(board[row].map(cell => cell === null ? 'e' : cell).join(' '));
+        }
+    };
+    
+    console.log(`Checking potential wins for player ${player} (${symbol}) in ${gameType}`);
+    logBoard(board);
 
     if (gameType === 'connect-four') {
         // Connect Four logic for checking three in a row
@@ -264,22 +284,80 @@ function checkPotentialWins(board, player, gameType) {
                     // Check vertically
                     if (row <= 2 && board[row + 1][col] === symbol && board[row + 2][col] === symbol && board[row + 3][col] === symbol) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found vertical win at [${row + 1},${col + 1}]`);
                     }
                     // Check horizontally
                     if (col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found horizontal win at [${row + 1},${col + 1}]`);
                     }
                     // Check diagonally (bottom-left to top-right)
                     if (row <= 2 && col <= 3 && board[row + 1][col + 1] === symbol && board[row + 2][col + 2] === symbol && board[row + 3][col + 3] === symbol) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found diagonal win at [${row + 1},${col + 1}]`);
                     }
                     // Check diagonally (top-left to bottom-right)
                     if (row >= 3 && col <= 3 && board[row - 1][col + 1] === symbol && board[row - 2][col + 2] === symbol && board[row - 3][col + 3] === symbol) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found anti-diagonal win at [${row + 1},${col + 1}]`);
+                    }
+                    // Check diagonally (bottom-right to top-left)
+                    if (row >= 3 && col >= 3 && board[row - 1][col - 1] === symbol && board[row - 2][col - 2] === symbol && board[row - 3][col - 3] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found diagonal win (bottom-right to top-left) at [${row + 1},${col + 1}]`);
+                    }
+                    // Check diagonally (top-right to bottom-left)
+                    if (row <= 2 && col >= 3 && board[row + 1][col - 1] === symbol && board[row + 2][col - 2] === symbol && board[row + 3][col - 3] === symbol) {
+                        potentialWins.push({ row: row + 1, col: col + 1 });
+                        console.log(`Found diagonal win (top-right to bottom-left) at [${row + 1},${col + 1}]`);
                     }
                 }
             }
         }
+    } else if (gameType === 'gomoku') {
+        const potentialWinsSet = new Set();
+
+        const checkDirection = (startRow, startCol, dRow, dCol) => {
+            for (let i = 0; i < 5; i++) {
+                let count = 0;
+                let emptyCell = null;
+                for (let j = 0; j < 5; j++) {
+                    const newRow = startRow + (i + j) * dRow;
+                    const newCol = startCol + (i + j) * dCol;
+                    if (newRow >= 0 && newRow < 15 && newCol >= 0 && newCol < 15) {
+                        if (board[newRow][newCol] === symbol) {
+                            count++;
+                        } else if (board[newRow][newCol] === null && emptyCell === null) {
+                            emptyCell = { row: newRow + 1, col: newCol + 1 };
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                if (count === 4 && emptyCell) {
+                    potentialWinsSet.add(`${emptyCell.row},${emptyCell.col}`);
+                    console.log(`Found Gomoku potential win at [${emptyCell.row},${emptyCell.col}]`);
+                }
+            }
+        };
+
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                if (board[row][col] === null) {
+                    checkDirection(row, col, 0, 1); // Check horizontally
+                    checkDirection(row, col, 1, 0); // Check vertically
+                    checkDirection(row, col, 1, 1); // Check diagonally (bottom-left to top-right)
+                    checkDirection(row, col, 1, -1); // Check diagonally (bottom-right to top-left)
+                }
+            }
+        }
+
+        potentialWins.push(...Array.from(potentialWinsSet).map(pos => {
+            const [row, col] = pos.split(',').map(Number);
+            return { row, col };
+        }));
     } else {
         // Tic-Tac-Toe logic for checking two in a row
         for (let i = 1; i <= 3; i++) {
@@ -288,6 +366,7 @@ function checkPotentialWins(board, player, gameType) {
             let emptyCellsRow = row.reduce((acc, cell, idx) => cell === null ? acc.concat([[i, idx + 1]]) : acc, []);
             if (row.filter(cell => cell === symbol).length === 2 && emptyCellsRow.length === 1) {
                 potentialWins.push({ row: emptyCellsRow[0][0], col: emptyCellsRow[0][1] });
+                console.log(`Found Tic-Tac-Toe row win at [${emptyCellsRow[0][0]},${emptyCellsRow[0][1]}]`);
             }
 
             // Check columns
@@ -295,6 +374,7 @@ function checkPotentialWins(board, player, gameType) {
             let emptyCellsCol = col.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, i]]) : acc, []);
             if (col.filter(cell => cell === symbol).length === 2 && emptyCellsCol.length === 1) {
                 potentialWins.push({ row: emptyCellsCol[0][0], col: emptyCellsCol[0][1] });
+                console.log(`Found Tic-Tac-Toe column win at [${emptyCellsCol[0][0]},${emptyCellsCol[0][1]}]`);
             }
         }
 
@@ -303,12 +383,14 @@ function checkPotentialWins(board, player, gameType) {
         let emptyCellsDiag1 = diag1.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, idx + 1]]) : acc, []);
         if (diag1.filter(cell => cell === symbol).length === 2 && emptyCellsDiag1.length === 1) {
             potentialWins.push({ row: emptyCellsDiag1[0][0], col: emptyCellsDiag1[0][1] });
+            console.log(`Found Tic-Tac-Toe diagonal win at [${emptyCellsDiag1[0][0]},${emptyCellsDiag1[0][1]}]`);
         }
 
         let diag2 = [board[0][2], board[1][1], board[2][0]];
         let emptyCellsDiag2 = diag2.reduce((acc, cell, idx) => cell === null ? acc.concat([[idx + 1, 3 - idx]]) : acc, []);
         if (diag2.filter(cell => cell === symbol).length === 2 && emptyCellsDiag2.length === 1) {
             potentialWins.push({ row: emptyCellsDiag2[0][0], col: emptyCellsDiag2[0][1] });
+            console.log(`Found Tic-Tac-Toe anti-diagonal win at [${emptyCellsDiag2[0][0]},${emptyCellsDiag2[0][1]}]`);
         }
     }
 
@@ -328,7 +410,7 @@ function analyzeBulkData(data, results) {
         const parts = key.split('_');
         const llm1 = parts[3];
         const llm2 = parts[4];
-        const gameType = parts[1]; // Update this to parts[2] if the gameType is the third part
+        const gameType = parts[1]; 
 
         if (!results[llm1]) {
             results[llm1] = {
