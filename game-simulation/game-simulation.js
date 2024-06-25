@@ -750,6 +750,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     addModel(new Model("AWS Bedrock", "meta.llama3-70b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     //addModel(new Model("AWS Bedrock", "meta.llama3-8b-instruct-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("AWS Bedrock", "anthropic.claude-3-sonnet-20240229-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
+    addModel(new Model("AWS Bedrock", "anthropic.claude-3-5-sonnet-20240620-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "anthropic.claude-3-haiku-20240307-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, true));
     //addModel(new Model("AWS Bedrock", "mistral.mistral-large-2402-v1:0", BEDROCK_URL, BEDROCK_SECRET, true, false));
     addModel(new Model("Random", "random-play", "Placeholder URL for random play.", "Placeholder API key for random play.", true, true));
