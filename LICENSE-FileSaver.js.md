@@ -1,3 +1,5 @@
+LICENSE for FileSaver.js
+
 The MIT License
 
 Copyright © 2016 [Eli Grey][1].
