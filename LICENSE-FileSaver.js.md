@@ -1,4 +1,5 @@
 LICENSE for FileSaver.js
+========================
 
 The MIT License
 
