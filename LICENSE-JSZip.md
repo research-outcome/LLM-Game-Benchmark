@@ -1,3 +1,5 @@
+LICENSE for JSZip
+
 JSZip is dual licensed. At your choice you may use it under the MIT license *or* the GPLv3
 license.
 
