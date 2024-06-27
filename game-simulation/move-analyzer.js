@@ -295,10 +295,10 @@ function checkPotentialWins(board, player, gameType) {
                         console.log(`Found vertical win at [${row + 1},${col + 1}]`);
                     }
                     // Check horizontally
-                    if (col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol || // (empty) symbol symbol symbol
-                        col >= 1 && col <= 4 && board[row][col - 1] === symbol && board[row][col + 1] === symbol && board[row][col + 2] === symbol || // symbol (empty) symbol symbol
-                        col >= 2 && col <= 5 && board[row][col - 2] === symbol && board[row][col - 1] === symbol && board[row][col + 1] === symbol || // symbol symbol (empty) symbol
-                        col >= 3 && board[row][col - 3] === symbol && board[row][col - 2] === symbol && board[row][col - 1] === symbol // symbol symbol symbol (empty)
+                    if ((col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol) || // (empty) symbol symbol symbol
+                        (col >= 1 && col <= 4 && board[row][col - 1] === symbol && board[row][col + 1] === symbol && board[row][col + 2] === symbol) || // symbol (empty) symbol symbol
+                        (col >= 2 && col <= 5 && board[row][col - 2] === symbol && board[row][col - 1] === symbol && board[row][col + 1] === symbol) || // symbol symbol (empty) symbol
+                        (col >= 3 && board[row][col - 3] === symbol && board[row][col - 2] === symbol && board[row][col - 1] === symbol) // symbol symbol symbol (empty)
                     ) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
                         console.log(`Found horizontal win at [${row + 1},${col + 1}]`);
