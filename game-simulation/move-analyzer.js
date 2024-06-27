@@ -103,6 +103,7 @@ function updateBoard(board, move) {
     const symbol = move.Player === 1 ? 'X' : 'O';
     const row = move.Row - 1;
     const col = move.Column - 1;
+    console.log("Move row and column: " + row + " " + col);
     board[row][col] = symbol;
     console.log(`Board updated at [${move.Row},${move.Column}] with ${symbol}`); 
 }
@@ -143,7 +144,14 @@ function performAnalysis(data, gameType) {
 
         // Check if the current move blocks any potential winning positions
         const opponentPlayer = move.Player === 1 ? 2 : 1;
-        const opponentPotentialWins = checkPotentialWins(board, opponentPlayer, gameType);
+        let opponentPotentialWins;
+        try {
+            opponentPotentialWins = checkPotentialWins(board, opponentPlayer, gameType);
+
+        }
+        catch(error) {
+            alert(error);
+        }
 
         // Update the board with the current move
         updateBoard(board, move);
@@ -394,6 +402,9 @@ function checkPotentialWins(board, player, gameType) {
             potentialWins.push({ row: emptyCellsDiag2[0][0], col: emptyCellsDiag2[0][1] });
             console.log(`Found Tic-Tac-Toe anti-diagonal win at [${emptyCellsDiag2[0][0]},${emptyCellsDiag2[0][1]}]`);
         }
+    }
+    else {
+        alert("The game type in the log file you provided has not been implemented in this move analyzer.");
     }
 
     console.log(`Potential wins for player ${player} with symbol ${symbol}: ${potentialWins.length > 0 ? potentialWins.map(pos => `[${pos.row},${pos.col}]`).join(', ') : 'None'}`);
