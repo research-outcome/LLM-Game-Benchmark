@@ -181,8 +181,8 @@ async function playGame() {
                 if (gameRepeatCounter < MAX_GAME_REPEATS) {
                     result = "networkerror";
                     if (useConsoleLogging) console.log("Network error occurred. Repeating game.");
-                    isGameActive = false;
-                    continue;
+                    game.resetBoard();
+                    break;
                 }
                 else {
                     if (useConsoleLogging) console.log("Attempted to repeat the game the maximum number of times. Cancelling game.");
