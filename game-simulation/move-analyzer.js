@@ -31,7 +31,7 @@ function analyzeMoves() {
                 alert('Invalid JSON file. Not all moves have the required "Row", "Column", and "Player" properties.');
                 return;
             }
-            const analysisResults = performAnalysis(data, data.GameType || 'tic-tac-toe');
+            const analysisResults = performAnalysis(data, data.GameType);
             displayResults(analysisResults);
         } catch (error) {
             alert('Invalid file. There was an error processing your file. Please ensure it is a valid JSON.');
@@ -115,7 +115,7 @@ function performAnalysis(data, gameType) {
     } else if (gameType === 'gomoku') {
         rows = 15;
         cols = 15;
-    } else {
+    } else if (gameType === 'tic-tac-toe') {
         rows = 3;
         cols = 3;
     }
@@ -287,29 +287,31 @@ function checkPotentialWins(board, player, gameType) {
                         console.log(`Found vertical win at [${row + 1},${col + 1}]`);
                     }
                     // Check horizontally
-                    if (col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol) {
+                    if (col <= 3 && board[row][col + 1] === symbol && board[row][col + 2] === symbol && board[row][col + 3] === symbol || // (empty) symbol symbol symbol
+                        col >= 1 && col <= 4 && board[row][col - 1] === symbol && board[row][col + 1] === symbol && board[row][col + 2] === symbol || // symbol (empty) symbol symbol
+                        col >= 2 && col <= 5 && board[row][col - 2] === symbol && board[row][col - 1] === symbol && board[row][col + 1] === symbol || // symbol symbol (empty) symbol
+                        col >= 3 && board[row][col - 3] === symbol && board[row][col - 2] === symbol && board[row][col - 1] === symbol // symbol symbol symbol (empty)
+                    ) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
                         console.log(`Found horizontal win at [${row + 1},${col + 1}]`);
                     }
-                    // Check diagonally (bottom-left to top-right)
-                    if (row <= 2 && col <= 3 && board[row + 1][col + 1] === symbol && board[row + 2][col + 2] === symbol && board[row + 3][col + 3] === symbol) {
+                    // Check diagonally (top-left to bottom-right)
+                    if ((row <= 2 && col <= 3 && board[row + 1][col + 1] === symbol && board[row + 2][col + 2] === symbol && board[row + 3][col + 3] === symbol) || // (empty) symbol symbol symbol
+                        (row >= 1 && row <= 3 && col >= 1 && col <= 4 && board[row - 1][col - 1] === symbol && board[row + 1][col + 1] === symbol && board[row + 2][col + 2] === symbol) || // symbol (empty) symbol symbol
+                        (row >= 2 && row <= 4 && col >= 2 && col <= 5 && board[row - 2][col - 2] === symbol && board[row - 1][col - 1] === symbol && board[row + 1][col + 1] === symbol) || // symbol symbol (empty) symbol
+                        (row >= 3 && col >= 3 && board[row - 3][col - 3] === symbol && board[row - 2][col - 2] === symbol && board[row - 1][col - 1] === symbol) // symbol symbol symbol (empty)
+                    ) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
                         console.log(`Found diagonal win at [${row + 1},${col + 1}]`);
                     }
-                    // Check diagonally (top-left to bottom-right)
-                    if (row >= 3 && col <= 3 && board[row - 1][col + 1] === symbol && board[row - 2][col + 2] === symbol && board[row - 3][col + 3] === symbol) {
+                    // Check diagonally (bottom-left to top-right)
+                    if ((row >= 3 && col <= 3 && board[row - 1][col + 1] === symbol && board[row - 2][col + 2] === symbol && board[row - 3][col + 3] === symbol) || // (empty) symbol symbol symbol
+                        (row >= 2 && row <= 4 && col >= 1 && col <= 4 && board[row + 1][col - 1] === symbol && board[row - 1][col + 1] === symbol && board[row - 2][col + 2] === symbol) || // symbol (empty) symbol symbol
+                        (row >= 1 && row <= 3 && col >= 2 && col <= 5 && board[row + 2][col - 2] === symbol && board[row + 1][col - 1] === symbol && board[row - 1][col + 1] === symbol) || // symbol symbol (empty) symbol
+                        (row <= 2 && col >= 3 && board[row + 3][col - 3] === symbol && board[row + 2][col - 2] === symbol && board[row + 1][col - 1] === symbol) // symbol symbol symbol (empty)
+                    ) {
                         potentialWins.push({ row: row + 1, col: col + 1 });
                         console.log(`Found anti-diagonal win at [${row + 1},${col + 1}]`);
-                    }
-                    // Check diagonally (bottom-right to top-left)
-                    if (row >= 3 && col >= 3 && board[row - 1][col - 1] === symbol && board[row - 2][col - 2] === symbol && board[row - 3][col - 3] === symbol) {
-                        potentialWins.push({ row: row + 1, col: col + 1 });
-                        console.log(`Found diagonal win (bottom-right to top-left) at [${row + 1},${col + 1}]`);
-                    }
-                    // Check diagonally (top-right to bottom-left)
-                    if (row <= 2 && col >= 3 && board[row + 1][col - 1] === symbol && board[row + 2][col - 2] === symbol && board[row + 3][col - 3] === symbol) {
-                        potentialWins.push({ row: row + 1, col: col + 1 });
-                        console.log(`Found diagonal win (top-right to bottom-left) at [${row + 1},${col + 1}]`);
                     }
                 }
             }
@@ -318,7 +320,7 @@ function checkPotentialWins(board, player, gameType) {
         const potentialWinsSet = new Set();
 
         const checkDirection = (startRow, startCol, dRow, dCol) => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = -4; i <= 0; i++) {
                 let count = 0;
                 let emptyCell = null;
                 for (let j = 0; j < 5; j++) {
@@ -358,7 +360,7 @@ function checkPotentialWins(board, player, gameType) {
             const [row, col] = pos.split(',').map(Number);
             return { row, col };
         }));
-    } else {
+    } else if (gameType === 'tic-tac-toe') {
         // Tic-Tac-Toe logic for checking two in a row
         for (let i = 1; i <= 3; i++) {
             // Check rows

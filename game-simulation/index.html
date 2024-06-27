@@ -14,10 +14,6 @@
                 // If a CORS error occurs due to the user opening the HTML file directly, display an explanation and offer some fixes.
                 if (event.target.tagName === 'SCRIPT') {
                     document.body.innerHTML = "<div style=\"font-size: 2vh; text-align: center;\">" +
-                            //"A Cross-Origin Resource Sharing (CORS) policy in your browser is preventing you from running this site from directly from the HTML file.<br><br>" +
-                            //"CORS is a security feature implemented in browsers to control how resources are accessed from different origins (domain, scheme, or port). <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS'>Learn More About CORS</a><br><br>" +
-                            //"Opening the HTML file directly uses the \"file://\" protocol, which means any requests made to an external server would violate the CORS same-origin policy, which is a security mechanism that restricts how resources from one origin (protocol, port, and host) can interact with resources from another origin. <a href='https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy'>Learn More About CORS Same-Origin Policy</a>"
-                            //"<span style=\"color: red;\">Do the following fixes at your own risk. Disabling web security on your browser may introduce security vulnerabilities along with other issues such as browser slowdowns. It is highly recommended to follow the suggestions about running the file on a server in the \"More Information\" link instead.</span>"
                             "<strong><u>Important Notice: Proceed At Your Own Risk</u></strong><br><br>" +
                             "Your browser is preventing you from running this site directly from the HTML file due to security settings designed to protect your system.<br>" +
                             "These measures are in place to safeguard you from potential threats. However, if you choose to bypass these protections, we provide a list of actions you can take.<br>" +
@@ -30,7 +26,7 @@
                             "\"\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --user-data-dir=\"C:/LLMBenchmark\" --disable-web-security\"<br>" +
                             "Then, you can drag-and-drop the HTML file onto your browser window; it should open and run as normal.<br><br>" +
                             "If these fixes did not work for your browser, you must either run the file on a server, or run the file with an IDE that creates a server for you.<br>" +
-                            "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>"
+                            "<a href='https://stackoverflow.com/questions/10752055/cross-origin-requests-are-only-supported-for-http-error-when-loading-a-local'>More Information</a>" +
                         "</div>";
                     window.stop();
                 }
@@ -96,42 +92,6 @@
                 <div class="info"><strong>2nd Player: </strong><span id="info-second-player"></span></div>
                 <div class="info"><strong>Total # of Games: </strong><span id="info-total-game-count"></span></div>
                 <div class="info"><strong>Current Game #: </strong><span id="info-current-game-number"></span></div>
-            </div>
-        </div>
-
-        <!-- Game Stats display shows users the current game statistics. -->
-        <div id="game-stats">
-            <div id="stats-label"><strong><em>Stats for the Current 1st vs. 2nd Player:</em></strong></div>
-            <div id="stats-table">
-                <div class="stats-row">
-                    <div class="stats-cell stats-header">1st Player Wins</div>
-                    <div class="stats-cell stats-header">2nd Player Wins</div>
-                    <div class="stats-cell stats-header">Draws</div>
-                    <div class="stats-cell stats-header">1st Player Total Move Count</div>
-                    <div class="stats-cell stats-header">2nd Player Total Move Count</div>
-                    <div class="stats-cell stats-header">1st Player Disqualifications</div>
-                    <div class="stats-cell stats-header">2nd Player Disqualifications</div>
-                    <div class="stats-cell stats-header">1st Player Invalid Moves</div>
-                    <div class="stats-cell stats-header">2nd Player Invalid Moves</div>
-                    <div class="stats-cell stats-header">1st Player Moves per Win</div>
-                    <div class="stats-cell stats-header">2nd Player Moves per Win</div>
-                </div>
-                <div class="stats-row">
-                    <div class="stats-cell" id="first-player-wins">0</div>
-                    <div class="stats-cell" id="second-player-wins">0</div>
-                    <div class="stats-cell" id="draws">0</div>
-                    <div class="stats-cell" id="first-player-total-move-count">0</div>
-                    <div class="stats-cell" id="second-player-total-move-count">0</div>
-                    <div class="stats-cell" id="first-player-disqualifications">0</div>
-                    <div class="stats-cell" id="second-player-disqualifications">0</div>
-                    <div class="stats-cell" id="first-player-invalid-moves">0</div>
-                    <div class="stats-cell" id="second-player-invalid-moves">0</div>
-                    <div class="stats-cell" id="first-player-moves-per-win">0</div>
-                    <div class="stats-cell" id="second-player-moves-per-win">0</div>
-                </div>
-            </div>
-            <div class="button-container" id="reset-btn-container">
-                <button id="reset-btn"><strong>Reset Stats</strong></button>
             </div>
         </div>
 
@@ -547,8 +507,44 @@
             </div>
         </div>
 
+        <!-- Game Stats display shows users the current game statistics. -->
+        <div id="game-stats">
+            <div id="stats-label"><strong><em>Stats for the Current 1st vs. 2nd Player:</em></strong></div>
+            <div id="stats-table">
+                <div class="stats-row">
+                    <div class="stats-cell stats-header">1st Player Wins</div>
+                    <div class="stats-cell stats-header">2nd Player Wins</div>
+                    <div class="stats-cell stats-header">Draws</div>
+                    <div class="stats-cell stats-header">1st Player Total Move Count</div>
+                    <div class="stats-cell stats-header">2nd Player Total Move Count</div>
+                    <div class="stats-cell stats-header">1st Player Disqualifications</div>
+                    <div class="stats-cell stats-header">2nd Player Disqualifications</div>
+                    <div class="stats-cell stats-header">1st Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">2nd Player Invalid Moves</div>
+                    <div class="stats-cell stats-header">1st Player Moves per Win</div>
+                    <div class="stats-cell stats-header">2nd Player Moves per Win</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell" id="first-player-wins">0</div>
+                    <div class="stats-cell" id="second-player-wins">0</div>
+                    <div class="stats-cell" id="draws">0</div>
+                    <div class="stats-cell" id="first-player-total-move-count">0</div>
+                    <div class="stats-cell" id="second-player-total-move-count">0</div>
+                    <div class="stats-cell" id="first-player-disqualifications">0</div>
+                    <div class="stats-cell" id="second-player-disqualifications">0</div>
+                    <div class="stats-cell" id="first-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="second-player-invalid-moves">0</div>
+                    <div class="stats-cell" id="first-player-moves-per-win">0</div>
+                    <div class="stats-cell" id="second-player-moves-per-win">0</div>
+                </div>
+            </div>
+            <div class="button-container" id="reset-btn-container">
+                <button id="reset-btn"><strong>Reset Stats</strong></button>
+            </div>
+        </div>
+
         <!-- This container holds the Prompt List, LLM List, Game Details, FAQs, and User Guide buttons. -->
-        <div class="button-container">
+        <div class="button-container" id="details-button-container">
             <button class="large-button" id="gameDetailsButton">Game Details</button>
             <button class="large-button" id="promptListButton">Prompt Details</button>
             <button class="large-button" id="LLMListButton">LLM List</button>

@@ -1,7 +1,5 @@
 html, body { /* Disable scrolling on page. */
     margin: 0 1vh 0;
-    height: 100%;
-    overflow: hidden
 }
 
 /* Set default font style for page and input fields. */
@@ -45,7 +43,6 @@ button {
     height: fit-content;
     padding: 1vh;
     font-size: 3vh;
-    margin-top: 1vh;
     margin-left: 1vh;
     margin-right: 1vh;
 }
@@ -82,44 +79,6 @@ button {
 }
 #game-count { /* Styling for "game count" text input field in options display. */
     width: 15%;
-}
-
-/* Statistics display styling */
-#game-stats { /* Styling for game statistics display container. */
-    display: flex;
-    align-items: center;
-    background-color: #f1f1f1;
-    padding: 0.5vh;
-    border: 0.25vh solid black;
-    font-size: 1.5vh;
-}
-#stats-label,
-#reset-btn-container { /* Styling for the "Stats for the Current 1st vs. 2nd Player:" label. */
-    text-align: center;
-    width: 8%;
-    margin-left: 1%;
-    margin-right: 1%;
-}
-#stats-table { /* Styling for the table displayed in the statistics display. */
-    width: 80%;
-    display: table;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 1.5vh;
-    border-collapse: collapse;
-}
-.stats-row { /* Styling for each row of the statistics table. */
-    display: table-row;
-}
-.stats-cell { /* Styling for each cell of the statistics table. */
-    display: table-cell;
-    text-align: center;
-    padding: 0.5vh;
-    border: 0.25vh solid black;
-}
-#reset-btn { /* Styling for the "Reset Stats" button. */
-    width: 100%;
-    height: 4vh;
 }
 
 /* Styling for page popups. */
@@ -250,7 +209,6 @@ button {
     text-align: center;
     justify-content: center;
     align-content: center;
-    margin-top: 1vh;
     background-color: #f1f1f1;
     font-size: 2vh;
     width: 100%;
@@ -460,6 +418,50 @@ button {
 }
 .white-stone { /* Styling for white Gomoku stones. */
     background-color: white;
+}
+
+/* Statistics display styling */
+#game-stats { /* Styling for game statistics display container. */
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    padding: 0.5vh;
+    border: 0.25vh solid black;
+    font-size: 1.5vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+#stats-label,
+#reset-btn-container { /* Styling for the "Stats for the Current 1st vs. 2nd Player:" label. */
+    text-align: center;
+    width: 8%;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+#stats-table { /* Styling for the table displayed in the statistics display. */
+    width: 80%;
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.5vh;
+    border-collapse: collapse;
+}
+.stats-row { /* Styling for each row of the statistics table. */
+    display: table-row;
+}
+.stats-cell { /* Styling for each cell of the statistics table. */
+    display: table-cell;
+    text-align: center;
+    padding: 0.5vh;
+    border: 0.25vh solid black;
+}
+#reset-btn { /* Styling for the "Reset Stats" button. */
+    width: 100%;
+    height: 4vh;
+}
+
+#details-button-container {
+    margin-bottom: 3vh;
 }
 
 /* Styling for content of popups that display for the buttons on the bottom of the screen. */

@@ -367,7 +367,7 @@ export function downloadBulkZipFile(allLogFiles) {
         }
     }
     catch (e) {
-        alert("An error occurred while generating the bulk ZIP file's contents. Downloading all files that were generated before the error.");
+        alert("An error occurred while generating the bulk ZIP file's contents: \"" + e + "\". Downloading all files that were generated before the error.");
     }
 
     // Remove last ",\n" from "All" JSON content and append closing newline and bracket "\n]".
