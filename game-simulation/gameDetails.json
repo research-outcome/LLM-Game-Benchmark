@@ -1,0 +1,14 @@
+[
+  {
+      "Game type": "Tic-Tac-Toe",
+      "Details": "Tic-Tac-Toe is a two-player game and is played on a 3 by 3 grid. The objective is to align three of your symbols, Xs for the first player and Os for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for three in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their symbols in an empty cell on the grid. Please see here for more details: https://en.wikipedia.org/wiki/Tic-tac-toe"
+  },
+  {
+      "Game type": "Connect Four",
+      "Details": "Connect-Four is a two-player game and played on a 6 by 7 grid. The objective is to connect four of your discs in a row, either horizontally, vertically, or diagonally. The first player uses red (R) discs and the second player uses yellow (Y) discs. Strategic placement is crucial; besides aiming for four in a row, players must also block their opponent's potential connections to avoid defeat. Players take turns drop-ping their discs into an empty column, where the disc occupies the lowest available space. Please see here for more details: https://en.wikipedia.org/wiki/Connect_Four"
+  },
+  {
+      "Game type": "Gomoku",
+      "Details": "Gomoku is a two-player game and is played on a 15 by 15 grid. The objective is to align five of your stones, black for the first player and white for the second, either horizontally, vertically, or diagonally. Strategic placement is crucial; besides aiming for five in a row, players must also block their opponent's potential alignments to avoid defeat. Players take turns placing their stones on an empty intersection of the grid. Please see here for more details: https://en.wikipedia.org/wiki/Gomoku"
+  }
+]

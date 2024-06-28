@@ -1,0 +1,77 @@
+[
+    {
+        "Company": "OpenAI",
+        "LLM Model": "gpt-3.5-turbo",
+        "More Info": "https://platform.openai.com/docs/models/gpt-3-5-turbo"
+    },
+    {
+        "Company": "OpenAI",
+        "LLM Model": "gpt-4",
+        "More Info": "https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4"
+    },
+    {
+        "Company": "OpenAI",
+        "LLM Model": "gpt-4-turbo",
+        "More Info": "https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4"
+    },
+    {
+        "Company": "OpenAI",
+        "LLM Model": "gpt-4o",
+        "More Info": "https://platform.openai.com/docs/models/gpt-4o"
+    },
+    {
+        "Company": "Google",
+        "LLM Model": "gemini 1.0 pro",
+        "More Info": "https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemini-pro"
+    },
+    {
+        "Company": "Google",
+        "LLM Model": "gemini 1.5 pro",
+        "More Info": "https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemini-1.5-pro-preview-0409"
+    },
+    {
+        "Company": "Google",
+        "LLM Model": "gemini-pro-vision",
+        "More Info": "https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemini-pro-vision"
+    },
+    {
+        "Company": "Meta",
+        "LLM Model": "meta.llama3-70b-instruct-v1:0",
+        "More Info": "https://llama.meta.com/llama3/"
+    },
+    {
+        "Company": "Meta",
+        "LLM Model": "meta.llama3-8b-instruct-v1:0",
+        "More Info": "https://llama.meta.com/llama3/"
+    },
+    {
+        "Company": "Anthropic",
+        "LLM Model": "anthropic.claude-v2",
+        "More Info": "https://www.anthropic.com/news/claude-2"
+    },
+    {
+        "Company": "Anthropic",
+        "LLM Model": "anthropic.claude-v2:1",
+        "More Info": "https://www.anthropic.com/news/claude-2-1"
+    },
+    {
+        "Company": "Anthropic",
+        "LLM Model": "anthropic.claude-3-sonnet-20240229-v1:0",
+        "More Info": "https://docs.anthropic.com/en/docs/models-overview"
+    },
+    {
+        "Company": "Anthropic",
+        "LLM Model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "More Info": "https://docs.anthropic.com/en/docs/models-overview"
+    },
+    {
+        "Company": "Anthropic",
+        "LLM Model": "anthropic.claude-3-haiku-20240307-v1:0",
+        "More Info": "https://docs.anthropic.com/en/docs/models-overview"
+    },
+    {
+        "Company": "Mistral",
+        "LLM Model": "mistral.mistral-large-2402-v1:0",
+        "More Info": "https://mistral.ai/technology/#models"
+    }
+]

@@ -1,8 +1,8 @@
 // URLs for JSON data
-const gameDetailsURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/gameDetails.json';
-const promptListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/promptList.json';
-const LLMListURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/LLMlist.json';
-const faqURL = 'https://raw.githubusercontent.com/jackson-harper/JSONLLM/main/FAQs.json';
+const gameDetailsURL = 'gameDetails.json';
+const promptListURL = 'promptList.json';
+const LLMListURL = 'LLMlist.json';
+const faqURL = 'FAQs.json';
 
 // Function to fetch JSON data
 async function fetchJSON(url) {
