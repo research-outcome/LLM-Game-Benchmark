@@ -161,9 +161,7 @@ button {
 #llm-table-body { /* Styling for body of the LLM table. */
     width: 100%;
     display: table-row-group;
-}
-.llm-table-header { /* Styling for the LLM table header row cells. */
-    border-bottom: 0.25vh solid black;
+    border-collapse: separate;
 }
 .llm-table-row { /* Styling for each row of the LLM table. */
     width: 100%;
@@ -172,6 +170,7 @@ button {
 .llm-table-cell { /* Styling for each cell of the LLM table. */
     display: table-cell;
     padding: 1vh;
+    border-bottom: 0.25vh solid black;
 }
 .llm-table-cell:nth-child(1),
 .llm-table-cell:nth-child(5),
@@ -484,19 +483,21 @@ button {
 #faqTable { /* Styling for the individual popup tables. */
     width: 100%;
     border: 0.25vh solid black;
+    border-spacing: 0;
+    border-collapse: collapse;
 }
 #promptTable th,
 #LLMTable th,
 #gameDetailsTable th,
-#faqTable th { /* Styling for popup table headers. */
-    border-bottom: 0.25vh solid black;
-}
+#faqTable th,
 #promptTable td,
 #LLMTable td,
 #gameDetailsTable td,
-#faqTable td { /* Styling for popup table cells. */
+#faqTable td { /* Styling for popup table headers. */
     padding: 1vh;
+    border-bottom: 0.25vh solid black;
 }
+
 /* Adjust width for "game type" column of the prompt table. */
 #game-type-column {
     width: 10%;
