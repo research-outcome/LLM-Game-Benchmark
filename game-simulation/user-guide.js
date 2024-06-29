@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Example data for demonstration
     const data = {
-        title: "How to Run the Game Simulation",
+        title: "Running The Game Simulation",
         description: `
             <p>Please follow the steps outlined below to run the game simulation:</p>
             <ol>
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </ol>
             <p>Below is a video demonstration of the steps:</p>
         `,
-        addLLMTitle: "How to Add a LLM",
+        addLLMTitle: "Adding an LLM",
         addLLMSteps: `
             <p>Please follow the steps outlined below to add a LLM:</p>
             <ol>
