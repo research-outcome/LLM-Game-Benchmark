@@ -30,5 +30,5 @@ We have implemented the interaction between each game and the LLMs, as shown in 
 **Publication:**
 
 We have published the details of this study. If you utilize the repository, please cite the publication:
-- Link to the publication
+- Coming soon to arXiv.org and a reputable publication venue.
 
