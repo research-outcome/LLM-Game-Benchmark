@@ -20,10 +20,10 @@ const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resettin
 const MAX_GAME_REPEATS = 10; // Max number of times to attempt to repeat a game when network errors occur.
 
 // REMOVE BEFORE RELEASE.
-const OPENAI_API_KEY = "sk-proj-AI4ZtKkTSmFvG37WBuevT3BlbkFJnhRKpeh2YyfqTctRQ8il";
-const GOOGLE_API_KEY = "AIzaSyC-xij8Mk7bdlh0HDQUbNaSseqkqY4nTBE";
-const BEDROCK_SECRET = "LLM-GameOn";
-const BEDROCK_URL = "https://v5fb43ch74.execute-api.us-east-1.amazonaws.com/devpost/bedrockllms";
+const OPENAI_API_KEY = "PLACE YOUR API KEY HERE";
+const GOOGLE_API_KEY = "PLACE YOUR API KEY HERE";
+const BEDROCK_SECRET = "PLACE YOUR API KEY HERE";
+const BEDROCK_URL = "PLACE YOUR URL HERE";
 
 // OpenAI URL
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
