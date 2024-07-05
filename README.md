@@ -17,14 +17,19 @@ This repository **welcomes contributions and suggestions**. The LLM Game Benchma
 
 **Game Simulation Webpage:**
 
-To run simulations of Tic-Tac-Toe, Connect Four, and Gomoku games, please visit the game simulation page [here]. You can use your OpenAI API Key or Google Gemini API Key to run the simulations yourself. Below is a screenshot of the game simulation page. 
+To run simulations of Tic-Tac-Toe, Connect Four, and Gomoku games, please visit the <a href="game-simulation">game simulation</a> page. You can use your OpenAI API Key or Google Gemini API Key to run the simulations yourself. Below is a screenshot of the game simulation page. 
 ![LLM-GameSimulation-Connect4Run](https://github.com/research-outcome/LLM-Game-Benchmark/assets/129539668/1d300826-5298-48dd-85fd-afdf0b5be79c)
 
 
 **Interactions with the LLMs:**
 
-We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in the webservice directory.
+We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in the <a href="webservice">webservice</a> directory.
 ![App-Web-Interaction](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/6999c68e-3a94-442e-9978-53ae57153e41)
+
+
+**Leaderboard Page:**
+
+To review the results of games among leading LLMs including Claude 3.5 Sonnet and Claude 3 Sonnet by Anthropic, Gemini 1.5 Pro and Gemini 1.5 Flash by Google, GPT-4 Turbo and GPT-4o by OpenAI, and Llama3-70B by Meta, please visit the <a href="leaderboard">leaderboard</a> page.
 
 
 **Publication:**
