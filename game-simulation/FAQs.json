@@ -4,11 +4,11 @@
     "Answer": "Please click the User Guide button on the game simulation page for written and video guides on how to use the page."
   },
   {
-    "Question": "Why do I get 'networkerror' when I run the game simulation at https://research-outcome.github.io/LLM-Game-Benchmark/game-simulation/ ?",
-    "Answer": "You need to enter your API Key for the LLMs that you are using to make the game simulation work."
+    "Question": "Why do I get 'networkerror'?",
+    "Answer": "If you get the error when you run the game simulation at https://research-outcome.github.io/LLM-Game-Benchmark/game-simulation/ or when you run it at your local machine, you need to enter your API Key for the LLMs that you are using to make the game simulation work."
   },
   {
-    "Question": "Can I run the simulation at my local machine ?",
+    "Question": "Can I run the simulation at my local machine?",
     "Answer": "Yes, you can download the GitHub repository to your local machine, then run the index.html in the game-simulation folder, and then enter your API Keys."
   },
   {
