@@ -90,6 +90,7 @@ body {
     font-weight: 500;
     font-size: medium;
     color: #333;
+    width: 320px;
 }
 .item .checkbox {
     display: flex;
