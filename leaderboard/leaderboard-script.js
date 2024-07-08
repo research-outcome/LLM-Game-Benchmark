@@ -102,11 +102,11 @@ $(document).ready(function() {
             });
         }
 
-        populateDropdown(0, '#gametypeList');
-        populateDropdown(1, '#prompttypeList');
-        populateDropdown(2, '#promptversionList');
-        populateDropdown(3, '#llm1stList');
-        populateDropdown(4, '#llm2ndList');
+        populateDropdown(0, '#llm1stList');
+        populateDropdown(1, '#llm2ndList');
+        populateDropdown(2, '#prompttypeList');
+        populateDropdown(3, '#promptversionList');
+        populateDropdown(4, '#gametypeList');
 
         // Function to close all dropdowns
         function closeAllDropdowns() {
