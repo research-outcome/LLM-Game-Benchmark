@@ -8,11 +8,11 @@ $(document).ready(function() {
 
     $.getJSON(jsonURL, function(data) {
         const formattedData = data.map(item => [
-            item.GameType,
-            item.PromptType,
-            item.PromptVersion,
             item.LLM1stPlayer,
             item.LLM2ndPlayer,
+            item.PromptType,
+            item.PromptVersion,
+            item.GameType,
             formatDecimal(item["WinRatio-1st"]),
             formatDecimal(item["WinRatio-2nd"]),
             item["Wins-1st"],
@@ -32,11 +32,11 @@ $(document).ready(function() {
         const table = $('#mytable').DataTable({
             data: formattedData,
             columns: [
-                { title: "Game Type"},
-                { title: "Prompt Type" },
-                { title: "Prompt Version" },
                 { title: "LLM (1st)" },
                 { title: "LLM (2nd)" },
+                { title: "Prompt Type" },
+                { title: "Prompt Version" },
+                { title: "Game Type"},
                 { title: "Win Ratio (1st)" },
                 { title: "Win Ratio (2nd)"} ,
                 { title: "Wins (1st)" },
@@ -57,7 +57,7 @@ $(document).ready(function() {
             columnDefs: [
                 { targets: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,17], className: 'dt-body-right' },
                 { targets: [0, 1, 2, 3, 4, 16], className: 'dt-body-center' },
-                { targets: [2, 16, 17, 18], visible: false}
+                { targets: [3, 16, 17, 18], visible: false}
             ]
         });
 
