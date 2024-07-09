@@ -1,0 +1,90 @@
+[
+  {
+    "LLM1stPlayer": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "Wins-1st": 185,
+    "Disqualifications-1st": 30,
+    "Disqualifications-2nd": 54,
+    "Draws": 5,
+    "InvalidMoves-1st": 827,
+    "InvalidMoves-2nd": 990,
+    "TotalMoves-1st": 2587,
+    "TotalMoves-2nd": 2506
+  },
+  {
+    "LLM1stPlayer": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "Wins-1st": 126,
+    "Disqualifications-1st": 43,
+    "Disqualifications-2nd": 56,
+    "Draws": 8,
+    "InvalidMoves-1st": 960,
+    "InvalidMoves-2nd": 1143,
+    "TotalMoves-1st": 3149,
+    "TotalMoves-2nd": 3125
+  },
+  {
+    "LLM1stPlayer": "gemini-1.5-flash",
+    "Wins-1st": 129,
+    "Disqualifications-1st": 55,
+    "Disqualifications-2nd": 44,
+    "Draws": 6,
+    "InvalidMoves-1st": 896,
+    "InvalidMoves-2nd": 872,
+    "TotalMoves-1st": 2700,
+    "TotalMoves-2nd": 2497
+  },
+  {
+    "LLM1stPlayer": "gemini-1.5-pro",
+    "Wins-1st": 138,
+    "Disqualifications-1st": 75,
+    "Disqualifications-2nd": 33,
+    "Draws": 9,
+    "InvalidMoves-1st": 1257,
+    "InvalidMoves-2nd": 816,
+    "TotalMoves-1st": 3065,
+    "TotalMoves-2nd": 2457
+  },
+  {
+    "LLM1stPlayer": "gpt-4-turbo",
+    "Wins-1st": 137,
+    "Disqualifications-1st": 91,
+    "Disqualifications-2nd": 22,
+    "Draws": 4,
+    "InvalidMoves-1st": 1504,
+    "InvalidMoves-2nd": 598,
+    "TotalMoves-1st": 3099,
+    "TotalMoves-2nd": 2023
+  },
+  {
+    "LLM1stPlayer": "gpt-4o",
+    "Wins-1st": 160,
+    "Disqualifications-1st": 23,
+    "Disqualifications-2nd": 64,
+    "Draws": 1,
+    "InvalidMoves-1st": 858,
+    "InvalidMoves-2nd": 1172,
+    "TotalMoves-1st": 2845,
+    "TotalMoves-2nd": 2934
+  },
+  {
+    "LLM1stPlayer": "meta.llama3-70b-instruct-v1:0",
+    "Wins-1st": 116,
+    "Disqualifications-1st": 15,
+    "Disqualifications-2nd": 23,
+    "Draws": 4,
+    "InvalidMoves-1st": 497,
+    "InvalidMoves-2nd": 486,
+    "TotalMoves-1st": 1816,
+    "TotalMoves-2nd": 1662
+  },
+  {
+    "LLM1stPlayer": "random-play",
+    "Wins-1st": 53,
+    "Disqualifications-1st": 44,
+    "Disqualifications-2nd": 47,
+    "Draws": 0,
+    "InvalidMoves-1st": 354,
+    "InvalidMoves-2nd": 988,
+    "TotalMoves-1st": 2670,
+    "TotalMoves-2nd": 3204
+  }
+]

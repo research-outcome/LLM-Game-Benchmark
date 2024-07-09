@@ -127,7 +127,7 @@ h1 {
     float: left !important;
  }
 
- h2 {
+h2 {
     margin-left: 10px;
     font-family: 'Tahoma', sans-serif;
     font-style: normal;
@@ -142,7 +142,7 @@ h3 {
     font-size:medium;
 }
 
- .table-container {
+.table-container {
     width: fit-content; /* Adjust the width */
     margin: 0; /* Center the container */
     box-sizing: border-box;
@@ -158,6 +158,18 @@ h3 {
     font-style: normal;
     font-weight: 500;
     font-size: medium;
+}
+
+#aggregate-btn-container {
+    display: inline;
+    padding-top: 20px;
+    padding-left: 210px;
+}
+
+.aggregate-btn {
+    max-width: 195px;
+    display: inline;
+    margin-bottom: 10px;
 }
 
 /* Style the submit button 
