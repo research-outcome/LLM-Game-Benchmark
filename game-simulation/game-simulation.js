@@ -338,8 +338,8 @@ async function playGame() {
         }
 
         // Update game results for progress windows.
-        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = result;
-        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = result;
+        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = (result === "networkerror") ? "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' window." : result;
+        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = (result === "networkerror") ? "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' window." : result;
 
         gameRepeatCounter++; // Increment game repeat counter.
 
@@ -458,10 +458,10 @@ function getBulkRunGameCount() {
 // Enable or disable option input fields.
 function disableInputs(disableFlag) {
     document.getElementById("game-type").disabled = disableFlag;
-    document.getElementById("game-count").disabled = disableFlag;
+    document.getElementById("prompt-type").disabled = disableFlag;
     document.getElementById("first-player").disabled = disableFlag;
     document.getElementById("second-player").disabled = disableFlag;
-    document.getElementById("prompt-type").disabled = disableFlag;
+    document.getElementById("game-count").disabled = disableFlag;
     document.getElementById("manage-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
 
@@ -471,6 +471,7 @@ function disableInputs(disableFlag) {
     }
 
     document.getElementById("checkbox-bulk-run-same-players").disabled = disableFlag;
+    document.getElementById("checkbox-save-progress-images").disabled = disableFlag;
 }
 
 // Update the Statistics display with the current game statistics.
@@ -530,12 +531,10 @@ async function updateProgressDisplays(game, move, progressDisplayType) {
 
     // Append current move to the current player's progress display.
     if (currentPlayer === 1) {
-        document.getElementById("first-player-game-progress").innerHTML += "Move " + moveNumber + ":<br>" +
-            newContent;
+        firstPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" + newContent;
     }
     else {
-        document.getElementById("second-player-game-progress").innerHTML += "Move " + moveNumber + ":<br>" +
-            newContent;
+        secondPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" + newContent;
     }
 
     // Scroll the progress displays downward if the "autoScrollDisplays" flag is set to true.
