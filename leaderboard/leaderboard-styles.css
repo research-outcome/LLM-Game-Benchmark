@@ -18,7 +18,7 @@ body {
 /* container for drop downs */
 .container {
     position: relative; 
-    max-width: 200px;
+    max-width: 320px;
     width: 100%;
     margin: 10px auto; 
     float: left;
