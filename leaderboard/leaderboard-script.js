@@ -131,7 +131,7 @@ function showOriginalTable() {
             dom: 'frtlpi',
             columnDefs: [
                 { targets: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17], className: 'dt-body-right' },
-                { targets: [0, 1, 2, 3, 4, 16], className: 'dt-body-center' },
+                { targets: [0, 1, 2, 3, 4, 16], className: 'dt-body-left' },
                 { targets: [3, 16, 17, 18], visible: false}
             ]
         });
@@ -222,7 +222,7 @@ document.getElementById("aggregate-gametype-prompttype-llm2-btn").addEventListen
                 dom: 'frtlpi',
                 columnDefs: [
                     { targets: [1, 2, 3, 4, 5, 6, 7, 8], className: 'dt-body-right' },
-                    { targets: [0], className: 'dt-body-center' },
+                    { targets: [0], className: 'dt-body-left' },
                 ]
             });
 
@@ -314,7 +314,7 @@ document.getElementById("aggregate-gametype-prompttype-btn").addEventListener('c
                 dom: 'frtlpi',
                 columnDefs: [
                     { targets: [2, 3, 4, 5, 6, 7, 8, 9, 10], className: 'dt-body-right' },
-                    { targets: [0, 1], className: 'dt-body-center' },
+                    { targets: [0, 1], className: 'dt-body-left' },
                 ]
             });
 
@@ -409,7 +409,7 @@ document.getElementById("aggregate-gametype-btn").addEventListener('click', func
                 dom: 'frtlpi',
                 columnDefs: [
                     { targets: [3, 4, 5, 6, 7, 8, 9, 10, 11], className: 'dt-body-right' },
-                    { targets: [0, 1, 2], className: 'dt-body-center' },
+                    { targets: [0, 1, 2], className: 'dt-body-left' },
                 ]
             });
 
