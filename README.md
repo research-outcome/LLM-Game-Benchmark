@@ -35,6 +35,8 @@ To review the results of games among leading LLMs including Claude 3.5 Sonnet an
 **Publication:**
 
 We have published the details of this study. If you utilize the repository, please cite the publication:
-- Coming soon to arXiv.org and a reputable publication venue.
+
+Topsakal, O., Edell, C. J., & Harper, J. B. (2024). Evaluating Large Language Models with Grid-Based Game Competitions: An Extensible LLM Benchmark and Leaderboard. arXiv [Cs.AI]. Retrieved from <a href="http://arxiv.org/abs/2407.07796">http://arxiv.org/abs/2407.07796</a>
+
 
 If you have any questions, please contact research.explorations at gmail.
