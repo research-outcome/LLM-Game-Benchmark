@@ -19,7 +19,6 @@ import { populateGameDetailsTable, populatePromptTable, populateLLMTable, popula
 const GAME_RESET_DELAY = 5000; // Time to wait (in milliseconds) before resetting the board after a game ends.
 const MAX_GAME_REPEATS = 10; // Max number of times to attempt to repeat a game when network errors occur.
 
-// REMOVE BEFORE RELEASE.
 const OPENAI_API_KEY = "PLACE YOUR API KEY HERE";
 const GOOGLE_API_KEY = "PLACE YOUR API KEY HERE";
 const BEDROCK_SECRET = "PLACE YOUR API KEY HERE";
@@ -338,8 +337,8 @@ async function playGame() {
         }
 
         // Update game results for progress windows.
-        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = (result === "networkerror") ? "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' window." : result;
-        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = (result === "networkerror") ? "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' window." : result;
+        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = result;
+        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = result;
 
         gameRepeatCounter++; // Increment game repeat counter.
 
@@ -458,10 +457,10 @@ function getBulkRunGameCount() {
 // Enable or disable option input fields.
 function disableInputs(disableFlag) {
     document.getElementById("game-type").disabled = disableFlag;
-    document.getElementById("prompt-type").disabled = disableFlag;
+    document.getElementById("game-count").disabled = disableFlag;
     document.getElementById("first-player").disabled = disableFlag;
     document.getElementById("second-player").disabled = disableFlag;
-    document.getElementById("game-count").disabled = disableFlag;
+    document.getElementById("prompt-type").disabled = disableFlag;
     document.getElementById("manage-llms-btn").disabled = disableFlag;
     document.getElementById("reset-btn").disabled = disableFlag;
 
@@ -531,10 +530,12 @@ async function updateProgressDisplays(game, move, progressDisplayType) {
 
     // Append current move to the current player's progress display.
     if (currentPlayer === 1) {
-        firstPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" + newContent;
+        firstPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" +
+            newContent;
     }
     else {
-        secondPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" + newContent;
+        secondPlayerProgressDisplay.innerHTML += "Move " + moveNumber + ":<br>" +
+            newContent;
     }
 
     // Scroll the progress displays downward if the "autoScrollDisplays" flag is set to true.
