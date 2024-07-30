@@ -34,9 +34,14 @@ To review the results of games among leading LLMs including Claude 3.5 Sonnet an
 
 **Publication:**
 
-We have published the details of this study. If you utilize the repository, please cite the publication:
+We have published the details of this study at ArXiv.org and submitted it to a leading IEEE journal in the field. If you utilize the repository, please cite the publication:
 
 - Topsakal, O., Edell, C. J., & Harper, J. B. (2024). Evaluating Large Language Models with Grid-Based Game Competitions: An Extensible LLM Benchmark and Leaderboard. arXiv [Cs.AI]. Available at <a href="http://arxiv.org/abs/2407.07796">http://arxiv.org/abs/2407.07796</a>
 
+
+
+In a previous study, we evaluated the strategic thinking capabilities of various LLMs, including Claude 2.1, Gemini-Pro 1.0, GPT-3.5-Turbo, GPT-4, Llama2-70B, and Mistral Large, by having them play Tic-Tac-Toe through a mobile app. This study builds upon that research with additional games, more in-depth analysis, and a user-friendly web-based game simulation software to evaluate more recent LLMs. 
+
+- Topsakal, O., Harper, J.B. Benchmarking Large Language Model (LLM) Performance for Game Playing via Tic-Tac-Toe. Electronics 2024, 13, 1532. <a href="https://doi.org/10.3390/electronics13081532">https://doi.org/10.3390/electronics13081532</a>
 
 If you have any questions, please contact **research.explorations at gmail**.
