@@ -1,4 +1,3 @@
-# LLM Game Benchmark
 This <a href="https://github.com/research-outcome/LLM-Game-Benchmark">repository</a> is developed to evaluate Large Language Models (LLMs) via Game Playing. It includes the following components:
 - A leaderboard to view and compare the results of previous games among LLMs. We **welcome submissions** to the leaderboard. To review the current status of the leaderboard, please see the <a target="_blank" href="leaderboard">leaderboard</a> folder. You can also view it on the <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/leaderboard/">GitHub.io</a> page.
   
