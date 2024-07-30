@@ -1,10 +1,11 @@
 This <a href="https://github.com/research-outcome/LLM-Game-Benchmark">repository</a> is developed to evaluate Large Language Models (LLMs) via Game Playing. It includes the following components:
-- A leaderboard to view and compare the results of previous games among LLMs. We **welcome submissions** to the leaderboard. To review the current status of the leaderboard, please see the <a target="_blank" href="leaderboard">leaderboard</a> folder. You can also view it on the <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/leaderboard/">GitHub.io</a> page.
-  
-- An extensible game simulation software to test LLMs via grid-based games such as Tic-Tac-Toe, Connect Four, and Gomoku. For more information and try out the game simulations, please see the <a href="game-simulation">game simulation</a> folder. You can run the game simulations directly from the <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/game-simulation/">GitHub.io</a> page. The results matrix is also available <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/leaderboard/result-matrix.html">here</a>.
+
+- An extensible game simulation software to test LLMs via grid-based games such as Tic-Tac-Toe, Connect Four, and Gomoku. For more information and try out the game simulations, please see the <a href="game-simulation">game simulation</a>. You can run the game simulations directly from the <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/game-simulation/">GitHub.io</a> page or you can download the code <a href="https://github.com/research-outcome/LLM-Game-Benchmark">repository</a> and then run the game simulation on your computer.
+
+- A leaderboard to view and compare the results of previous games among LLMs. We **welcome submissions** to the leaderboard. To review the current status of the leaderboard, please see the <a target="_blank" href="leaderboard">leaderboard</a> folder. You can also view it on the <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/leaderboard/">GitHub.io</a> page. The results matrix is also available <a target="_blank" href="https://research-outcome.github.io/LLM-Game-Benchmark/leaderboard/result-matrix.html">here</a>.
   
 - The detailed output files of game runs to analyze the details of the games that are presented on the leaderboard. Please see the <a target="_blank" href="outputs">outputs</a> folder.
-  
+
 
 This repository **welcomes contributions and suggestions**. The LLM Game Benchmark repository is shared under the MIT License.
 
