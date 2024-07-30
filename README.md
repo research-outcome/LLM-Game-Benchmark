@@ -23,13 +23,11 @@ To run simulations of Tic-Tac-Toe, Connect Four, and Gomoku games, please visit 
 
 **Interactions with the LLMs:**
 
-We have implemented the interaction between each game and the LLMs, as shown in the figure below. To interact with the LLMs hosted on AWS Bedrock, you can use the sample code provided in the <a href="webservice">webservice</a> directory.
+We have implemented the interaction between each game and the LLMs, as shown in the figure below. We utilized the web services provided by Open AI and Google for their models. You can simply use your own API Key to run the game simulations for OpenAI and Google models. To interact with the LLMs hosted on AWS Bedrock such as models developed by Anthropic and Meta, you can use the sample AWS Bedrock code provided in the <a href="webservice">webservice</a> directory.
 ![App-Web-Interaction](https://github.com/research-outcome/LLM-Game-Benchmark/assets/136174718/6999c68e-3a94-442e-9978-53ae57153e41)
 
 
-**Leaderboard Page:**
 
-To review the results of games among leading LLMs including Claude 3.5 Sonnet and Claude 3 Sonnet by Anthropic, Gemini 1.5 Pro and Gemini 1.5 Flash by Google, GPT-4 Turbo and GPT-4o by OpenAI, and Llama3-70B by Meta, please visit the <a href="leaderboard">leaderboard</a> page.
 
 
 **Publication:**
