@@ -337,8 +337,14 @@ async function playGame() {
         }
 
         // Update game results for progress windows.
-        document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = result;
-        document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = result;
+        if (result !== "networkerror") {
+            document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = result;
+            document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = result;
+        } else {
+            document.getElementById("game-" + currentGameCount + "-result-first-player-" + gameRepeatCounter).textContent = "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' menu.";
+            document.getElementById("game-" + currentGameCount + "-result-second-player-" + gameRepeatCounter).textContent = "Network error occurred. Please check your API keys and URLs in the 'Manage LLMs' menu.";
+        }
+
 
         gameRepeatCounter++; // Increment game repeat counter.
 
