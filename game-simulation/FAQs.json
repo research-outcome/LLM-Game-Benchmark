@@ -1,7 +1,7 @@
 [
   {
     "Question": "Why do I get a 'networkerror' when I run the game.",
-    "Answer": "Please make sure that you have entered API Keys correctly for the LLMs that you are trying to use."
+    "Answer": "Please ensure that you have entered the API keys correctly in the 'Manage LLMs' section for the LLMs you are trying to use."
   },
   {
     "Question": "How do I use the game simulation page?",
